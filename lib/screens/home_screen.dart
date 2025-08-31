@@ -6,7 +6,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Table Grid with Boxes')),
+      appBar: AppBar(title: const Text('Dashboard')),
       body: Center(
         child: Table(
           // No border on the Table itself, as cells will have their own
@@ -24,12 +24,12 @@ class HomeScreen extends StatelessWidget {
             // Row 1
             TableRow(
               children: <Widget>[
-                _buildBarChartCell(Colors.blue, 100),
+                _buildBarChartCell(Colors.blue, 100, dayColor: const Color.fromARGB(255, 0, 0, 150)),
+                _buildBarChartCell(Colors.blue, 80),
+                _buildBarChartCell(Colors.blue, 60, selectionColor: const Color.fromARGB(255, 160, 160, 160)),
+                _buildBarChartCell(Colors.blue, 40),
                 _buildBarChartCell(Colors.blue, 20),
-                _buildBarChartCell(Colors.blue, 20),
-                _buildBarChartCell(Colors.blue, 20),
-                _buildBarChartCell(Colors.blue, 20),
-                _buildBarChartCell(Colors.blue, 20),
+                _buildBarChartCell(Colors.blue, 0),
                 _buildBarChartCell(Colors.blue, 20),
                 _buildLabelCell('2000 🔥', 'of 3000'),
               ],
@@ -37,9 +37,9 @@ class HomeScreen extends StatelessWidget {
             // Row 2 (with an empty cell)
             TableRow(
               children: <Widget>[
-                _buildBarChartCell(Colors.red, 100),
+                _buildBarChartCell(Colors.red, 100, dayColor: const Color.fromARGB(255, 0, 0, 150)),
                 _buildBarChartCell(Colors.red, 20),
-                _buildBarChartCell(Colors.red, 20),
+                _buildBarChartCell(Colors.red, 20, selectionColor: const Color.fromARGB(255, 160, 160, 160)),
                 _buildBarChartCell(Colors.red, 20),
                 _buildBarChartCell(Colors.red, 20),
                 _buildBarChartCell(Colors.red, 20),
@@ -50,9 +50,9 @@ class HomeScreen extends StatelessWidget {
             // Row 3
             TableRow(
               children: <Widget>[
-                _buildBarChartCell(Colors.yellow, 100),
+                _buildBarChartCell(Colors.yellow, 100, dayColor: const Color.fromARGB(255, 0, 0, 150)),
                 _buildBarChartCell(Colors.yellow, 20),
-                _buildBarChartCell(Colors.yellow, 20),
+                _buildBarChartCell(Colors.yellow, 20, selectionColor: const Color.fromARGB(255, 160, 160, 160)),
                 _buildBarChartCell(Colors.yellow, 20),
                 _buildBarChartCell(Colors.yellow, 20),
                 _buildBarChartCell(Colors.yellow, 20),
@@ -63,9 +63,9 @@ class HomeScreen extends StatelessWidget {
             // Row 4
             TableRow(
               children: <Widget>[
-                _buildBarChartCell(Colors.green, 100),
+                _buildBarChartCell(Colors.green, 100, dayColor: const Color.fromARGB(255, 0, 0, 150)),
                 _buildBarChartCell(Colors.green, 20),
-                _buildBarChartCell(Colors.green, 20),
+                _buildBarChartCell(Colors.green, 20, selectionColor: const Color.fromARGB(255, 160, 160, 160)),
                 _buildBarChartCell(Colors.green, 20),
                 _buildBarChartCell(Colors.green, 20),
                 _buildBarChartCell(Colors.green, 20),
@@ -83,9 +83,7 @@ class HomeScreen extends StatelessWidget {
                 _buildFooterCell('F'),
                 _buildFooterCell('S'),
                 _buildFooterCell('S'),
-                const SizedBox(
-                    height: 50,
-                    child: Center(child: Text(''))), // Empty top-left corner
+                _buildEmptyCell(),
               ],
             ),
           ],
@@ -101,7 +99,7 @@ class HomeScreen extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: Colors.grey[200],
-        border: Border.all(color: Colors.grey.shade400, width: 0.5),
+        // Removed border to eliminate borders between cells
       ),
       height: 50,
       child: Text(
@@ -118,7 +116,7 @@ class HomeScreen extends StatelessWidget {
       alignment: Alignment.centerLeft,
       decoration: BoxDecoration(
         color: Colors.grey[100],
-        border: Border.all(color: Colors.grey.shade400, width: 0.5),
+        // Removed border to eliminate borders between cells
       ),
       child: Column(
         children: [
@@ -135,37 +133,21 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  // Content cells now have a clear border
-  Widget _buildContentCell(Color color, String text) {
-    return Container(
-      padding: const EdgeInsets.all(8.0),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.2), // Light background color
-        border: Border.all(color: Colors.black, width: 0.8), // Distinct box border
-      ),
-      child: Text(text),
-    );
-  }
-
-  // Empty cells also have a clear border to show they are "boxes"
   Widget _buildEmptyCell() {
     return Container(
-      // The height will be determined by the tallest content in the row
-      // We are just adding decoration to make it visible as a box
       decoration: BoxDecoration(
-        color: Colors.grey[50],
-        border: Border.all(color: Colors.black, width: 0.8), // Distinct box border
+        color: Colors.grey[200],
       ),
     );
   }
 
   // Constants for consistent cell sizing for bar charts
   final double _barChartCellHeight = 50.0; // Example fixed height for the entire cell
-  final double _barWidthFixed = 4.0; // Fixed bar width
-  final double _maxBarHeightFixed = 20.0; // Max height for the bar itself (at 100%)
+  final double _barWidth = 4.0; // Fixed bar width
+  final double _maxBarHeight= 20.0; // Max height for the bar itself (at 100%)
+  final double _barGraphTrackWidth = 20.0;
 
-  Widget _buildBarChartCell(Color color, double value) {
+  Widget _buildBarChartCell(Color color, double value, {Color dayColor = const Color.fromARGB(255, 110, 110, 110), Color selectionColor = const Color.fromARGB(255, 135, 135, 135)}) {
     // 1. Error Checking: Ensure value is within 0-100
     if (value < 0) {
       debugPrint('Warning: Bar chart value $value is less than 0. Clamping to 0.');
@@ -175,32 +157,39 @@ class HomeScreen extends StatelessWidget {
       debugPrint('Warning: Bar chart value $value is greater than 100. Clamping to 100.');
       value = 100;
     }
-  
-    // 2. Calculate actual bar height based on percentage
-    final double barHeight = (_maxBarHeightFixed * (value / 100));
-  
-    // 3. Create the bar using a Container
-    final Widget bar = Container(
-      width: _barWidthFixed,
-      height: barHeight,
-      color: color,
-    );
-  
-    // 4. Wrap the bar and text in a Container with a fixed height
+
+    // Calculate actual bar height based on percentage
+    final double currentBarHeight = (_maxBarHeight * (value / 100));
+
     return Container(
-      height: _barChartCellHeight, // <--- **Crucial Change: Fixed height for the cell**
-      alignment: Alignment.bottomCenter,
-      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+      height: _barChartCellHeight, // Outer container for the entire grid cell
+      // Outer container provides overall cell styling (background, rounded border for the cell itself)
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.grey.shade300, width: 0.5),
+        color: selectionColor,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          bar,
-        ],
+      alignment: Alignment.center, // Center the bar graph component within the cell
+      padding: const EdgeInsets.all(4.0), // Padding around the bar graph component from cell edge
+      child: SizedBox(
+        width: _barGraphTrackWidth, // Defines the total width for the track and bar
+        height: _maxBarHeight, // Defines the total height for the track and bar
+        child: Stack(
+          // The bar should simply grow from the bottom of this Stack
+          alignment: Alignment.bottomCenter, // **Crucial: All children align to bottom center**
+          children: [
+            // 1. Background Track (Rectangular)
+            Container(
+              width: _barGraphTrackWidth,
+              height: _maxBarHeight,
+              color: dayColor, // Light grey background for the rectangular track
+            ),
+            // 2. The Actual Bar (Rectangular, grows upwards from the bottom)
+            Container(
+              width: _barWidth, // This is the narrower width of the actual bar
+              height: currentBarHeight, // Bar grows from bottom up to this height
+              color: color, // The actual bar color
+            ),
+          ],
+        ),
       ),
     );
   }

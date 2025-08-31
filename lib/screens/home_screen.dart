@@ -6,311 +6,201 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Bar Graph Area
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey[300]!),
-              ),
-              child: Column(
-                children: [
-                  // Row 1: Bars + X F of Y
-                  Row(
-                    children: [
-                      // 7 bar graphs for row 1 - using fixed column widths
-                      Expanded(
-                        child: Row(
-                          children: List.generate(7, (columnIndex) {
-                            bool isToday = columnIndex == 2;
-                            return Expanded(
-                              child: Center(
-                                child: Container(
-                                  width: 20,
-                                  height: 20,
-                                  decoration: BoxDecoration(
-                                    color: isToday ? Colors.blue[400] : Colors.grey[400],
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: TinyBar(value: 0.5),
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      // X F of Y labels for row 1
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'X 🔥',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                          Text(
-                            'of Y',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  // Row 2: Bars + X P of Y
-                  Row(
-                    children: [
-                      // 7 bar graphs for row 2 - using fixed column widths
-                      Expanded(
-                        child: Row(
-                          children: List.generate(7, (columnIndex) {
-                            bool isToday = columnIndex == 2;
-                            return Expanded(
-                              child: Center(
-                                child: Container(
-                                  width: 20,
-                                  height: 20,
-                                  decoration: BoxDecoration(
-                                    color: isToday ? Colors.blue[400] : Colors.grey[400],
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      // X P of Y labels for row 2
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'X P',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                          Text(
-                            'of Y',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  // Row 3: Bars + X F of Y
-                  Row(
-                    children: [
-                      // 7 bar graphs for row 3 - using fixed column widths
-                      Expanded(
-                        child: Row(
-                          children: List.generate(7, (columnIndex) {
-                            bool isToday = columnIndex == 2;
-                            return Expanded(
-                              child: Center(
-                                child: Container(
-                                  width: 20,
-                                  height: 20,
-                                  decoration: BoxDecoration(
-                                    color: isToday ? Colors.blue[400] : Colors.grey[400],
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      // X F of Y labels for row 3
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'X F',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                          Text(
-                            'of Y',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  // Row 4: Bars + X C of Y
-                  Row(
-                    children: [
-                      // 7 bar graphs for row 4 - using fixed column widths
-                      Expanded(
-                        child: Row(
-                          children: List.generate(7, (columnIndex) {
-                            bool isToday = columnIndex == 2;
-                            return Expanded(
-                              child: Center(
-                                child: Container(
-                                  width: 20,
-                                  height: 20,
-                                  decoration: BoxDecoration(
-                                    color: isToday ? Colors.blue[400] : Colors.grey[400],
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      // X C of Y labels for row 4
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'X C',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                          Text(
-                            'of Y',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  
-                  // Day labels row - now with consistent spacing
-                  Row(
-                    children: [
-                      // 7 day labels aligned with their respective bar columns
-                      Expanded(
-                        child: Row(
-                          children: [
-                            // Use the same spacing logic as the bars
-                            ...List.generate(7, (columnIndex) {
-                              bool isToday = columnIndex == 2;
-                              return Expanded(
-                                child: Center(
-                                  child: Container(
-                                    width: 30,
-                                    height: 30,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(15),
-                                      border: Border.all(color: Colors.grey[300]!),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        'D', // Placeholder: will be programmatically set
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: isToday ? Colors.blue[700] : Colors.grey[600],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      // Blank space to maintain consistent layout
-                      const SizedBox(width: 20, height: 30),
-                    ],
-                  ),
-                ],
-              ),
+      appBar: AppBar(title: const Text('Table Grid with Boxes')),
+      body: Center(
+        child: Table(
+          // No border on the Table itself, as cells will have their own
+          columnWidths: const <int, TableColumnWidth>{
+            0: FlexColumnWidth(1.0), // Column 1 content
+            1: FlexColumnWidth(1.0), // Column 2 content
+            2: FlexColumnWidth(1.0), // Column 3 content
+            3: FlexColumnWidth(1.0), // Column 4 content
+            4: FlexColumnWidth(1.0), // Column 5 content
+            5: FlexColumnWidth(1.0), // Column 6 content
+            6: FlexColumnWidth(1.0), // Column 7 content
+            7: FixedColumnWidth(80.0), // Row labels
+          },
+          children: <TableRow>[
+            // Row 1
+            TableRow(
+              children: <Widget>[
+                _buildBarChartCell(Colors.blue, 100),
+                _buildBarChartCell(Colors.blue, 20),
+                _buildBarChartCell(Colors.blue, 20),
+                _buildBarChartCell(Colors.blue, 20),
+                _buildBarChartCell(Colors.blue, 20),
+                _buildBarChartCell(Colors.blue, 20),
+                _buildBarChartCell(Colors.blue, 20),
+                _buildLabelCell('2000 🔥', 'of 3000'),
+              ],
             ),
-            const SizedBox(height: 20),
-            // Placeholder for additional content
-            Text(
-              'Additional dashboard content will go here',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+            // Row 2 (with an empty cell)
+            TableRow(
+              children: <Widget>[
+                _buildBarChartCell(Colors.red, 100),
+                _buildBarChartCell(Colors.red, 20),
+                _buildBarChartCell(Colors.red, 20),
+                _buildBarChartCell(Colors.red, 20),
+                _buildBarChartCell(Colors.red, 20),
+                _buildBarChartCell(Colors.red, 20),
+                _buildBarChartCell(Colors.red, 20),
+                _buildLabelCell('125 P', 'of 160'),
+              ],
+            ),
+            // Row 3
+            TableRow(
+              children: <Widget>[
+                _buildBarChartCell(Colors.yellow, 100),
+                _buildBarChartCell(Colors.yellow, 20),
+                _buildBarChartCell(Colors.yellow, 20),
+                _buildBarChartCell(Colors.yellow, 20),
+                _buildBarChartCell(Colors.yellow, 20),
+                _buildBarChartCell(Colors.yellow, 20),
+                _buildBarChartCell(Colors.yellow, 20),
+                _buildLabelCell('45 F', 'of 88'),
+              ],
+            ),
+            // Row 4
+            TableRow(
+              children: <Widget>[
+                _buildBarChartCell(Colors.green, 100),
+                _buildBarChartCell(Colors.green, 20),
+                _buildBarChartCell(Colors.green, 20),
+                _buildBarChartCell(Colors.green, 20),
+                _buildBarChartCell(Colors.green, 20),
+                _buildBarChartCell(Colors.green, 20),
+                _buildBarChartCell(Colors.green, 20),
+                _buildLabelCell('100 C', 'of 225'),
+              ],
+            ),
+            // Column Labels Row
+            TableRow(
+              children: <Widget>[
+                _buildFooterCell('M'),
+                _buildFooterCell('T'),
+                _buildFooterCell('W'),
+                _buildFooterCell('T'),
+                _buildFooterCell('F'),
+                _buildFooterCell('S'),
+                _buildFooterCell('S'),
+                const SizedBox(
+                    height: 50,
+                    child: Center(child: Text(''))), // Empty top-left corner
+              ],
             ),
           ],
         ),
       ),
     );
   }
-}
 
-double mmToLogicalPx(BuildContext context, double mm) {
-  final dpi = MediaQuery.of(context).devicePixelRatio * 160;
-  return mm * dpi / 25.4;
-}
-
-class TinyBar extends StatelessWidget {
-  final double value; // 0.0 to 1.0
-  const TinyBar({super.key, required this.value});
-
-  double mmToLogicalPx(BuildContext context, double mm) {
-    final dpi = MediaQuery.of(context).devicePixelRatio * 160;
-    return mm * dpi / 25.4;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final barWidth = mmToLogicalPx(context, 1.5);
-    final barHeight = mmToLogicalPx(context, 5);
-
+  // Header cells with a subtle border and background
+  Widget _buildFooterCell(String text) {
     return Container(
-      width: barWidth,
-      height: barHeight,
-      alignment: Alignment.bottomCenter,
+      padding: const EdgeInsets.all(8.0),
+      alignment: Alignment.center,
       decoration: BoxDecoration(
+        color: Colors.grey[200],
         border: Border.all(color: Colors.grey.shade400, width: 0.5),
       ),
-      child: FractionallySizedBox(
-        heightFactor: value, // scales bar fill
-        child: Container(color: Colors.blue),
+      height: 50,
+      child: Text(
+        text,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  // Row label cells with a subtle border and background
+  Widget _buildLabelCell(String text1, String text2) {
+    return Container(
+      padding: const EdgeInsets.all(8.0),
+      alignment: Alignment.centerLeft,
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        border: Border.all(color: Colors.grey.shade400, width: 0.5),
+      ),
+      child: Column(
+        children: [
+          Text(
+            text1,
+            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12.0),
+          ),
+          Text(
+            text2,
+            style: const TextStyle(fontWeight: FontWeight.w400, fontSize: 10.0),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Content cells now have a clear border
+  Widget _buildContentCell(Color color, String text) {
+    return Container(
+      padding: const EdgeInsets.all(8.0),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.2), // Light background color
+        border: Border.all(color: Colors.black, width: 0.8), // Distinct box border
+      ),
+      child: Text(text),
+    );
+  }
+
+  // Empty cells also have a clear border to show they are "boxes"
+  Widget _buildEmptyCell() {
+    return Container(
+      // The height will be determined by the tallest content in the row
+      // We are just adding decoration to make it visible as a box
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        border: Border.all(color: Colors.black, width: 0.8), // Distinct box border
+      ),
+    );
+  }
+
+  // Constants for consistent cell sizing for bar charts
+  final double _barChartCellHeight = 50.0; // Example fixed height for the entire cell
+  final double _barWidthFixed = 4.0; // Fixed bar width
+  final double _maxBarHeightFixed = 20.0; // Max height for the bar itself (at 100%)
+
+  Widget _buildBarChartCell(Color color, double value) {
+    // 1. Error Checking: Ensure value is within 0-100
+    if (value < 0) {
+      debugPrint('Warning: Bar chart value $value is less than 0. Clamping to 0.');
+      value = 0;
+    }
+    if (value > 100) {
+      debugPrint('Warning: Bar chart value $value is greater than 100. Clamping to 100.');
+      value = 100;
+    }
+  
+    // 2. Calculate actual bar height based on percentage
+    final double barHeight = (_maxBarHeightFixed * (value / 100));
+  
+    // 3. Create the bar using a Container
+    final Widget bar = Container(
+      width: _barWidthFixed,
+      height: barHeight,
+      color: color,
+    );
+  
+    // 4. Wrap the bar and text in a Container with a fixed height
+    return Container(
+      height: _barChartCellHeight, // <--- **Crucial Change: Fixed height for the cell**
+      alignment: Alignment.bottomCenter,
+      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.grey.shade300, width: 0.5),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          bar,
+        ],
       ),
     );
   }

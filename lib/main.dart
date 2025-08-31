@@ -16,9 +16,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Free Cal Counter',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 202, 137, 15)),
         useMaterial3: true,
       ),
+      darkTheme: ThemeData.dark(),
       home: const MainScreen(),
     );
   }

@@ -136,6 +136,14 @@ class HomeScreen extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
+                    const Text(
+                      'Weight',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     SizedBox(
                       height: 200,
                       child: LineChart(

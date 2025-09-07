@@ -42,13 +42,13 @@ class _WeightScreenState extends State<WeightScreen> {
 
   void _onCancelPressed() {
     // TODO: Add null value to database
-    print('Weight entry cancelled');
+    print('Weight Entry Cancelled');
     _navigateToHome();
   }
 
   void _onSkipPressed() {
     // TODO: Add null value to database
-    print('Weight entry skipped');
+    print('Weight Entry Skipped');
     _navigateToHome();
   }
 
@@ -59,7 +59,7 @@ class _WeightScreenState extends State<WeightScreen> {
     // Show feedback message
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Weight entry completed'),
+        content: Text('Weight Entry Completed'),
         duration: Duration(seconds: 1),
       ),
     );
@@ -115,10 +115,6 @@ class _WeightScreenState extends State<WeightScreen> {
                         border: OutlineInputBorder(),
                         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       ),
-                      onTapOutside: (event) {
-                        // Hide keyboard when tapping outside the text field
-                        FocusScope.of(context).unfocus();
-                      },
                     ),
                   ),
                   const SizedBox(height: 48),

@@ -133,10 +133,180 @@ class FoodItemWidget extends StatelessWidget {
   }
 }
 
+class DraggableFoodItemWidget extends StatefulWidget {
+  final Food food;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
+
+  const DraggableFoodItemWidget({
+    super.key,
+    required this.food,
+    this.onEdit,
+    this.onDelete,
+  });
+
+  @override
+  State<DraggableFoodItemWidget> createState() => _DraggableFoodItemWidgetState();
+}
+
+class _DraggableFoodItemWidgetState extends State<DraggableFoodItemWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  double _dragOffset = 0.0;
+  bool _showActions = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _onPanStart(DragStartDetails details) {
+    // Pan start - no state changes needed
+  }
+
+  void _onPanUpdate(DragUpdateDetails details) {
+    setState(() {
+      _dragOffset += details.delta.dx;
+      // Limit the drag distance
+      _dragOffset = _dragOffset.clamp(-100.0, 100.0);
+    });
+  }
+
+  void _onPanEnd(DragEndDetails details) {
+    // Determine if we should show edit or delete action
+    if (_dragOffset > 30) {
+      // Dragged right - show edit actions
+      setState(() {
+        _showActions = true;
+        _dragOffset = 60.0; // Show edit action
+      });
+    } else if (_dragOffset < -30) {
+      // Dragged left - show delete actions
+      setState(() {
+        _showActions = true;
+        _dragOffset = -60.0; // Show delete action
+      });
+    } else {
+      // Snap back to center
+      _snapBack();
+    }
+  }
+
+  void _onEditTap() {
+    if (widget.onEdit != null) {
+      widget.onEdit!();
+    }
+    _snapBack();
+  }
+
+  void _onDeleteTap() {
+    if (widget.onDelete != null) {
+      widget.onDelete!();
+    }
+    _snapBack();
+  }
+
+  void _snapBack() {
+    setState(() {
+      _dragOffset = 0.0;
+      _showActions = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Stack(
+        children: [
+          // Edit action (left edge) - always present
+          Positioned(
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: 60, // Fixed width for the action button
+            child: GestureDetector(
+              onTap: _onEditTap,
+              child: Container(
+                margin: const EdgeInsets.all(4.0),
+                decoration: BoxDecoration(
+                  color: Colors.blue[200],
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(color: Colors.blue[400]!, width: 2),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.edit,
+                    color: Colors.blue,
+                    size: 32,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Delete action (right edge) - always present
+          Positioned(
+            right: 0,
+            top: 0,
+            bottom: 0,
+            width: 60, // Fixed width for the action button
+            child: GestureDetector(
+              onTap: _onDeleteTap,
+              child: Container(
+                margin: const EdgeInsets.all(4.0),
+                decoration: BoxDecoration(
+                  color: Colors.red[200],
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(color: Colors.red[400]!, width: 2),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.delete,
+                    color: Colors.red,
+                    size: 32,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Draggable content - positioned on top
+          Transform.translate(
+            offset: Offset(_dragOffset, 0),
+            child: GestureDetector(
+              onPanStart: _onPanStart,
+              onPanUpdate: _onPanUpdate,
+              onPanEnd: _onPanEnd,
+              onTap: _showActions ? _snapBack : null, // Tap to close when actions are shown
+              child: FoodItemWidget(food: widget.food),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class FoodLogEntryWidget extends StatelessWidget {
   final FoodLogEntry entry;
+  final Function(FoodLogEntry entry, Food food)? onEditFood;
+  final Function(FoodLogEntry entry, Food food)? onDeleteFood;
 
-  const FoodLogEntryWidget({super.key, required this.entry});
+  const FoodLogEntryWidget({
+    super.key, 
+    required this.entry,
+    this.onEditFood,
+    this.onDeleteFood,
+  });
 
   String _formatTime(DateTime timestamp) {
     final hour = timestamp.hour;
@@ -199,7 +369,11 @@ class FoodLogEntryWidget extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           // Food items
-          ...entry.foods.map((food) => FoodItemWidget(food: food)),
+          ...entry.foods.map((food) => DraggableFoodItemWidget(
+            food: food,
+            onEdit: () => onEditFood?.call(entry, food),
+            onDelete: () => onDeleteFood?.call(entry, food),
+          )),
         ],
       ),
     );
@@ -327,6 +501,36 @@ class _LogScreenState extends State<LogScreen> {
     setState(() {
       _currentDate = _currentDate.add(const Duration(days: 1));
     });
+  }
+
+  void _editFood(FoodLogEntry entry, Food food) {
+    // Reload the log tab by triggering a rebuild
+    setState(() {
+      // This will cause the entire log screen to rebuild
+    });
+    
+    // Show feedback
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Edit ${food.name} - Log reloaded'),
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
+
+  void _deleteFood(FoodLogEntry entry, Food food) {
+    // Reload the log tab by triggering a rebuild
+    setState(() {
+      // This will cause the entire log screen to rebuild
+    });
+    
+    // Show feedback
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Delete ${food.name} - Log reloaded'),
+        duration: const Duration(seconds: 1),
+      ),
+    );
   }
 
   String _formatDate(DateTime date) {
@@ -465,7 +669,11 @@ class _LogScreenState extends State<LogScreen> {
                         ),
                       )
                     else
-                      ..._foodLogEntries.map((entry) => FoodLogEntryWidget(entry: entry)),
+                      ..._foodLogEntries.map((entry) => FoodLogEntryWidget(
+                        entry: entry,
+                        onEditFood: _editFood,
+                        onDeleteFood: _deleteFood,
+                      )),
                   ],
                 ),
               ),

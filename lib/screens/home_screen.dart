@@ -8,7 +8,10 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard')),
       body: Center(
-        child: Table(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Table(
           // No border on the Table itself, as cells will have their own
           columnWidths: const <int, TableColumnWidth>{
             0: FlexColumnWidth(1.0), // Column 1 content
@@ -84,6 +87,27 @@ class HomeScreen extends StatelessWidget {
                 _buildFooterCell('S'),
                 _buildFooterCell('S'),
                 _buildEmptyCell(),
+              ],
+            ),
+          ],
+            ),
+            const SizedBox(height: 20), // Add some spacing between table and buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    // TODO: Add functionality for Consumed button
+                  },
+                  child: const Text('Consumed'),
+                ),
+                const SizedBox(width: 16), // Add spacing between buttons
+                ElevatedButton(
+                  onPressed: () {
+                    // TODO: Add functionality for Remaining button
+                  },
+                  child: const Text('Remaining'),
+                ),
               ],
             ),
           ],

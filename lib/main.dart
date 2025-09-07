@@ -70,7 +70,33 @@ class _MainScreenState extends State<MainScreen> {
     }
     
     return Scaffold(
-      body: _screens[_selectedIndex],
+      body: Column(
+        children: [
+          // Scrollable content area
+          Expanded(
+            child: _screens[_selectedIndex],
+          ),
+          // Search TextBox - Fixed between content and tabs
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              border: Border(
+                top: BorderSide(color: Colors.grey[300]!),
+                bottom: BorderSide(color: Colors.grey[300]!),
+              ),
+            ),
+            child: TextField(
+              decoration: const InputDecoration(
+                hintText: '🔍 Food Search',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+            ),
+          ),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         items: const <BottomNavigationBarItem>[

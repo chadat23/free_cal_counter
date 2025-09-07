@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -7,11 +8,22 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Table(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              // Table Section Container
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey[300]!),
+                ),
+                child: Column(
+                  children: [
+                    Table(
           // No border on the Table itself, as cells will have their own
           columnWidths: const <int, TableColumnWidth>{
             0: FlexColumnWidth(1.0), // Column 1 content
@@ -90,27 +102,112 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
           ],
-            ),
-            const SizedBox(height: 20), // Add some spacing between table and buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    // TODO: Add functionality for Consumed button
-                  },
-                  child: const Text('Consumed'),
                 ),
-                const SizedBox(width: 16), // Add spacing between buttons
-                ElevatedButton(
-                  onPressed: () {
-                    // TODO: Add functionality for Remaining button
-                  },
-                  child: const Text('Remaining'),
+                const SizedBox(height: 20), // Add some spacing between table and buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        // TODO: Add functionality for Consumed button
+                      },
+                      child: const Text('Consumed'),
+                    ),
+                    const SizedBox(width: 16), // Add spacing between buttons
+                    ElevatedButton(
+                      onPressed: () {
+                        // TODO: Add functionality for Remaining button
+                      },
+                      child: const Text('Remaining'),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32), // Add spacing between sections
+              // Chart Section Container
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey[300]!),
+                ),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 200,
+                      child: LineChart(
+                        LineChartData(
+                          gridData: FlGridData(show: true),
+                          titlesData: FlTitlesData(
+                            leftTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: true),
+                            ),
+                            topTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                            rightTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                            bottomTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: true),
+                            ),
+                          ),
+                          borderData: FlBorderData(show: true),
+                          lineBarsData: [
+                            LineChartBarData(
+                              spots: [
+                                const FlSpot(0, 3),
+                                const FlSpot(1, 1),
+                                const FlSpot(2, 4),
+                                const FlSpot(3, 2),
+                                const FlSpot(4, 5),
+                                const FlSpot(5, 3),
+                                const FlSpot(6, 4),
+                              ],
+                              isCurved: false,
+                              color: Colors.blue,
+                              barWidth: 3,
+                              dotData: FlDotData(show: true),
+                              belowBarData: BarAreaData(show: false),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20), // Add spacing between chart and buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            // TODO: Add functionality for Week button
+                          },
+                          child: const Text('Week'),
+                        ),
+                        const SizedBox(width: 12),
+                        ElevatedButton(
+                          onPressed: () {
+                            // TODO: Add functionality for Month button
+                          },
+                          child: const Text('Month'),
+                        ),
+                        const SizedBox(width: 12),
+                        ElevatedButton(
+                          onPressed: () {
+                            // TODO: Add functionality for 6 Months button
+                          },
+                          child: const Text('6 Months'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

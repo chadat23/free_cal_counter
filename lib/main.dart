@@ -35,11 +35,11 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _screens = <Widget>[
-    HomeScreen(),
-    LogScreen(),
-    WeightScreen(),
-    SettingsScreen(),
+  List<Widget> get _screens => <Widget>[
+    const HomeScreen(),
+    const LogScreen(),
+    WeightScreen(onWeightEntered: () => _onItemTapped(0)), // Navigate to home after weight entry
+    const SettingsScreen(),
   ];
 
   @override
@@ -76,25 +76,30 @@ class _MainScreenState extends State<MainScreen> {
           Expanded(
             child: _screens[_selectedIndex],
           ),
-          // Search TextBox - Fixed between content and tabs
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              border: Border(
-                top: BorderSide(color: Colors.grey[300]!),
-                bottom: BorderSide(color: Colors.grey[300]!),
+          // Search TextBox - Only show on Home (0) and Log (1) screens
+          if (_selectedIndex == 0 || _selectedIndex == 1)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                border: Border(
+                  top: BorderSide(color: Colors.grey[300]!),
+                  bottom: BorderSide(color: Colors.grey[300]!),
+                ),
+              ),
+              child: TextField(
+                decoration: const InputDecoration(
+                  hintText: '🔍 Food Search',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+                onTapOutside: (event) {
+                  // Hide keyboard when tapping outside the text field
+                  FocusScope.of(context).unfocus();
+                },
               ),
             ),
-            child: TextField(
-              decoration: const InputDecoration(
-                hintText: '🔍 Food Search',
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              ),
-            ),
-          ),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(

@@ -33,8 +33,9 @@ class FoodLogEntry {
 
 class FoodItemWidget extends StatelessWidget {
   final Food food;
+  final bool isSelected;
 
-  const FoodItemWidget({super.key, required this.food});
+  const FoodItemWidget({super.key, required this.food, this.isSelected = false});
 
   @override
   Widget build(BuildContext context) {
@@ -42,14 +43,19 @@ class FoodItemWidget extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4.0),
       padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isSelected ? Colors.blue[50] : Colors.white,
         borderRadius: BorderRadius.circular(8.0),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(
+          color: isSelected ? Colors.blue[400]! : Colors.grey[300]!,
+          width: isSelected ? 2.0 : 1.0,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            spreadRadius: 1,
-            blurRadius: 2,
+            color: isSelected 
+                ? Colors.blue.withValues(alpha: 0.2)
+                : Colors.grey.withValues(alpha: 0.1),
+            spreadRadius: isSelected ? 2 : 1,
+            blurRadius: isSelected ? 4 : 2,
             offset: const Offset(0, 1),
           ),
         ],
@@ -137,12 +143,20 @@ class DraggableFoodItemWidget extends StatefulWidget {
   final Food food;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+  final bool isSelected;
+  final bool isInSelectionMode;
 
   const DraggableFoodItemWidget({
     super.key,
     required this.food,
     this.onEdit,
     this.onDelete,
+    this.onTap,
+    this.onLongPress,
+    this.isSelected = false,
+    this.isInSelectionMode = false,
   });
 
   @override
@@ -286,8 +300,9 @@ class _DraggableFoodItemWidgetState extends State<DraggableFoodItemWidget>
               onPanStart: _onPanStart,
               onPanUpdate: _onPanUpdate,
               onPanEnd: _onPanEnd,
-              onTap: _showActions ? _snapBack : null, // Tap to close when actions are shown
-              child: FoodItemWidget(food: widget.food),
+              onTap: _showActions ? _snapBack : (widget.isInSelectionMode ? widget.onTap : null), // Tap works in selection mode or to close actions
+              onLongPress: widget.onLongPress, // Long press to select item
+              child: FoodItemWidget(food: widget.food, isSelected: widget.isSelected),
             ),
           ),
         ],
@@ -300,12 +315,20 @@ class FoodLogEntryWidget extends StatelessWidget {
   final FoodLogEntry entry;
   final Function(FoodLogEntry entry, Food food)? onEditFood;
   final Function(FoodLogEntry entry, Food food)? onDeleteFood;
+  final Function(FoodLogEntry entry, Food food)? onTapFood;
+  final Function(FoodLogEntry entry, Food food)? onLongPressFood;
+  final bool Function(FoodLogEntry entry, Food food)? isFoodSelected;
+  final bool isInSelectionMode;
 
   const FoodLogEntryWidget({
     super.key, 
     required this.entry,
     this.onEditFood,
     this.onDeleteFood,
+    this.onTapFood,
+    this.onLongPressFood,
+    this.isFoodSelected,
+    this.isInSelectionMode = false,
   });
 
   String _formatTime(DateTime timestamp) {
@@ -373,6 +396,10 @@ class FoodLogEntryWidget extends StatelessWidget {
             food: food,
             onEdit: () => onEditFood?.call(entry, food),
             onDelete: () => onDeleteFood?.call(entry, food),
+            onTap: () => onTapFood?.call(entry, food),
+            onLongPress: () => onLongPressFood?.call(entry, food),
+            isSelected: isFoodSelected?.call(entry, food) ?? false,
+            isInSelectionMode: isInSelectionMode,
           )),
         ],
       ),
@@ -464,6 +491,10 @@ class LogScreen extends StatefulWidget {
 class _LogScreenState extends State<LogScreen> {
   DateTime _currentDate = DateTime.now();
   
+  // Selection state management
+  final Set<String> _selectedItems = <String>{};
+  bool _isInSelectionMode = false;
+  
   // Sample food log data
   final List<FoodLogEntry> _foodLogEntries = [
     FoodLogEntry(
@@ -529,6 +560,138 @@ class _LogScreenState extends State<LogScreen> {
       SnackBar(
         content: Text('Delete ${food.name} - Log reloaded'),
         duration: const Duration(seconds: 1),
+      ),
+    );
+  }
+
+  // Generate unique ID for food item based on entry timestamp and food name
+  String _getFoodItemId(FoodLogEntry entry, Food food) {
+    return '${entry.timestamp.millisecondsSinceEpoch}_${food.name}';
+  }
+
+  // Handle item selection (for long press - starts selection mode)
+  void _startSelectionMode(FoodLogEntry entry, Food food) {
+    setState(() {
+      final itemId = _getFoodItemId(entry, food);
+      _isInSelectionMode = true;
+      if (_selectedItems.contains(itemId)) {
+        _selectedItems.remove(itemId);
+        // If no items selected, exit selection mode
+        if (_selectedItems.isEmpty) {
+          _isInSelectionMode = false;
+        }
+      } else {
+        _selectedItems.add(itemId);
+      }
+    });
+  }
+
+  // Handle item selection (for tap - only works in selection mode)
+  void _toggleItemSelection(FoodLogEntry entry, Food food) {
+    if (!_isInSelectionMode) return; // Only work in selection mode
+    
+    setState(() {
+      final itemId = _getFoodItemId(entry, food);
+      if (_selectedItems.contains(itemId)) {
+        _selectedItems.remove(itemId);
+        // If no items selected, exit selection mode
+        if (_selectedItems.isEmpty) {
+          _isInSelectionMode = false;
+        }
+      } else {
+        _selectedItems.add(itemId);
+      }
+    });
+  }
+
+  // Check if item is selected
+  bool _isItemSelected(FoodLogEntry entry, Food food) {
+    final itemId = _getFoodItemId(entry, food);
+    return _selectedItems.contains(itemId);
+  }
+
+  // Clear all selections
+  void _clearAllSelections() {
+    setState(() {
+      _selectedItems.clear();
+      _isInSelectionMode = false;
+    });
+  }
+
+  // Action button handlers
+  void _onCopyPressed() {
+    // For now, just clear selections
+    _clearAllSelections();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Copy action - selections cleared'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+  }
+
+  void _onMovePressed() {
+    // For now, just clear selections
+    _clearAllSelections();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Move action - selections cleared'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+  }
+
+  void _onDeletePressed() {
+    // For now, just clear selections
+    _clearAllSelections();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Delete action - selections cleared'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+  }
+
+  void _onCancelPressed() {
+    // Clear selections
+    _clearAllSelections();
+  }
+
+  // Helper method to build action buttons
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8.0),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: color,
+              size: 20,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -648,37 +811,86 @@ class _LogScreenState extends State<LogScreen> {
           ),
           // Scrollable content below
           Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Food log entries
-                    if (_foodLogEntries.isEmpty)
-                      const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(32.0),
-                          child: Text(
-                            'No food logged yet for this day',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
+            child: GestureDetector(
+              onTap: _clearAllSelections, // Tap outside to clear selections
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Food log entries
+                      if (_foodLogEntries.isEmpty)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(32.0),
+                            child: Text(
+                              'No food logged yet for this day',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
                             ),
                           ),
-                        ),
-                      )
-                    else
-                      ..._foodLogEntries.map((entry) => FoodLogEntryWidget(
-                        entry: entry,
-                        onEditFood: _editFood,
-                        onDeleteFood: _deleteFood,
-                      )),
-                  ],
+                        )
+                      else
+                        ..._foodLogEntries.map((entry) => FoodLogEntryWidget(
+                          entry: entry,
+                          onEditFood: _editFood,
+                          onDeleteFood: _deleteFood,
+                          onTapFood: _toggleItemSelection, // Regular tap works in selection mode
+                          onLongPressFood: _startSelectionMode, // Long press starts selection mode
+                          isFoodSelected: _isItemSelected,
+                          isInSelectionMode: _isInSelectionMode,
+                        )),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
+          // Action buttons row (only shown when items are selected) - positioned at bottom
+          if (_selectedItems.isNotEmpty)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                border: Border(
+                  top: BorderSide(color: Colors.blue[200]!),
+                  bottom: BorderSide(color: Colors.blue[200]!),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildActionButton(
+                    icon: Icons.copy,
+                    label: 'Copy',
+                    color: Colors.blue,
+                    onPressed: _onCopyPressed,
+                  ),
+                  _buildActionButton(
+                    icon: Icons.drive_file_move,
+                    label: 'Move',
+                    color: Colors.orange,
+                    onPressed: _onMovePressed,
+                  ),
+                  _buildActionButton(
+                    icon: Icons.delete,
+                    label: 'Delete',
+                    color: Colors.red,
+                    onPressed: _onDeletePressed,
+                  ),
+                  _buildActionButton(
+                    icon: Icons.cancel,
+                    label: 'Cancel',
+                    color: Colors.grey,
+                    onPressed: _onCancelPressed,
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );

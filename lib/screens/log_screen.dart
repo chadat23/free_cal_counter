@@ -724,8 +724,7 @@ class _LogScreenState extends State<LogScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Column(
+    return Column(
         children: [
           // Header with date navigation
           Container(
@@ -892,7 +891,6 @@ class _LogScreenState extends State<LogScreen> {
               ),
             ),
         ],
-      ),
     );
   }
 }

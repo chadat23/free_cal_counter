@@ -3,6 +3,7 @@ import 'screens/home_screen.dart';
 import 'screens/log_screen.dart';
 import 'screens/weight_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/food_search_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -70,12 +71,13 @@ class _MainScreenState extends State<MainScreen> {
     }
     
     return Scaffold(
-      body: Column(
-        children: [
-          // Scrollable content area
-          Expanded(
-            child: _screens[_selectedIndex],
-          ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Scrollable content area
+            Expanded(
+              child: _screens[_selectedIndex],
+            ),
           // Search TextBox - Only show on Home (0) and Log (1) screens
           if (_selectedIndex == 0 || _selectedIndex == 1)
             Container(
@@ -94,13 +96,22 @@ class _MainScreenState extends State<MainScreen> {
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
+                onTap: () {
+                  // Navigate to food search screen when tapped
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const FoodSearchScreen(),
+                    ),
+                  );
+                },
                 onTapOutside: (event) {
                   // Hide keyboard when tapping outside the text field
                   FocusScope.of(context).unfocus();
                 },
               ),
             ),
-        ],
+          ],
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,

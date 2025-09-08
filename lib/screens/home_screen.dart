@@ -6,8 +6,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: SingleChildScrollView(
+    return SingleChildScrollView(
         child: Column(
           children: [
             // Header with Dashboard title
@@ -238,7 +237,6 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 

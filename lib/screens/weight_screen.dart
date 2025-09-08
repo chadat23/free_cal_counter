@@ -70,8 +70,7 @@ class _WeightScreenState extends State<WeightScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: GestureDetector(
+    return GestureDetector(
         onTap: () {
           // Dismiss keyboard when tapping anywhere
           FocusScope.of(context).unfocus();
@@ -157,7 +156,6 @@ class _WeightScreenState extends State<WeightScreen> {
               ),
           ],
         ),
-      ),
     );
   }
 }

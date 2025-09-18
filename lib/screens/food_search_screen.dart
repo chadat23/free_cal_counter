@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../models/food.dart';
+import '../models/food_portion.dart';
+import '../services/database_service.dart';
 
 class FoodSearchScreen extends StatefulWidget {
   const FoodSearchScreen({super.key});
@@ -13,6 +16,11 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
   List<String> provisionalFoods = []; // List to hold emojis of provisionally added foods
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
+  
+  // Database and search state
+  final DatabaseService _databaseService = DatabaseService();
+  List<Food> _searchResults = [];
+  bool _isSearching = false;
 
   @override
   void initState() {
@@ -21,6 +29,9 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _searchFocusNode.requestFocus();
     });
+    
+    // Load some random foods initially
+    _loadRandomFoods();
   }
 
   @override
@@ -28,6 +39,41 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     _searchController.dispose();
     _searchFocusNode.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadRandomFoods() async {
+    try {
+      final foods = await _databaseService.getRandomFoods(limit: 10);
+      setState(() {
+        _searchResults = foods;
+      });
+    } catch (e) {
+      print('Error loading random foods: $e');
+    }
+  }
+
+  Future<void> _searchFoods(String query) async {
+    if (query.trim().isEmpty) {
+      await _loadRandomFoods();
+      return;
+    }
+
+    setState(() {
+      _isSearching = true;
+    });
+
+    try {
+      final results = await _databaseService.searchFoods(query, limit: 20);
+      setState(() {
+        _searchResults = results;
+        _isSearching = false;
+      });
+    } catch (e) {
+      print('Error searching foods: $e');
+      setState(() {
+        _isSearching = false;
+      });
+    }
   }
 
   @override
@@ -152,103 +198,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                  // Placeholder for future food search results
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(24.0),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[50],
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey[300]!),
-                    ),
-                    child: const Column(
-                      children: [
-                        Icon(
-                          Icons.search,
-                          size: 48,
-                          color: Colors.grey,
-                        ),
-                        SizedBox(height: 16),
-                        Text(
-                          'Food Search Results',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Search results will appear here',
-                          style: TextStyle(
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Example food items (placeholder)
-                  ...List.generate(5, (index) {
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey[300]!),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.1),
-                            spreadRadius: 1,
-                            blurRadius: 2,
-                            offset: const Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          const Text('🍎', style: TextStyle(fontSize: 24)),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Food Item ${index + 1}',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                Text(
-                                  '${(index + 1) * 50} calories',
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: () {
-                              // TODO: Add to provisional foods
-                              _addToProvisionalFoods('🍎');
-                            },
-                            icon: const Icon(Icons.add),
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
-                  ],
-                ),
+                child: _buildSearchResults(),
               ),
             ),
           ),
@@ -266,11 +216,29 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
             child: TextField(
               controller: _searchController,
               focusNode: _searchFocusNode,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: '🔍 Search for foods...',
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                border: const OutlineInputBorder(),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                suffixIcon: _isSearching 
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: Padding(
+                          padding: EdgeInsets.all(12),
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : null,
               ),
+              onChanged: (value) {
+                // Debounce search to avoid too many database calls
+                Future.delayed(const Duration(milliseconds: 300), () {
+                  if (_searchController.text == value) {
+                    _searchFoods(value);
+                  }
+                });
+              },
               onTapOutside: (event) {
                 // Hide keyboard when tapping outside the text field
                 FocusScope.of(context).unfocus();
@@ -283,10 +251,272 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     );
   }
 
-  void _addToProvisionalFoods(String emoji) {
+  Widget _buildSearchResults() {
+    if (_searchResults.isEmpty && !_isSearching) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(24.0),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey[300]!),
+        ),
+        child: const Column(
+          children: [
+            Icon(
+              Icons.search,
+              size: 48,
+              color: Colors.grey,
+            ),
+            SizedBox(height: 16),
+            Text(
+              'No foods found',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Try searching for a different food',
+              style: TextStyle(
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      children: _searchResults.map((food) => _buildFoodItem(food)).toList(),
+    );
+  }
+
+  Widget _buildFoodItem(Food food) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey[300]!),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 2,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Text(_getFoodEmoji(food.description), style: const TextStyle(fontSize: 24)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  food.displayName,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  food.caloriesText100g,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                if (food.portions.isNotEmpty)
+                  _buildPortionsRow(food.portions, food),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              _addToProvisionalFoods(food);
+            },
+            icon: const Icon(Icons.add),
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPortionsRow(List<FoodPortion> portions, Food food) {
+    final top = portions.take(3).toList();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final p in top)
+              _portionChip(p, food),
+            if (portions.length > 3)
+              GestureDetector(
+                onTap: () => _showAllPortions(food),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text('+${portions.length - 3} more', style: TextStyle(color: Colors.grey[700], fontSize: 12)),
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _portionChip(FoodPortion portion, Food food) {
+    final grams = portion.gramWeight;
+    final kcal = food.caloriesForGrams(grams).round();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey[300]!),
+      ),
+      child: Text('${portion.label} • ${grams.toStringAsFixed(0)} g • $kcal kcal', style: const TextStyle(fontSize: 12)),
+    );
+  }
+
+  void _showAllPortions(Food food) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(food.displayName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                const SizedBox(height: 8),
+                Text(food.caloriesText100g, style: TextStyle(color: Colors.grey[600])),
+                const SizedBox(height: 12),
+                for (final portion in food.portions)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(child: Text(portion.label)),
+                        Text('${portion.gramWeight.toStringAsFixed(0)} g'),
+                        const SizedBox(width: 8),
+                        Text('${food.caloriesForGrams(portion.gramWeight).round()} kcal'),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _getFoodEmoji(String description) {
+    final desc = description.toLowerCase();
+    if (desc.contains('apple')) return '🍎';
+    if (desc.contains('banana')) return '🍌';
+    if (desc.contains('orange')) return '🍊';
+    if (desc.contains('grape')) return '🍇';
+    if (desc.contains('strawberry')) return '🍓';
+    if (desc.contains('cherry')) return '🍒';
+    if (desc.contains('peach')) return '🍑';
+    if (desc.contains('pear')) return '🍐';
+    if (desc.contains('lemon')) return '🍋';
+    if (desc.contains('lime')) return '🍋';
+    if (desc.contains('watermelon')) return '🍉';
+    if (desc.contains('melon')) return '🍈';
+    if (desc.contains('pineapple')) return '🍍';
+    if (desc.contains('coconut')) return '🥥';
+    if (desc.contains('mango')) return '🥭';
+    if (desc.contains('avocado')) return '🥑';
+    if (desc.contains('tomato')) return '🍅';
+    if (desc.contains('carrot')) return '🥕';
+    if (desc.contains('corn')) return '🌽';
+    if (desc.contains('pepper')) return '🌶️';
+    if (desc.contains('cucumber')) return '🥒';
+    if (desc.contains('broccoli')) return '🥦';
+    if (desc.contains('lettuce')) return '🥬';
+    if (desc.contains('mushroom')) return '🍄';
+    if (desc.contains('peanut')) return '🥜';
+    if (desc.contains('bread')) return '🍞';
+    if (desc.contains('croissant')) return '🥐';
+    if (desc.contains('bagel')) return '🥯';
+    if (desc.contains('pancake')) return '🥞';
+    if (desc.contains('waffle')) return '🧇';
+    if (desc.contains('cheese')) return '🧀';
+    if (desc.contains('meat')) return '🥩';
+    if (desc.contains('bacon')) return '🥓';
+    if (desc.contains('sausage')) return '🌭';
+    if (desc.contains('pizza')) return '🍕';
+    if (desc.contains('burger')) return '🍔';
+    if (desc.contains('sandwich')) return '🥪';
+    if (desc.contains('taco')) return '🌮';
+    if (desc.contains('burrito')) return '🌯';
+    if (desc.contains('salad')) return '🥗';
+    if (desc.contains('popcorn')) return '🍿';
+    if (desc.contains('butter')) return '🧈';
+    if (desc.contains('salt')) return '🧂';
+    if (desc.contains('egg')) return '🥚';
+    if (desc.contains('milk')) return '🥛';
+    if (desc.contains('coffee')) return '☕';
+    if (desc.contains('tea')) return '🍵';
+    if (desc.contains('beer')) return '🍺';
+    if (desc.contains('wine')) return '🍷';
+    if (desc.contains('cake')) return '🍰';
+    if (desc.contains('cookie')) return '🍪';
+    if (desc.contains('chocolate')) return '🍫';
+    if (desc.contains('candy')) return '🍬';
+    if (desc.contains('lollipop')) return '🍭';
+    if (desc.contains('honey')) return '🍯';
+    if (desc.contains('donut')) return '🍩';
+    if (desc.contains('ice cream')) return '🍦';
+    if (desc.contains('fish')) return '🐟';
+    if (desc.contains('shrimp')) return '🦐';
+    if (desc.contains('crab')) return '🦀';
+    if (desc.contains('lobster')) return '🦞';
+    if (desc.contains('oyster')) return '🦪';
+    if (desc.contains('rice')) return '🍚';
+    if (desc.contains('noodle')) return '🍜';
+    if (desc.contains('spaghetti')) return '🍝';
+    if (desc.contains('bread')) return '🍞';
+    if (desc.contains('pretzel')) return '🥨';
+    if (desc.contains('cracker')) return '🍘';
+    if (desc.contains('soup')) return '🍲';
+    if (desc.contains('stew')) return '🍲';
+    if (desc.contains('curry')) return '🍛';
+    if (desc.contains('sushi')) return '🍣';
+    if (desc.contains('bento')) return '🍱';
+    if (desc.contains('dumpling')) return '🥟';
+    if (desc.contains('fortune cookie')) return '🥠';
+    if (desc.contains('takeout box')) return '🥡';
+    return '🍽️'; // Default food emoji
+  }
+
+  void _addToProvisionalFoods(Food food) {
     setState(() {
-      provisionalFoods.add(emoji);
-      consumedCalories += 50; // Example: add 50 calories per food
+      provisionalFoods.add(_getFoodEmoji(food.description));
+      consumedCalories += (food.caloriesKcal ?? 0).round();
     });
   }
 
@@ -301,20 +531,26 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
             if (provisionalFoods.isEmpty)
               const Text('No provisional foods added yet')
             else
-              ...provisionalFoods.map((emoji) => ListTile(
-                leading: Text(emoji, style: const TextStyle(fontSize: 24)),
-                title: Text('Food with $emoji'),
-                trailing: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      provisionalFoods.remove(emoji);
-                      consumedCalories -= 50; // Example: remove 50 calories
-                    });
-                    Navigator.of(context).pop();
-                  },
-                  icon: const Icon(Icons.remove_circle, color: Colors.red),
-                ),
-              )),
+              ...provisionalFoods.asMap().entries.map((entry) {
+                final index = entry.key;
+                final emoji = entry.value;
+                return ListTile(
+                  leading: Text(emoji, style: const TextStyle(fontSize: 24)),
+                  title: Text('Food ${index + 1}'),
+                  subtitle: Text('$consumedCalories calories total'),
+                  trailing: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        provisionalFoods.removeAt(index);
+                        // Recalculate calories - this is simplified
+                        consumedCalories = (consumedCalories * (provisionalFoods.length - 1) / provisionalFoods.length).round();
+                      });
+                      Navigator.of(context).pop();
+                    },
+                    icon: const Icon(Icons.remove_circle, color: Colors.red),
+                  ),
+                );
+              }),
           ],
         ),
         actions: [

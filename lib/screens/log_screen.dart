@@ -108,9 +108,9 @@ class FoodItemWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildNutritionChip('P', '${food.protein.toStringAsFixed(1)}', Colors.red),
-              _buildNutritionChip('F', '${food.fat.toStringAsFixed(1)}', Colors.yellow),
-              _buildNutritionChip('C', '${food.carbs.toStringAsFixed(1)}', Colors.green),
+              _buildNutritionChip('P', food.protein.toStringAsFixed(1), Colors.red),
+              _buildNutritionChip('F', food.fat.toStringAsFixed(1), Colors.yellow),
+              _buildNutritionChip('C', food.carbs.toStringAsFixed(1), Colors.green),
               _buildNutritionChip('', '${food.grams.toStringAsFixed(0)}g', Colors.blue),
             ],
           ),

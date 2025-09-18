@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'screens/home_screen.dart';
 import 'screens/log_screen.dart';
 import 'screens/weight_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/food_search_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
+  
   runApp(const MyApp());
 }
 

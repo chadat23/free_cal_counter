@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'dart:io';
 import '../models/food.dart';
 import '../models/food_portion.dart';
 import '../services/database_service.dart';
@@ -20,7 +22,11 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
   // Database and search state
   final DatabaseService _databaseService = DatabaseService();
   List<Food> _searchResults = [];
+  List<Food> _offSearchResults = [];
   bool _isSearching = false;
+  bool _isSearchingOff = false;
+  bool _showOffResults = false;
+  String _currentQuery = '';
 
   @override
   void initState() {
@@ -60,6 +66,9 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
 
     setState(() {
       _isSearching = true;
+      _currentQuery = query;
+      _showOffResults = false;
+      _offSearchResults = [];
     });
 
     try {
@@ -74,6 +83,78 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
         _isSearching = false;
       });
     }
+  }
+
+  Future<void> _searchOpenFoodFacts() async {
+    if (_currentQuery.trim().isEmpty) return;
+
+    setState(() {
+      _isSearchingOff = true;
+    });
+
+    try {
+      // Make HTTP request to OpenFoodFacts API
+      final client = HttpClient();
+      final uri = Uri.parse('https://world.openfoodfacts.org/cgi/search.pl?search_terms=${Uri.encodeComponent(_currentQuery)}&search_simple=1&action=process&json=1&page_size=20');
+      
+      final request = await client.getUrl(uri);
+      request.headers.set('User-Agent', 'Free Cal Counter - Flutter - Version 1.0');
+      
+      final response = await request.close();
+      final responseBody = await response.transform(utf8.decoder).join();
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(responseBody);
+        final products = data['products'] as List<dynamic>? ?? [];
+        
+        // Convert OpenFoodFacts products to your Food model
+        final offResults = products.map((product) => _convertOffProductToFood(product)).toList();
+        
+        setState(() {
+          _offSearchResults = offResults;
+          _isSearchingOff = false;
+          _showOffResults = true;
+        });
+      } else {
+        throw Exception('Failed to search OpenFoodFacts: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error searching OpenFoodFacts: $e');
+      setState(() {
+        _isSearchingOff = false;
+      });
+    }
+  }
+
+  Food _convertOffProductToFood(Map<String, dynamic> product) {
+    // Extract calories from nutrients
+    double calories = 0.0;
+    final nutriments = product['nutriments'] as Map<String, dynamic>? ?? {};
+    
+    if (nutriments['energy-kcal_100g'] != null) {
+      calories = (nutriments['energy-kcal_100g'] as num).toDouble();
+    } else if (nutriments['energy_100g'] != null) {
+      // Convert kJ to kcal if needed
+      calories = (nutriments['energy_100g'] as num).toDouble() / 4.184;
+    }
+
+    // Extract other nutrients (per 100g)
+    double protein = (nutriments['proteins_100g'] as num?)?.toDouble() ?? 0.0;
+    double fat = (nutriments['fat_100g'] as num?)?.toDouble() ?? 0.0;
+    double carbs = (nutriments['carbohydrates_100g'] as num?)?.toDouble() ?? 0.0;
+
+    // Create a Food object from OpenFoodFacts data
+    return Food(
+      id: int.tryParse(product['code'] as String? ?? '0') ?? 0,
+      source: 'openfoodfacts',
+      externalId: product['code'] as String? ?? 'unknown',
+      description: product['product_name'] as String? ?? 'Unknown Product',
+      caloriesKcal: calories,
+      proteinG: protein,
+      fatG: fat,
+      carbsG: carbs,
+      portions: [], // OpenFoodFacts doesn't have portion data in the same format
+    );
   }
 
   @override
@@ -213,36 +294,63 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                 top: BorderSide(color: Colors.grey[300]!),
               ),
             ),
-            child: TextField(
-              controller: _searchController,
-              focusNode: _searchFocusNode,
-              decoration: InputDecoration(
-                hintText: '🔍 Search for foods...',
-                border: const OutlineInputBorder(),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                suffixIcon: _isSearching 
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: Padding(
-                          padding: EdgeInsets.all(12),
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      )
-                    : null,
-              ),
-              onChanged: (value) {
-                // Debounce search to avoid too many database calls
-                Future.delayed(const Duration(milliseconds: 300), () {
-                  if (_searchController.text == value) {
-                    _searchFoods(value);
-                  }
-                });
-              },
-              onTapOutside: (event) {
-                // Hide keyboard when tapping outside the text field
-                FocusScope.of(context).unfocus();
-              },
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    focusNode: _searchFocusNode,
+                    decoration: InputDecoration(
+                      hintText: '🔍 Search for foods...',
+                      border: const OutlineInputBorder(),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      suffixIcon: _isSearching 
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: Padding(
+                                padding: EdgeInsets.all(12),
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            )
+                          : null,
+                    ),
+                    onChanged: (value) {
+                      // Debounce search to avoid too many database calls
+                      Future.delayed(const Duration(milliseconds: 300), () {
+                        if (_searchController.text == value) {
+                          _searchFoods(value);
+                        }
+                      });
+                    },
+                    onTapOutside: (event) {
+                      // Hide keyboard when tapping outside the text field
+                      FocusScope.of(context).unfocus();
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // OpenFoodFacts button - always visible
+                ElevatedButton.icon(
+                  onPressed: _isSearchingOff ? null : _searchOpenFoodFacts,
+                  icon: _isSearchingOff 
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Icon(Icons.public, size: 18),
+                  label: Text(_isSearchingOff ? 'OFF...' : 'OFF'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue[600],
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -252,6 +360,96 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
   }
 
   Widget _buildSearchResults() {
+    // Show OpenFoodFacts results if we're showing them
+    if (_showOffResults) {
+      return Column(
+        children: [
+          // Header with back button
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.blue[50],
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.blue[200]!),
+            ),
+            child: Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _showOffResults = false;
+                    });
+                  },
+                  icon: const Icon(Icons.arrow_back, color: Colors.blue),
+                ),
+                const SizedBox(width: 8),
+                const Icon(Icons.public, color: Colors.blue, size: 20),
+                const SizedBox(width: 8),
+                const Text(
+                  'OpenFoodFacts Results',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                    fontSize: 16,
+                  ),
+                ),
+                const Spacer(),
+                if (_isSearchingOff)
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          // OpenFoodFacts results
+          if (_offSearchResults.isEmpty && !_isSearchingOff)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24.0),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: const Column(
+                children: [
+                  Icon(
+                    Icons.search_off,
+                    size: 48,
+                    color: Colors.grey,
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'No OpenFoodFacts results',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Try a different search term',
+                    style: TextStyle(
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            Column(
+              children: _offSearchResults.map((food) => _buildFoodItem(food, isOffResult: true)).toList(),
+            ),
+        ],
+      );
+    }
+
+    // Show local database results
     if (_searchResults.isEmpty && !_isSearching) {
       return Container(
         width: double.infinity,
@@ -290,11 +488,15 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     }
 
     return Column(
-      children: _searchResults.map((food) => _buildFoodItem(food)).toList(),
+      children: [
+        // Local database results
+        ..._searchResults.map((food) => _buildFoodItem(food)).toList(),
+        
+      ],
     );
   }
 
-  Widget _buildFoodItem(Food food) {
+  Widget _buildFoodItem(Food food, {bool isOffResult = false}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(16),
@@ -319,12 +521,41 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  food.displayName,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        food.displayName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    if (isOffResult)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.blue[100],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.public, size: 12, color: Colors.blue),
+                            const SizedBox(width: 4),
+                            const Text(
+                              'OFF',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -516,7 +747,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
   void _addToProvisionalFoods(Food food) {
     setState(() {
       provisionalFoods.add(_getFoodEmoji(food.description));
-      consumedCalories += (food.caloriesKcal ?? 0).round();
+      consumedCalories += food.caloriesKcal.round();
     });
   }
 

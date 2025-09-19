@@ -8,7 +8,7 @@ class ApiConfig {
     }
     return key;
   }
-  
+
   // You can add other API configurations here
   static String get fdaBaseUrl => 'https://api.fda.gov';
-} 
+}

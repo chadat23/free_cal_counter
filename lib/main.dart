@@ -8,10 +8,10 @@ import 'screens/food_search_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Load environment variables
   await dotenv.load(fileName: ".env");
-  
+
   runApp(const MyApp());
 }
 
@@ -23,7 +23,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Free Cal Counter',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 202, 137, 15)),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color.fromARGB(255, 202, 137, 15),
+        ),
         useMaterial3: true,
       ),
       darkTheme: ThemeData.dark(),
@@ -45,7 +47,9 @@ class _MainScreenState extends State<MainScreen> {
   List<Widget> get _screens => <Widget>[
     const HomeScreen(),
     const LogScreen(),
-    WeightScreen(onWeightEntered: () => _onItemTapped(0)), // Navigate to home after weight entry
+    WeightScreen(
+      onWeightEntered: () => _onItemTapped(0),
+    ), // Navigate to home after weight entry
     const SettingsScreen(),
   ];
 
@@ -64,7 +68,6 @@ class _MainScreenState extends State<MainScreen> {
       });
     } else {
       // Debug: log invalid index attempts
-      print('Invalid tab index attempted: $index, valid range: 0-${_screens.length - 1}');
     }
   }
 
@@ -72,50 +75,50 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     // Ensure _selectedIndex is within valid bounds
     if (_selectedIndex >= _screens.length) {
-      print('Resetting invalid _selectedIndex from $_selectedIndex to 0');
       _selectedIndex = 0;
     }
-    
+
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
             // Scrollable content area
-            Expanded(
-              child: _screens[_selectedIndex],
-            ),
-          // Search TextBox - Only show on Home (0) and Log (1) screens
-          if (_selectedIndex == 0 || _selectedIndex == 1)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                border: Border(
-                  top: BorderSide(color: Colors.grey[300]!),
-                  bottom: BorderSide(color: Colors.grey[300]!),
+            Expanded(child: _screens[_selectedIndex]),
+            // Search TextBox - Only show on Home (0) and Log (1) screens
+            if (_selectedIndex == 0 || _selectedIndex == 1)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  border: Border(
+                    top: BorderSide(color: Colors.grey[300]!),
+                    bottom: BorderSide(color: Colors.grey[300]!),
+                  ),
                 ),
-              ),
-              child: TextField(
-                decoration: const InputDecoration(
-                  hintText: '🔍 Food Search',
-                  border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-                onTap: () {
-                  // Navigate to food search screen when tapped
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const FoodSearchScreen(),
+                child: TextField(
+                  decoration: const InputDecoration(
+                    hintText: '🔍 Food Search',
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
                     ),
-                  );
-                },
-                onTapOutside: (event) {
-                  // Hide keyboard when tapping outside the text field
-                  FocusScope.of(context).unfocus();
-                },
+                  ),
+                  onTap: () {
+                    // Navigate to food search screen when tapped
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const FoodSearchScreen(),
+                      ),
+                    );
+                  },
+                  onTapOutside: (event) {
+                    // Hide keyboard when tapping outside the text field
+                    FocusScope.of(context).unfocus();
+                  },
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -126,10 +129,7 @@ class _MainScreenState extends State<MainScreen> {
             icon: Icon(Icons.calendar_month),
             label: 'Home',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.restaurant),
-            label: 'Log',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.restaurant), label: 'Log'),
           BottomNavigationBarItem(
             icon: Icon(Icons.monitor_weight),
             label: 'Weight',

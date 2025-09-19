@@ -47,7 +47,10 @@ class DatabaseService {
     await _copyDatabaseFromAssets(dstPath, overwrite: true);
   }
 
-  Future<void> _copyDatabaseFromAssets(String dstPath, {bool overwrite = false}) async {
+  Future<void> _copyDatabaseFromAssets(
+    String dstPath, {
+    bool overwrite = false,
+  }) async {
     final dstFile = File(dstPath);
     if (await dstFile.exists()) {
       if (!overwrite) return;
@@ -57,7 +60,10 @@ class DatabaseService {
     // Prefer bundled asset; fall back to local etl file in debug/dev
     try {
       final ByteData data = await rootBundle.load('etl/foods.db');
-      final bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+      final bytes = data.buffer.asUint8List(
+        data.offsetInBytes,
+        data.lengthInBytes,
+      );
       await dstFile.create(recursive: true);
       await dstFile.writeAsBytes(bytes, flush: true);
       return;
@@ -77,15 +83,15 @@ class DatabaseService {
     await database.close();
   }
 
-  // Intentionally unused: schema comes from prebuilt DB
-  Future<void> _onCreate(Database db, int version) async {}
-
   Future<bool> _hasRequiredTables(Database db) async {
     try {
       final rows = await db.rawQuery(
         "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('foods','food_portions')",
       );
-      final names = rows.map((e) => (e['name'] as String?)?.toLowerCase()).whereType<String>().toSet();
+      final names = rows
+          .map((e) => (e['name'] as String?)?.toLowerCase())
+          .whereType<String>()
+          .toSet();
       return names.contains('foods') && names.contains('food_portions');
     } catch (_) {
       return false;
@@ -94,7 +100,7 @@ class DatabaseService {
 
   Future<List<Food>> searchFoods(String query, {int limit = 20}) async {
     final db = await database;
-    
+
     if (query.trim().isEmpty) {
       return [];
     }
@@ -139,7 +145,7 @@ class DatabaseService {
 
   Future<List<Food>> getRandomFoods({int limit = 10}) async {
     final db = await database;
-    
+
     final results = await db.rawQuery(
       'SELECT * FROM foods WHERE is_active = 1 ORDER BY RANDOM() LIMIT ?',
       [limit],
@@ -167,7 +173,7 @@ class DatabaseService {
 
   Future<Food?> getFoodById(int id) async {
     final db = await database;
-    
+
     final results = await db.query(
       'foods',
       where: 'id = ? AND is_active = 1',

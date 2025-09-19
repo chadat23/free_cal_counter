@@ -11,6 +11,8 @@ class Food {
   final double carbsG; // per 100g baseline
   final bool isActive;
   final List<FoodPortion> portions;
+  final String? imageThumbUrl;
+  final String? imageFrontThumbUrl;
 
   Food({
     required this.id,
@@ -23,9 +25,14 @@ class Food {
     required this.carbsG,
     this.isActive = true,
     this.portions = const [],
+    this.imageThumbUrl,
+    this.imageFrontThumbUrl,
   });
 
-  factory Food.fromMap(Map<String, dynamic> map, {List<FoodPortion> portions = const []}) {
+  factory Food.fromMap(
+    Map<String, dynamic> map, {
+    List<FoodPortion> portions = const [],
+  }) {
     return Food(
       id: map['id'] as int,
       source: map['source'] as String,
@@ -55,9 +62,10 @@ class Food {
   }
 
   String get displayName => description;
-  
-  String get caloriesText100g => '${caloriesKcal.toStringAsFixed(0)} kcal / 100g';
-  
+
+  String get caloriesText100g =>
+      '${caloriesKcal.toStringAsFixed(0)} kcal / 100g';
+
   double caloriesForGrams(double grams) => caloriesKcal * (grams / 100.0);
   double proteinForGrams(double grams) => proteinG * (grams / 100.0);
   double fatForGrams(double grams) => fatG * (grams / 100.0);
@@ -65,9 +73,9 @@ class Food {
 
   String nutritionSummaryForGrams(double grams) {
     return '${caloriesForGrams(grams).round()} kcal • '
-           '${proteinForGrams(grams).toStringAsFixed(1)}g P • '
-           '${fatForGrams(grams).toStringAsFixed(1)}g F • '
-           '${carbsForGrams(grams).toStringAsFixed(1)}g C';
+        '${proteinForGrams(grams).toStringAsFixed(1)}g P • '
+        '${fatForGrams(grams).toStringAsFixed(1)}g F • '
+        '${carbsForGrams(grams).toStringAsFixed(1)}g C';
   }
 
   @override
@@ -75,4 +83,3 @@ class Food {
     return 'Food(id: $id, description: $description, kcal/100g: $caloriesKcal)';
   }
 }
-

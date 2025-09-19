@@ -7,236 +7,289 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-        child: Column(
-          children: [
-            // Header with Dashboard title
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                border: Border(
-                  bottom: BorderSide(color: Colors.grey[300]!),
-                ),
-              ),
-              child: const Text(
-                'Dashboard',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+      child: Column(
+        children: [
+          // Header with Dashboard title
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
             ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-              // Table Section Container
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.grey[50],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey[300]!),
-                ),
-                child: Column(
-                  children: [
-                    Table(
-          // No border on the Table itself, as cells will have their own
-          columnWidths: const <int, TableColumnWidth>{
-            0: FlexColumnWidth(1.0), // Column 1 content
-            1: FlexColumnWidth(1.0), // Column 2 content
-            2: FlexColumnWidth(1.0), // Column 3 content
-            3: FlexColumnWidth(1.0), // Column 4 content
-            4: FlexColumnWidth(1.0), // Column 5 content
-            5: FlexColumnWidth(1.0), // Column 6 content
-            6: FlexColumnWidth(1.0), // Column 7 content
-            7: FixedColumnWidth(80.0), // Row labels
-          },
-          children: <TableRow>[
-            // Row 1
-            TableRow(
-              children: <Widget>[
-                _buildBarChartCell(Colors.blue, 100, dayColor: const Color.fromARGB(255, 0, 0, 150)),
-                _buildBarChartCell(Colors.blue, 80),
-                _buildBarChartCell(Colors.blue, 60, selectionColor: const Color.fromARGB(255, 160, 160, 160)),
-                _buildBarChartCell(Colors.blue, 40),
-                _buildBarChartCell(Colors.blue, 20),
-                _buildBarChartCell(Colors.blue, 0),
-                _buildBarChartCell(Colors.blue, 20),
-                _buildLabelCell('2000 🔥', 'of 3000'),
-              ],
+            child: const Text(
+              'Dashboard',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            // Row 2 (with an empty cell)
-            TableRow(
-              children: <Widget>[
-                _buildBarChartCell(Colors.red, 100, dayColor: const Color.fromARGB(255, 0, 0, 150)),
-                _buildBarChartCell(Colors.red, 20),
-                _buildBarChartCell(Colors.red, 20, selectionColor: const Color.fromARGB(255, 160, 160, 160)),
-                _buildBarChartCell(Colors.red, 20),
-                _buildBarChartCell(Colors.red, 20),
-                _buildBarChartCell(Colors.red, 20),
-                _buildBarChartCell(Colors.red, 20),
-                _buildLabelCell('125 P', 'of 160'),
-              ],
-            ),
-            // Row 3
-            TableRow(
-              children: <Widget>[
-                _buildBarChartCell(Colors.yellow, 100, dayColor: const Color.fromARGB(255, 0, 0, 150)),
-                _buildBarChartCell(Colors.yellow, 20),
-                _buildBarChartCell(Colors.yellow, 20, selectionColor: const Color.fromARGB(255, 160, 160, 160)),
-                _buildBarChartCell(Colors.yellow, 20),
-                _buildBarChartCell(Colors.yellow, 20),
-                _buildBarChartCell(Colors.yellow, 20),
-                _buildBarChartCell(Colors.yellow, 20),
-                _buildLabelCell('45 F', 'of 88'),
-              ],
-            ),
-            // Row 4
-            TableRow(
-              children: <Widget>[
-                _buildBarChartCell(Colors.green, 100, dayColor: const Color.fromARGB(255, 0, 0, 150)),
-                _buildBarChartCell(Colors.green, 20),
-                _buildBarChartCell(Colors.green, 20, selectionColor: const Color.fromARGB(255, 160, 160, 160)),
-                _buildBarChartCell(Colors.green, 20),
-                _buildBarChartCell(Colors.green, 20),
-                _buildBarChartCell(Colors.green, 20),
-                _buildBarChartCell(Colors.green, 20),
-                _buildLabelCell('100 C', 'of 225'),
-              ],
-            ),
-            // Column Labels Row
-            TableRow(
-              children: <Widget>[
-                _buildFooterCell('M'),
-                _buildFooterCell('T'),
-                _buildFooterCell('W'),
-                _buildFooterCell('T'),
-                _buildFooterCell('F'),
-                _buildFooterCell('S'),
-                _buildFooterCell('S'),
-                _buildEmptyCell(),
-              ],
-            ),
-          ],
-                ),
-                const SizedBox(height: 20), // Add some spacing between table and buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        // TODO: Add functionality for Consumed button
-                      },
-                      child: const Text('Consumed'),
-                    ),
-                    const SizedBox(width: 16), // Add spacing between buttons
-                    ElevatedButton(
-                      onPressed: () {
-                        // TODO: Add functionality for Remaining button
-                      },
-                      child: const Text('Remaining'),
-                    ),
-                  ],
-                ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32), // Add spacing between sections
-              // Chart Section Container
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.grey[50],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey[300]!),
-                ),
-                child: Column(
-                  children: [
-                    const Text(
-                      'Weight',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      height: 200,
-                      child: LineChart(
-                        LineChartData(
-                          gridData: FlGridData(show: true),
-                          titlesData: FlTitlesData(
-                            leftTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: true),
-                            ),
-                            topTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            rightTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            bottomTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: true),
-                            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                // Table Section Container
+                Container(
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: Column(
+                    children: [
+                      Table(
+                        // No border on the Table itself, as cells will have their own
+                        columnWidths: const <int, TableColumnWidth>{
+                          0: FlexColumnWidth(1.0), // Column 1 content
+                          1: FlexColumnWidth(1.0), // Column 2 content
+                          2: FlexColumnWidth(1.0), // Column 3 content
+                          3: FlexColumnWidth(1.0), // Column 4 content
+                          4: FlexColumnWidth(1.0), // Column 5 content
+                          5: FlexColumnWidth(1.0), // Column 6 content
+                          6: FlexColumnWidth(1.0), // Column 7 content
+                          7: FixedColumnWidth(80.0), // Row labels
+                        },
+                        children: <TableRow>[
+                          // Row 1
+                          TableRow(
+                            children: <Widget>[
+                              _buildBarChartCell(
+                                Colors.blue,
+                                100,
+                                dayColor: const Color.fromARGB(255, 0, 0, 150),
+                              ),
+                              _buildBarChartCell(Colors.blue, 80),
+                              _buildBarChartCell(
+                                Colors.blue,
+                                60,
+                                selectionColor: const Color.fromARGB(
+                                  255,
+                                  160,
+                                  160,
+                                  160,
+                                ),
+                              ),
+                              _buildBarChartCell(Colors.blue, 40),
+                              _buildBarChartCell(Colors.blue, 20),
+                              _buildBarChartCell(Colors.blue, 0),
+                              _buildBarChartCell(Colors.blue, 20),
+                              _buildLabelCell('2000 🔥', 'of 3000'),
+                            ],
                           ),
-                          borderData: FlBorderData(show: true),
-                          lineBarsData: [
-                            LineChartBarData(
-                              spots: [
-                                const FlSpot(0, 3),
-                                const FlSpot(1, 1),
-                                const FlSpot(2, 4),
-                                const FlSpot(3, 2),
-                                const FlSpot(4, 5),
-                                const FlSpot(5, 3),
-                                const FlSpot(6, 4),
-                              ],
-                              isCurved: false,
-                              color: Colors.blue,
-                              barWidth: 3,
-                              dotData: FlDotData(show: true),
-                              belowBarData: BarAreaData(show: false),
-                            ),
-                          ],
+                          // Row 2 (with an empty cell)
+                          TableRow(
+                            children: <Widget>[
+                              _buildBarChartCell(
+                                Colors.red,
+                                100,
+                                dayColor: const Color.fromARGB(255, 0, 0, 150),
+                              ),
+                              _buildBarChartCell(Colors.red, 20),
+                              _buildBarChartCell(
+                                Colors.red,
+                                20,
+                                selectionColor: const Color.fromARGB(
+                                  255,
+                                  160,
+                                  160,
+                                  160,
+                                ),
+                              ),
+                              _buildBarChartCell(Colors.red, 20),
+                              _buildBarChartCell(Colors.red, 20),
+                              _buildBarChartCell(Colors.red, 20),
+                              _buildBarChartCell(Colors.red, 20),
+                              _buildLabelCell('125 P', 'of 160'),
+                            ],
+                          ),
+                          // Row 3
+                          TableRow(
+                            children: <Widget>[
+                              _buildBarChartCell(
+                                Colors.yellow,
+                                100,
+                                dayColor: const Color.fromARGB(255, 0, 0, 150),
+                              ),
+                              _buildBarChartCell(Colors.yellow, 20),
+                              _buildBarChartCell(
+                                Colors.yellow,
+                                20,
+                                selectionColor: const Color.fromARGB(
+                                  255,
+                                  160,
+                                  160,
+                                  160,
+                                ),
+                              ),
+                              _buildBarChartCell(Colors.yellow, 20),
+                              _buildBarChartCell(Colors.yellow, 20),
+                              _buildBarChartCell(Colors.yellow, 20),
+                              _buildBarChartCell(Colors.yellow, 20),
+                              _buildLabelCell('45 F', 'of 88'),
+                            ],
+                          ),
+                          // Row 4
+                          TableRow(
+                            children: <Widget>[
+                              _buildBarChartCell(
+                                Colors.green,
+                                100,
+                                dayColor: const Color.fromARGB(255, 0, 0, 150),
+                              ),
+                              _buildBarChartCell(Colors.green, 20),
+                              _buildBarChartCell(
+                                Colors.green,
+                                20,
+                                selectionColor: const Color.fromARGB(
+                                  255,
+                                  160,
+                                  160,
+                                  160,
+                                ),
+                              ),
+                              _buildBarChartCell(Colors.green, 20),
+                              _buildBarChartCell(Colors.green, 20),
+                              _buildBarChartCell(Colors.green, 20),
+                              _buildBarChartCell(Colors.green, 20),
+                              _buildLabelCell('100 C', 'of 225'),
+                            ],
+                          ),
+                          // Column Labels Row
+                          TableRow(
+                            children: <Widget>[
+                              _buildFooterCell('M'),
+                              _buildFooterCell('T'),
+                              _buildFooterCell('W'),
+                              _buildFooterCell('T'),
+                              _buildFooterCell('F'),
+                              _buildFooterCell('S'),
+                              _buildFooterCell('S'),
+                              _buildEmptyCell(),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ), // Add some spacing between table and buttons
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              // TODO: Add functionality for Consumed button
+                            },
+                            child: const Text('Consumed'),
+                          ),
+                          const SizedBox(
+                            width: 16,
+                          ), // Add spacing between buttons
+                          ElevatedButton(
+                            onPressed: () {
+                              // TODO: Add functionality for Remaining button
+                            },
+                            child: const Text('Remaining'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32), // Add spacing between sections
+                // Chart Section Container
+                Container(
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Weight',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 20), // Add spacing between chart and buttons
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            // TODO: Add functionality for Week button
-                          },
-                          child: const Text('Week'),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        height: 200,
+                        child: LineChart(
+                          LineChartData(
+                            gridData: FlGridData(show: true),
+                            titlesData: FlTitlesData(
+                              leftTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: true),
+                              ),
+                              topTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              rightTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              bottomTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: true),
+                              ),
+                            ),
+                            borderData: FlBorderData(show: true),
+                            lineBarsData: [
+                              LineChartBarData(
+                                spots: [
+                                  const FlSpot(0, 3),
+                                  const FlSpot(1, 1),
+                                  const FlSpot(2, 4),
+                                  const FlSpot(3, 2),
+                                  const FlSpot(4, 5),
+                                  const FlSpot(5, 3),
+                                  const FlSpot(6, 4),
+                                ],
+                                isCurved: false,
+                                color: Colors.blue,
+                                barWidth: 3,
+                                dotData: FlDotData(show: true),
+                                belowBarData: BarAreaData(show: false),
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(width: 12),
-                        ElevatedButton(
-                          onPressed: () {
-                            // TODO: Add functionality for Month button
-                          },
-                          child: const Text('Month'),
-                        ),
-                        const SizedBox(width: 12),
-                        ElevatedButton(
-                          onPressed: () {
-                            // TODO: Add functionality for 6 Months button
-                          },
-                          child: const Text('6 Months'),
-                        ),
-                      ],
-                    ),
-                  ],
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ), // Add spacing between chart and buttons
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              // TODO: Add functionality for Week button
+                            },
+                            child: const Text('Week'),
+                          ),
+                          const SizedBox(width: 12),
+                          ElevatedButton(
+                            onPressed: () {
+                              // TODO: Add functionality for Month button
+                            },
+                            child: const Text('Month'),
+                          ),
+                          const SizedBox(width: 12),
+                          ElevatedButton(
+                            onPressed: () {
+                              // TODO: Add functionality for 6 Months button
+                            },
+                            child: const Text('6 Months'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-                ],
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -250,10 +303,7 @@ class HomeScreen extends StatelessWidget {
         // Removed border to eliminate borders between cells
       ),
       height: 50,
-      child: Text(
-        text,
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
+      child: Text(text, style: const TextStyle(fontWeight: FontWeight.bold)),
     );
   }
 
@@ -282,27 +332,33 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildEmptyCell() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-      ),
-    );
+    return Container(decoration: BoxDecoration(color: Colors.grey[200]));
   }
 
   // Constants for consistent cell sizing for bar charts
-  final double _barChartCellHeight = 50.0; // Example fixed height for the entire cell
+  final double _barChartCellHeight =
+      50.0; // Example fixed height for the entire cell
   final double _barWidth = 4.0; // Fixed bar width
-  final double _maxBarHeight= 20.0; // Max height for the bar itself (at 100%)
+  final double _maxBarHeight = 20.0; // Max height for the bar itself (at 100%)
   final double _barGraphTrackWidth = 20.0;
 
-  Widget _buildBarChartCell(Color color, double value, {Color dayColor = const Color.fromARGB(255, 110, 110, 110), Color selectionColor = const Color.fromARGB(255, 135, 135, 135)}) {
+  Widget _buildBarChartCell(
+    Color color,
+    double value, {
+    Color dayColor = const Color.fromARGB(255, 110, 110, 110),
+    Color selectionColor = const Color.fromARGB(255, 135, 135, 135),
+  }) {
     // 1. Error Checking: Ensure value is within 0-100
     if (value < 0) {
-      debugPrint('Warning: Bar chart value $value is less than 0. Clamping to 0.');
+      debugPrint(
+        'Warning: Bar chart value $value is less than 0. Clamping to 0.',
+      );
       value = 0;
     }
     if (value > 100) {
-      debugPrint('Warning: Bar chart value $value is greater than 100. Clamping to 100.');
+      debugPrint(
+        'Warning: Bar chart value $value is greater than 100. Clamping to 100.',
+      );
       value = 100;
     }
 
@@ -312,28 +368,33 @@ class HomeScreen extends StatelessWidget {
     return Container(
       height: _barChartCellHeight, // Outer container for the entire grid cell
       // Outer container provides overall cell styling (background, rounded border for the cell itself)
-      decoration: BoxDecoration(
-        color: selectionColor,
-      ),
-      alignment: Alignment.center, // Center the bar graph component within the cell
-      padding: const EdgeInsets.all(4.0), // Padding around the bar graph component from cell edge
+      decoration: BoxDecoration(color: selectionColor),
+      alignment:
+          Alignment.center, // Center the bar graph component within the cell
+      padding: const EdgeInsets.all(
+        4.0,
+      ), // Padding around the bar graph component from cell edge
       child: SizedBox(
-        width: _barGraphTrackWidth, // Defines the total width for the track and bar
+        width:
+            _barGraphTrackWidth, // Defines the total width for the track and bar
         height: _maxBarHeight, // Defines the total height for the track and bar
         child: Stack(
           // The bar should simply grow from the bottom of this Stack
-          alignment: Alignment.bottomCenter, // **Crucial: All children align to bottom center**
+          alignment: Alignment
+              .bottomCenter, // **Crucial: All children align to bottom center**
           children: [
             // 1. Background Track (Rectangular)
             Container(
               width: _barGraphTrackWidth,
               height: _maxBarHeight,
-              color: dayColor, // Light grey background for the rectangular track
+              color:
+                  dayColor, // Light grey background for the rectangular track
             ),
             // 2. The Actual Bar (Rectangular, grows upwards from the bottom)
             Container(
               width: _barWidth, // This is the narrower width of the actual bar
-              height: currentBarHeight, // Bar grows from bottom up to this height
+              height:
+                  currentBarHeight, // Bar grows from bottom up to this height
               color: color, // The actual bar color
             ),
           ],

@@ -15,10 +15,11 @@ class FoodSearchScreen extends StatefulWidget {
 class _FoodSearchScreenState extends State<FoodSearchScreen> {
   int consumedCalories = 0;
   int totalCalories = 2000; // Example total calories
-  List<String> provisionalFoods = []; // List to hold emojis of provisionally added foods
+  List<String> provisionalFoods =
+      []; // List to hold emojis of provisionally added foods
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
-  
+
   // Database and search state
   final DatabaseService _databaseService = DatabaseService();
   List<Food> _searchResults = [];
@@ -35,7 +36,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _searchFocusNode.requestFocus();
     });
-    
+
     // Load some random foods initially
     _loadRandomFoods();
   }
@@ -54,7 +55,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
         _searchResults = foods;
       });
     } catch (e) {
-      print('Error loading random foods: $e');
+      //TODO: Handle error
     }
   }
 
@@ -78,7 +79,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
         _isSearching = false;
       });
     } catch (e) {
-      print('Error searching foods: $e');
+      //TODO: Handle error
       setState(() {
         _isSearching = false;
       });
@@ -95,31 +96,39 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     try {
       // Make HTTP request to OpenFoodFacts API
       final client = HttpClient();
-      final uri = Uri.parse('https://world.openfoodfacts.org/cgi/search.pl?search_terms=${Uri.encodeComponent(_currentQuery)}&search_simple=1&action=process&json=1&page_size=20');
-      
+      final uri = Uri.parse(
+        'https://world.openfoodfacts.org/cgi/search.pl?search_terms=${Uri.encodeComponent(_currentQuery)}&search_simple=1&action=process&json=1&page_size=20',
+      );
+
       final request = await client.getUrl(uri);
-      request.headers.set('User-Agent', 'Free Cal Counter - Flutter - Version 1.0');
-      
+      request.headers.set(
+        'User-Agent',
+        'Free Cal Counter - Flutter - Version 1.0',
+      );
+
       final response = await request.close();
       final responseBody = await response.transform(utf8.decoder).join();
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(responseBody);
         final products = data['products'] as List<dynamic>? ?? [];
-        
+
         // Convert OpenFoodFacts products to your Food model
-        final offResults = products.map((product) => _convertOffProductToFood(product)).toList();
-        
+        final offResults =
+            products.map((product) => _convertOffProductToFood(product)).toList();
+
         setState(() {
           _offSearchResults = offResults;
           _isSearchingOff = false;
           _showOffResults = true;
         });
       } else {
-        throw Exception('Failed to search OpenFoodFacts: ${response.statusCode}');
+        throw Exception(
+          'Failed to search OpenFoodFacts: ${response.statusCode}',
+        );
       }
     } catch (e) {
-      print('Error searching OpenFoodFacts: $e');
+      //TODO: Handle error
       setState(() {
         _isSearchingOff = false;
       });
@@ -130,7 +139,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     // Extract calories from nutrients
     double calories = 0.0;
     final nutriments = product['nutriments'] as Map<String, dynamic>? ?? {};
-    
+
     if (nutriments['energy-kcal_100g'] != null) {
       calories = (nutriments['energy-kcal_100g'] as num).toDouble();
     } else if (nutriments['energy_100g'] != null) {
@@ -141,7 +150,8 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     // Extract other nutrients (per 100g)
     double protein = (nutriments['proteins_100g'] as num?)?.toDouble() ?? 0.0;
     double fat = (nutriments['fat_100g'] as num?)?.toDouble() ?? 0.0;
-    double carbs = (nutriments['carbohydrates_100g'] as num?)?.toDouble() ?? 0.0;
+    double carbs =
+        (nutriments['carbohydrates_100g'] as num?)?.toDouble() ?? 0.0;
 
     // Create a Food object from OpenFoodFacts data
     return Food(
@@ -153,7 +163,10 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
       proteinG: protein,
       fatG: fat,
       carbsG: carbs,
-      portions: [], // OpenFoodFacts doesn't have portion data in the same format
+      portions:
+          [], // OpenFoodFacts doesn't have portion data in the same format
+      imageThumbUrl: product['image_thumb_url'] as String?,
+      imageFrontThumbUrl: product['image_front_thumb_url'] as String?,
     );
   }
 
@@ -164,196 +177,200 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
       body: SafeArea(
         child: Column(
           children: [
-          // Fixed header - always visible, doesn't scroll
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 12.0),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              border: Border(
-                bottom: BorderSide(color: Colors.grey[300]!),
+            // Fixed header - always visible, doesn't scroll
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 12.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
               ),
-            ),
-            child: Row(
-              children: [
-                // Calories display (X/Y format)
-                Text(
-                  '$consumedCalories/$totalCalories',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                
-                // Emoji area for provisionally added foods
-                Expanded(
-                  child: Container(
-                    height: 40,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey[300]!),
-                    ),
-                    child: Row(
-                      children: [
-                        // Display emojis of provisionally added foods
-                        if (provisionalFoods.isEmpty)
-                          Text(
-                            'Added foods...',
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 14,
-                            ),
-                          )
-                        else
-                          Expanded(
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: provisionalFoods.length,
-                              itemBuilder: (context, index) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(right: 8.0),
-                                  child: Text(
-                                    provisionalFoods[index],
-                                    style: const TextStyle(fontSize: 20),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                      ],
+              child: Row(
+                children: [
+                  // Calories display (X/Y format)
+                  Text(
+                    '$consumedCalories/$totalCalories',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-                
-                const SizedBox(width: 8),
-                
-                // Dropdown arrow (⬇️)
-                GestureDetector(
-                  onTap: () {
-                    // TODO: Show detailed view of provisionally added foods
-                    _showProvisionalFoodsDetails();
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: const Text(
-                      '⬇️',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(width: 8),
-                
-                // Close button (X)
-                GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.red[100],
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: const Icon(
-                      Icons.close,
-                      color: Colors.red,
-                      size: 20,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          // Scrollable content area for food search results
-          Expanded(
-            child: SingleChildScrollView(
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16.0),
-                child: _buildSearchResults(),
-              ),
-            ),
-          ),
-          
-          // Search box at the bottom
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              border: Border(
-                top: BorderSide(color: Colors.grey[300]!),
-              ),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    focusNode: _searchFocusNode,
-                    decoration: InputDecoration(
-                      hintText: '🔍 Search for foods...',
-                      border: const OutlineInputBorder(),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      suffixIcon: _isSearching 
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: Padding(
-                                padding: EdgeInsets.all(12),
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                  const SizedBox(width: 12),
+
+                  // Emoji area for provisionally added foods
+                  Expanded(
+                    child: Container(
+                      height: 40,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey[300]!),
+                      ),
+                      child: Row(
+                        children: [
+                          // Display emojis of provisionally added foods
+                          if (provisionalFoods.isEmpty)
+                            Text(
+                              'Added foods...',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 14,
                               ),
                             )
-                          : null,
-                    ),
-                    onChanged: (value) {
-                      // Debounce search to avoid too many database calls
-                      Future.delayed(const Duration(milliseconds: 300), () {
-                        if (_searchController.text == value) {
-                          _searchFoods(value);
-                        }
-                      });
-                    },
-                    onTapOutside: (event) {
-                      // Hide keyboard when tapping outside the text field
-                      FocusScope.of(context).unfocus();
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // OpenFoodFacts button - always visible
-                ElevatedButton.icon(
-                  onPressed: _isSearchingOff ? null : _searchOpenFoodFacts,
-                  icon: _isSearchingOff 
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                        )
-                      : const Icon(Icons.public, size: 18),
-                  label: Text(_isSearchingOff ? 'OFF...' : 'OFF'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue[600],
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                          else
+                            Expanded(
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: provisionalFoods.length,
+                                itemBuilder: (context, index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 8.0),
+                                    child: Text(
+                                      provisionalFoods[index],
+                                      style: const TextStyle(fontSize: 20),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+
+                  const SizedBox(width: 8),
+
+                  // Dropdown arrow (⬇️)
+                  GestureDetector(
+                    onTap: () {
+                      // TODO: Show detailed view of provisionally added foods
+                      _showProvisionalFoodsDetails();
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Text('⬇️', style: TextStyle(fontSize: 16)),
+                    ),
+                  ),
+
+                  const SizedBox(width: 8),
+
+                  // Close button (X)
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.red[100],
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.red,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+
+            // Scrollable content area for food search results
+            Expanded(
+              child: SingleChildScrollView(
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16.0),
+                  child: _buildSearchResults(),
+                ),
+              ),
+            ),
+
+            // Search box at the bottom
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                border: Border(top: BorderSide(color: Colors.grey[300]!)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      focusNode: _searchFocusNode,
+                      decoration: InputDecoration(
+                        hintText: '🔍 Search for foods...',
+                        border: const OutlineInputBorder(),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        suffixIcon: _isSearching
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: Padding(
+                                  padding: EdgeInsets.all(12),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              )
+                            : null,
+                      ),
+                      onChanged: (value) {
+                        // Debounce search to avoid too many database calls
+                        Future.delayed(const Duration(milliseconds: 300), () {
+                          if (_searchController.text == value) {
+                            _searchFoods(value);
+                          }
+                        });
+                      },
+                      onTapOutside: (event) {
+                        // Hide keyboard when tapping outside the text field
+                        FocusScope.of(context).unfocus();
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // OpenFoodFacts button - always visible
+                  ElevatedButton.icon(
+                    onPressed: _isSearchingOff ? null : _searchOpenFoodFacts,
+                    icon: _isSearchingOff
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(Icons.public, size: 18),
+                    label: Text(_isSearchingOff ? 'OFF...' : 'OFF'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue[600],
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -417,11 +434,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
               ),
               child: const Column(
                 children: [
-                  Icon(
-                    Icons.search_off,
-                    size: 48,
-                    color: Colors.grey,
-                  ),
+                  Icon(Icons.search_off, size: 48, color: Colors.grey),
                   SizedBox(height: 16),
                   Text(
                     'No OpenFoodFacts results',
@@ -434,16 +447,16 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                   SizedBox(height: 8),
                   Text(
                     'Try a different search term',
-                    style: TextStyle(
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(color: Colors.grey),
                   ),
                 ],
               ),
             )
           else
             Column(
-              children: _offSearchResults.map((food) => _buildFoodItem(food, isOffResult: true)).toList(),
+              children: _offSearchResults
+                  .map((food) => _buildFoodItem(food, isOffResult: true))
+                  .toList(),
             ),
         ],
       );
@@ -461,11 +474,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
         ),
         child: const Column(
           children: [
-            Icon(
-              Icons.search,
-              size: 48,
-              color: Colors.grey,
-            ),
+            Icon(Icons.search, size: 48, color: Colors.grey),
             SizedBox(height: 16),
             Text(
               'No foods found',
@@ -478,9 +487,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
             SizedBox(height: 8),
             Text(
               'Try searching for a different food',
-              style: TextStyle(
-                color: Colors.grey,
-              ),
+              style: TextStyle(color: Colors.grey),
             ),
           ],
         ),
@@ -490,8 +497,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     return Column(
       children: [
         // Local database results
-        ..._searchResults.map((food) => _buildFoodItem(food)).toList(),
-        
+        ..._searchResults.map((food) => _buildFoodItem(food)),
       ],
     );
   }
@@ -506,7 +512,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
         border: Border.all(color: Colors.grey[300]!),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withAlpha(25),
             spreadRadius: 1,
             blurRadius: 2,
             offset: const Offset(0, 1),
@@ -515,7 +521,25 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
       ),
       child: Row(
         children: [
-          Text(_getFoodEmoji(food.description), style: const TextStyle(fontSize: 24)),
+          if (isOffResult && food.imageThumbUrl != null)
+            Image.network(
+              food.imageThumbUrl!,
+              width: 24,
+              height: 24,
+              fit: BoxFit.cover,
+            )
+          else if (isOffResult && food.imageFrontThumbUrl != null)
+            Image.network(
+              food.imageFrontThumbUrl!,
+              width: 24,
+              height: 24,
+              fit: BoxFit.cover,
+            )
+          else
+            Text(
+              _getFoodEmoji(food.description),
+              style: const TextStyle(fontSize: 24),
+            ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -534,7 +558,10 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                     ),
                     if (isOffResult)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.blue[100],
                           borderRadius: BorderRadius.circular(12),
@@ -542,7 +569,11 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.public, size: 12, color: Colors.blue),
+                            const Icon(
+                              Icons.public,
+                              size: 12,
+                              color: Colors.blue,
+                            ),
                             const SizedBox(width: 4),
                             const Text(
                               'OFF',
@@ -593,18 +624,23 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
           spacing: 8,
           runSpacing: 8,
           children: [
-            for (final p in top)
-              _portionChip(p, food),
+            for (final p in top) _portionChip(p, food),
             if (portions.length > 3)
               GestureDetector(
                 onTap: () => _showAllPortions(food),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Text('+${portions.length - 3} more', style: TextStyle(color: Colors.grey[700], fontSize: 12)),
+                  child: Text(
+                    '+${portions.length - 3} more',
+                    style: TextStyle(color: Colors.grey[700], fontSize: 12),
+                  ),
                 ),
               ),
           ],
@@ -623,7 +659,10 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey[300]!),
       ),
-      child: Text('${portion.label} • ${grams.toStringAsFixed(0)} g • $kcal kcal', style: const TextStyle(fontSize: 12)),
+      child: Text(
+        '${portion.label} • ${grams.toStringAsFixed(0)} g • $kcal kcal',
+        style: const TextStyle(fontSize: 12),
+      ),
     );
   }
 
@@ -638,9 +677,18 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(food.displayName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                Text(
+                  food.displayName,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
                 const SizedBox(height: 8),
-                Text(food.caloriesText100g, style: TextStyle(color: Colors.grey[600])),
+                Text(
+                  food.caloriesText100g,
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
                 const SizedBox(height: 12),
                 for (final portion in food.portions)
                   Padding(
@@ -651,7 +699,9 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                         Expanded(child: Text(portion.label)),
                         Text('${portion.gramWeight.toStringAsFixed(0)} g'),
                         const SizedBox(width: 8),
-                        Text('${food.caloriesForGrams(portion.gramWeight).round()} kcal'),
+                        Text(
+                          '${food.caloriesForGrams(portion.gramWeight).round()} kcal',
+                        ),
                       ],
                     ),
                   ),
@@ -774,7 +824,11 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                       setState(() {
                         provisionalFoods.removeAt(index);
                         // Recalculate calories - this is simplified
-                        consumedCalories = (consumedCalories * (provisionalFoods.length - 1) / provisionalFoods.length).round();
+                        consumedCalories =
+                            (consumedCalories *
+                                    (provisionalFoods.length - 1) /
+                                    provisionalFoods.length)
+                                .round();
                       });
                       Navigator.of(context).pop();
                     },

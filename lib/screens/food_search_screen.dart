@@ -162,6 +162,26 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
       return null;
     }
 
+    // Handle serving size
+    List<FoodPortion> portions = [];
+    final caloriesPerServing = nutriments?.getValue(
+      Nutrient.energyKCal,
+      PerSize.serving,
+    );
+
+    if (caloriesPerServing != null && calories > 0) {
+      final gramWeight = (caloriesPerServing / calories) * 100;
+      portions.add(
+        FoodPortion(
+          id: 0,
+          foodId: int.tryParse(product.barcode ?? '0') ?? 0,
+          amount: 1,
+          unit: product.servingSize ?? 'Serving',
+          gramWeight: gramWeight,
+        ),
+      );
+    }
+
     // Create a Food object from OpenFoodFacts data
     return Food(
       id: int.tryParse(product.barcode ?? '0') ?? 0,
@@ -172,8 +192,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
       proteinG: protein,
       fatG: fat,
       carbsG: carbs,
-      portions:
-          [], // OpenFoodFacts doesn't have portion data in the same format
+      portions: portions,
       imageThumbUrl: product.imageFrontUrl,
       imageFrontThumbUrl: product.imageFrontUrl,
     );

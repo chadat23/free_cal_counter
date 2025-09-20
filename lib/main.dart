@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:openfoodfacts/openfoodfacts.dart';
 import 'screens/home_screen.dart';
 import 'screens/log_screen.dart';
 import 'screens/weight_screen.dart';
@@ -8,6 +9,14 @@ import 'screens/food_search_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  OpenFoodAPIConfiguration.userAgent = UserAgent(name: 'Free Cal Counter', url: 'https://github.com/chadat2/free_cal_counter');
+
+  OpenFoodAPIConfiguration.globalLanguages = <OpenFoodFactsLanguage>[
+    OpenFoodFactsLanguage.ENGLISH
+  ];
+
+  OpenFoodAPIConfiguration.globalCountry = OpenFoodFactsCountry.USA;
 
   // Load environment variables
   await dotenv.load(fileName: ".env");

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'dart:io';
+import 'package:openfoodfacts/openfoodfacts.dart';
 import '../models/food.dart';
 import '../models/food_portion.dart';
 import '../services/database_service.dart';
@@ -94,39 +93,31 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     });
 
     try {
-      // Make HTTP request to OpenFoodFacts API
-      final client = HttpClient();
-      final uri = Uri.parse(
-        'https://world.openfoodfacts.org/cgi/search.pl?search_terms=${Uri.encodeComponent(_currentQuery)}&search_simple=1&action=process&json=1&page_size=20',
+      final ProductSearchQueryConfiguration configuration =
+          ProductSearchQueryConfiguration(
+            parametersList: <Parameter>[
+              SearchTerms(terms: [_currentQuery]),
+            ],
+            version: ProductQueryVersion.v3,
+          );
+
+      final SearchResult result = await OpenFoodAPIClient.searchProducts(
+        null,
+        configuration,
       );
 
-      final request = await client.getUrl(uri);
-      request.headers.set(
-        'User-Agent',
-        'Free Cal Counter - Flutter - Version 1.0',
-      );
+      final offResults =
+          result.products
+              ?.map((product) => _convertOffProductToFood(product))
+              .whereType<Food>()
+              .toList() ??
+          [];
 
-      final response = await request.close();
-      final responseBody = await response.transform(utf8.decoder).join();
-
-      if (response.statusCode == 200) {
-        final data = json.decode(responseBody);
-        final products = data['products'] as List<dynamic>? ?? [];
-
-        // Convert OpenFoodFacts products to your Food model
-        final offResults =
-            products.map((product) => _convertOffProductToFood(product)).toList();
-
-        setState(() {
-          _offSearchResults = offResults;
-          _isSearchingOff = false;
-          _showOffResults = true;
-        });
-      } else {
-        throw Exception(
-          'Failed to search OpenFoodFacts: ${response.statusCode}',
-        );
-      }
+      setState(() {
+        _offSearchResults = offResults;
+        _isSearchingOff = false;
+        _showOffResults = true;
+      });
     } catch (e) {
       //TODO: Handle error
       setState(() {
@@ -135,38 +126,56 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     }
   }
 
-  Food _convertOffProductToFood(Map<String, dynamic> product) {
+  Food? _convertOffProductToFood(Product product) {
     // Extract calories from nutrients
-    double calories = 0.0;
-    final nutriments = product['nutriments'] as Map<String, dynamic>? ?? {};
+    final nutriments = product.nutriments;
 
-    if (nutriments['energy-kcal_100g'] != null) {
-      calories = (nutriments['energy-kcal_100g'] as num).toDouble();
-    } else if (nutriments['energy_100g'] != null) {
+    final energyKcal = nutriments?.getValue(
+      Nutrient.energyKCal,
+      PerSize.oneHundredGrams,
+    );
+    final energyKj = nutriments?.getValue(
+      Nutrient.energyKJ,
+      PerSize.oneHundredGrams,
+    );
+    double? calories;
+
+    if (energyKcal != null) {
+      calories = energyKcal;
+    } else if (energyKj != null) {
       // Convert kJ to kcal if needed
-      calories = (nutriments['energy_100g'] as num).toDouble() / 4.184;
+      calories = energyKj / 4.184;
     }
 
     // Extract other nutrients (per 100g)
-    double protein = (nutriments['proteins_100g'] as num?)?.toDouble() ?? 0.0;
-    double fat = (nutriments['fat_100g'] as num?)?.toDouble() ?? 0.0;
-    double carbs =
-        (nutriments['carbohydrates_100g'] as num?)?.toDouble() ?? 0.0;
+    double? protein = nutriments?.getValue(
+      Nutrient.proteins,
+      PerSize.oneHundredGrams,
+    );
+    double? fat = nutriments?.getValue(Nutrient.fat, PerSize.oneHundredGrams);
+    double? carbs = nutriments?.getValue(
+      Nutrient.carbohydrates,
+      PerSize.oneHundredGrams,
+    );
+
+    if (calories == null || protein == null || fat == null || carbs == null) {
+      return null;
+    }
 
     // Create a Food object from OpenFoodFacts data
     return Food(
-      id: int.tryParse(product['code'] as String? ?? '0') ?? 0,
+      id: int.tryParse(product.barcode ?? '0') ?? 0,
       source: 'openfoodfacts',
-      externalId: product['code'] as String? ?? 'unknown',
-      description: product['product_name'] as String? ?? 'Unknown Product',
+      externalId: product.barcode ?? 'unknown',
+      description: product.productName ?? 'Unknown Product',
       caloriesKcal: calories,
       proteinG: protein,
       fatG: fat,
       carbsG: carbs,
       portions:
           [], // OpenFoodFacts doesn't have portion data in the same format
-      imageThumbUrl: product['image_thumb_url'] as String?,
-      imageFrontThumbUrl: product['image_front_thumb_url'] as String?,
+      imageThumbUrl: product.imageFrontUrl,
+      imageFrontThumbUrl: product.imageFrontUrl,
     );
   }
 

@@ -544,9 +544,11 @@ class DatabaseService {
     bool isUsed = false;
     model.Food? existingLiveFood;
 
-    if (food.id > 0 && food.source == 'live') {
-      isUsed = await isFoodReferenced(food.id, 'live');
+    if (food.id > 0) {
       existingLiveFood = await getFoodById(food.id, 'live');
+      if (existingLiveFood != null) {
+        isUsed = await isFoodReferenced(food.id, 'live');
+      }
     }
 
     if (isUsed && existingLiveFood != null) {
@@ -1517,6 +1519,18 @@ class DatabaseService {
 
       final existing = await existingQuery.getSingleOrNull();
       if (existing != null) {
+        // Update metadata for existing food
+        await (_liveDb.update(
+          _liveDb.foods,
+        )..where((t) => t.id.equals(existing.id))).write(
+          FoodsCompanion(
+            name: Value(foodName),
+            emoji: Value(sourceFood.emoji),
+            thumbnail: Value(sourceFood.thumbnail),
+            usageNote: Value(sourceFood.usageNote),
+          ),
+        );
+
         final servings = await getServingsForFood(existing.id, 'live');
         return _mapFoodData(existing, servings);
       }
@@ -1581,7 +1595,12 @@ class DatabaseService {
 
   Future<bool> isFoodReferenced(int foodId, String source) async {
     // Check if referenced in logged_portions
-    if (source == 'live') {
+    if (source == 'live' ||
+        source == 'user' ||
+        source == 'user_created' ||
+        source == 'off_cache' ||
+        source == 'system' ||
+        source == 'recipe') {
       final loggedQuery = _liveDb.select(_liveDb.loggedPortions)
         ..where((t) => t.foodId.equals(foodId))
         ..limit(1);

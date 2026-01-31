@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:free_cal_counter1/models/food.dart';
 import 'package:free_cal_counter1/models/food_serving.dart';
 import 'package:free_cal_counter1/services/database_service.dart';
@@ -157,7 +156,8 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
       fat: _parse(_fatController.text) * factor,
       carbs: _parse(_carbsController.text) * factor,
       fiber: _parse(_fiberController.text) * factor,
-      source: 'user', // Always user created/edited
+      source:
+          widget.originalFood?.source ?? 'user', // Preserve source if editing
       servings: _servings,
     );
 
@@ -566,7 +566,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
     // Save image (cropping to be added later)
     try {
       final guid = await ImageStorageService.instance.saveImage(
-        File(pickedFile!.path),
+        File(pickedFile.path),
       );
 
       // Delete old image if exists

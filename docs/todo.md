@@ -60,12 +60,12 @@ I want to be able to handle more than just jpgs (I think that that's all we can 
 Right now, on the overview screen, to the right of the bar charts there's the text, and I like it, but I'd like to make that whichever day's bar carts are selected, and the column that represents the selected (tapped on) day's bar charts should be somehow highlighted (maybe with a color behind them), that day should display in the text to the right. Also, it should default to today being highlighted and the selection state and be forgotten and reselected each time the overview screen is left/returned to.
 
 
-8. **Food Image Update Persistence**
+DONE 8. **Food Image Update Persistence**
    - Fix the bug where food images sometimes stop updating once a food has been logged.
    - Ensure image updates propagate regardless of logging status.
    - *Complexity: 5*
 
-While I haven't fully tracked down when it's fine and when it's not, pictures sometimes update but not always. It kind of seems like, if a food has not yet been logged, then updating its image works, but once it's logged, it no longer updates properly.
+    While I haven't fully tracked down when it's fine and when it's not, pictures sometimes update but not always. It kind of seems like, if a food has not yet been logged, then updating its image works, but once it's logged, it no longer updates properly.
 
 9. **Recipe Ingredient Reordering**
    - Implement drag-and-drop or position indices to reorder ingredients in the Recipe Edit screen.

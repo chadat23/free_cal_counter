@@ -73,10 +73,8 @@ class LogQueueScreen extends StatelessWidget {
                   final reloadedFood = await DatabaseService.instance
                       .getFoodById(foodId, 'live');
 
-                  if (reloadedFood == null) {
-                    // Fallback to cached food if reload fails
-                    return;
-                  }
+                  // Fallback to cached food if reload fails (e.g., food not yet logged)
+                  final foodToUse = reloadedFood ?? foodServing.food;
 
                   if (!context.mounted) return;
 
@@ -84,14 +82,14 @@ class LogQueueScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) {
-                        final unit = reloadedFood.servings.firstWhere(
+                        final unit = foodToUse.servings.firstWhere(
                           (s) => s.unit == foodServing.unit,
-                          orElse: () => reloadedFood.servings.first,
+                          orElse: () => foodToUse.servings.first,
                         );
                         return QuantityEditScreen(
                           config: QuantityEditConfig(
                             context: QuantityEditContext.day,
-                            food: reloadedFood,
+                            food: foodToUse,
                             isUpdate: true,
                             initialUnit: unit.unit,
                             initialQuantity: unit.quantityFromGrams(
@@ -102,7 +100,7 @@ class LogQueueScreen extends StatelessWidget {
                               logProvider.updateFoodInQueue(
                                 index,
                                 FoodPortion(
-                                  food: updatedFood ?? reloadedFood,
+                                  food: updatedFood ?? foodToUse,
                                   grams: grams,
                                   unit: unitName,
                                 ),

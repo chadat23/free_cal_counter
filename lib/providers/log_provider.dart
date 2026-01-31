@@ -145,6 +145,7 @@ class LogProvider extends ChangeNotifier {
     int foodId,
     model_food.Food updatedFood,
   ) async {
+    bool changed = false;
     for (int i = 0; i < _logQueue.length; i++) {
       final portion = _logQueue[i];
       // Match by food ID or by barcode (for OFF foods)
@@ -157,10 +158,13 @@ class LogProvider extends ChangeNotifier {
           grams: portion.grams,
           unit: portion.unit,
         );
-        _recalculateQueuedMacros();
-        notifyListeners();
-        return; // Only update first match
+        changed = true;
       }
+    }
+
+    if (changed) {
+      _recalculateQueuedMacros();
+      notifyListeners();
     }
   }
 

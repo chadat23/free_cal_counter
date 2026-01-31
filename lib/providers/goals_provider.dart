@@ -207,7 +207,9 @@ class GoalsProvider extends ChangeNotifier {
         } else {
           // For Lose/Gain: dynamically adjust maintenance calories based on trend weight
           // Calculate weight ratio and apply to baseline maintenance calories
-          final weightRatio = trendWeight / _settings.anchorWeight;
+          final weightRatio = _settings.anchorWeight > 0
+              ? trendWeight / _settings.anchorWeight
+              : 1.0;
           final adjustedMaintenanceCalories =
               _settings.maintenanceCaloriesStart * weightRatio;
 

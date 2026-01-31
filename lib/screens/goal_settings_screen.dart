@@ -69,7 +69,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
     super.dispose();
   }
 
-  void _save() {
+  Future<void> _save() async {
     // Validate required fields
     final maintenanceCal = double.tryParse(_maintenanceCalController.text);
     if (maintenanceCal == null || maintenanceCal <= 0) {
@@ -137,7 +137,8 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
     final isInitialSetup = !goalsProvider.isGoalsSet;
 
     final newSettings = GoalSettings(
-      anchorWeight: _mode == GoalMode.maintain ? targetWeight! : 0.0,
+      anchorWeight:
+          targetWeight ?? double.tryParse(_anchorWeightController.text) ?? 0.0,
       maintenanceCaloriesStart: maintenanceCal,
       proteinTarget: protein,
       fatTarget: fat ?? 0.0,
@@ -151,7 +152,10 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
       isSet: true,
     );
 
-    goalsProvider.saveSettings(newSettings, isInitialSetup: isInitialSetup);
+    await goalsProvider.saveSettings(
+      newSettings,
+      isInitialSetup: isInitialSetup,
+    );
 
     // Switch to Overview tab
     final navProvider = Provider.of<NavigationProvider>(context, listen: false);

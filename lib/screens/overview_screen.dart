@@ -29,6 +29,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
   String _weightRangeLabel = '1 wk';
   DateTime _weightRangeStart = DateTime.now();
   DateTime _weightRangeEnd = DateTime.now();
+  bool _needsReload = false;
 
   @override
   void initState() {
@@ -45,13 +46,16 @@ class _OverviewScreenState extends State<OverviewScreen> {
     // This will be called whenever LogProvider or GoalsProvider notifies
     Provider.of<LogProvider>(context);
     Provider.of<GoalsProvider>(context);
-    Provider.of<WeightProvider>(context);
     _loadData();
   }
 
   Future<void> _loadData() async {
-    if (_isDataLoading) return;
+    if (_isDataLoading) {
+      _needsReload = true;
+      return;
+    }
     _isDataLoading = true;
+    _needsReload = false;
     if (!mounted) return;
 
     final now = DateTime.now();
@@ -150,6 +154,9 @@ class _OverviewScreenState extends State<OverviewScreen> {
       debugPrint('Error loading overview data: $e');
     } finally {
       _isDataLoading = false;
+      if (_needsReload) {
+        _loadData();
+      }
     }
   }
 

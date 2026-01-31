@@ -19,19 +19,19 @@ Right now the app defaults to imperial units but in the settings it asks about m
 While there may be exceptions, I want most if not all numeric values to default to showing zero decimal places. Right now there are tons of toStringAsFixed(0) calls and this seems messy. Is this an optimal solution? Would it be better to switch to package:intl.dart DumberFormat('0')? Is there a better way?
 
 
-3. **Log Queue Edit Fix**
+DONE 3. **Log Queue Edit Fix**
    - Fix the edit button for portions in the Log Queue when the food has never been logged before.
    - *Complexity: 3*
 
-Once foods have been added to the Log Queue, the edit button on the side of the food/portion doesn't work if the food's never been logged before. I want to be able to still edit those portions in case I entered a wrong quantity or unit.
+   Once foods have been added to the Log Queue, the edit button on the side of the food/portion doesn't work if the food's never been logged before. I want to be able to still edit those portions in case I entered a wrong quantity or unit.
 
 
-4. **Goal Update Synchronization**
+DONE 4. **Goal Update Synchronization**
    - Ensure the Overview screen targets update immediately when goals are modified in settings.
    - Currently, the goal page updates but the home screen requires a refresh/navigation.
    - *Complexity: 3*
 
-When I update the goal, the goal page updates as expected and if I leave it and go back to it it is still updated, but the targets on the overview screen don't update.
+    When I update the goal, the goal page updates as expected and if I leave it and go back to it it is still updated, but the targets on the overview screen don't update.
 
 5. **Recipe Ingredient Icons**
    - Fix the ingredient widgets in the Recipe Edit screen to show correct emojis/images instead of a generic icon.

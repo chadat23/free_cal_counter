@@ -117,7 +117,7 @@ class NutritionTargetsOverviewChart extends StatelessWidget {
                             child: Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                '${displayAmount.toInt()} ${data.macroLabel}\n of ${data.targetAmount.toInt()}${data.unitLabel}',
+                                '${displayAmount.isFinite ? displayAmount.toInt() : 0} ${data.macroLabel}\n of ${data.targetAmount.isFinite ? data.targetAmount.toInt() : 0}${data.unitLabel}',
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,

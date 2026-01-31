@@ -24,6 +24,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
   late GoalMode _mode;
   late MacroCalculationMode _calcMode;
   late bool _useMetric;
+  late bool _enableSmartTargets;
 
   @override
   void initState() {
@@ -55,6 +56,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
     _mode = settings.mode;
     _calcMode = settings.calculationMode;
     _useMetric = settings.useMetric;
+    _enableSmartTargets = settings.enableSmartTargets;
   }
 
   @override
@@ -150,6 +152,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
       lastTargetUpdate: goalsProvider.settings.lastTargetUpdate,
       useMetric: _useMetric,
       isSet: true,
+      enableSmartTargets: _enableSmartTargets,
     );
 
     await goalsProvider.saveSettings(
@@ -188,6 +191,14 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
               label: 'Target Weight (${_useMetric ? 'kg' : 'lb'})',
               hint: 'Your target weight',
             ),
+          SwitchListTile(
+            title: const Text('Smart Target Calculations'),
+            subtitle: const Text(
+              'When enabled, targets are automatically adjusted based on weight trends after the first week.',
+            ),
+            value: _enableSmartTargets,
+            onChanged: (val) => setState(() => _enableSmartTargets = val),
+          ),
           SwitchListTile(
             title: const Text('Use Metric Units (kg)'),
             subtitle: const Text('Affects calorie drift calculation'),

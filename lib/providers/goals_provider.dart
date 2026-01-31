@@ -105,20 +105,7 @@ class GoalsProvider extends ChangeNotifier {
     bool isInitialSetup = false,
   }) async {
     // Ensure we mark them as set when saving
-    _settings = GoalSettings(
-      anchorWeight: newSettings.anchorWeight,
-      maintenanceCaloriesStart: newSettings.maintenanceCaloriesStart,
-      proteinTarget: newSettings.proteinTarget,
-      fatTarget: newSettings.fatTarget,
-      carbTarget: newSettings.carbTarget,
-      fiberTarget: newSettings.fiberTarget,
-      mode: newSettings.mode,
-      calculationMode: newSettings.calculationMode,
-      fixedDelta: newSettings.fixedDelta,
-      lastTargetUpdate: newSettings.lastTargetUpdate,
-      useMetric: newSettings.useMetric,
-      isSet: true,
-    );
+    _settings = newSettings.copyWith(isSet: true);
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_settingsKey, jsonEncode(_settings.toJson()));
@@ -160,7 +147,10 @@ class GoalsProvider extends ChangeNotifier {
   Future<void> recalculateTargets({bool isInitialSetup = false}) async {
     double targetCalories = _settings.maintenanceCaloriesStart;
 
-    if (isInitialSetup) {
+    // Use initial setup logic (manual calories) if requested OR if smart targets are disabled
+    final useManualLogic = isInitialSetup || !_settings.enableSmartTargets;
+
+    if (useManualLogic) {
       // First week logic
       if (_settings.mode == GoalMode.maintain) {
         // Just maintenance for first week

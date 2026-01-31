@@ -138,6 +138,44 @@ void main() {
       },
     );
 
+    test(
+      'recalculateTargets should NOT use weight trend when enableSmartTargets is false',
+      () async {
+        await Future.delayed(Duration.zero);
+
+        final history = [
+          Weight(
+            weight: 100.0,
+            date: DateTime.now().subtract(const Duration(days: 1)),
+          ),
+        ];
+
+        when(
+          mockDatabaseService.getWeightsForRange(any, any),
+        ).thenAnswer((_) async => history);
+
+        // Set settings to maintenance for 105lb anchor but DISABLE smart targets
+        final settings = GoalSettings(
+          anchorWeight: 105.0,
+          maintenanceCaloriesStart: 2000,
+          proteinTarget: 150,
+          fatTarget: 70,
+          carbTarget: 200,
+          mode: GoalMode.maintain,
+          calculationMode: MacroCalculationMode.proteinFat,
+          fixedDelta: 0,
+          lastTargetUpdate: DateTime.now().subtract(const Duration(days: 7)),
+          useMetric: false,
+          fiberTarget: 37.0,
+          enableSmartTargets: false,
+        );
+        await goalsProvider.saveSettings(settings);
+
+        // Even though trend is 100 and anchor is 105, it should stay at 2000 because smart targets are OFF
+        expect(goalsProvider.currentGoals.calories, 2000.0);
+      },
+    );
+
     test('checkWeeklyUpdate should trigger update on Monday', () async {
       // This test is tricky because it uses DateTime.now()
       // For a true unit test we might need a clock wrapper,

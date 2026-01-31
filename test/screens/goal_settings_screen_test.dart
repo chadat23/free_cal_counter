@@ -86,7 +86,9 @@ void main() {
     expect(find.text('Target Weight (lb)'), findsOneWidget);
 
     // Tap the metric switch
-    await tester.tap(find.byType(SwitchListTile));
+    await tester.tap(
+      find.widgetWithText(SwitchListTile, 'Use Metric Units (kg)'),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Target Weight (kg)'), findsOneWidget);

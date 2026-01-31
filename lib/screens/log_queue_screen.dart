@@ -9,7 +9,6 @@ import 'package:free_cal_counter1/widgets/slidable_portion_widget.dart';
 import 'package:free_cal_counter1/models/food_portion.dart';
 import 'package:free_cal_counter1/models/quantity_edit_config.dart';
 import 'package:free_cal_counter1/screens/quantity_edit_screen.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
 import 'package:provider/provider.dart';
 
 class LogQueueScreen extends StatelessWidget {
@@ -67,17 +66,8 @@ class LogQueueScreen extends StatelessWidget {
                 onDelete: () {
                   logProvider.removeFoodFromQueue(foodServing);
                 },
-                onEdit: () async {
-                  // Reload food from database to get latest changes (e.g., image)
-                  final foodId = foodServing.food.id;
-                  final reloadedFood = await DatabaseService.instance
-                      .getFoodById(foodId, 'live');
-
-                  // Fallback to cached food if reload fails (e.g., food not yet logged)
-                  final foodToUse = reloadedFood ?? foodServing.food;
-
-                  if (!context.mounted) return;
-
+                onEdit: () {
+                  final foodToUse = foodServing.food;
                   Navigator.push(
                     context,
                     MaterialPageRoute(

@@ -53,86 +53,94 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: widget.config.showQueueStats ? 180 : null,
-        automaticallyImplyLeading: !widget.config.showQueueStats,
-        title: widget.config.showQueueStats
-            ? Consumer<LogProvider>(
-                builder: (context, logProvider, child) {
-                  return LogQueueTopRibbon(
-                    leading: IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () async {
-                        final logProvider = Provider.of<LogProvider>(
-                          context,
-                          listen: false,
-                        );
-                        final navProvider = Provider.of<NavigationProvider>(
-                          context,
-                          listen: false,
-                        );
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          Provider.of<LogProvider>(context, listen: false).clearQueue();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          toolbarHeight: widget.config.showQueueStats ? 180 : null,
+          automaticallyImplyLeading: !widget.config.showQueueStats,
+          title: widget.config.showQueueStats
+              ? Consumer<LogProvider>(
+                  builder: (context, logProvider, child) {
+                    return LogQueueTopRibbon(
+                      leading: IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () async {
+                          final logProvider = Provider.of<LogProvider>(
+                            context,
+                            listen: false,
+                          );
+                          final navProvider = Provider.of<NavigationProvider>(
+                            context,
+                            listen: false,
+                          );
 
-                        bool shouldPop = false;
-                        if (logProvider.logQueue.isNotEmpty) {
-                          final discard = await showDiscardDialog(context);
-                          if (discard == true) {
-                            logProvider.clearQueue();
+                          bool shouldPop = false;
+                          if (logProvider.logQueue.isNotEmpty) {
+                            final discard = await showDiscardDialog(context);
+                            if (discard == true) {
+                              logProvider.clearQueue();
+                              navProvider.goBack();
+                              shouldPop = true;
+                            }
+                          } else {
                             navProvider.goBack();
                             shouldPop = true;
                           }
-                        } else {
-                          navProvider.goBack();
-                          shouldPop = true;
-                        }
 
-                        if (shouldPop) {
-                          // Defer the pop operation to the next frame
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            if (mounted) {
-                              Navigator.pop(context);
-                            }
-                          });
-                        }
+                          if (shouldPop) {
+                            // Defer the pop operation to the next frame
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (mounted) {
+                                Navigator.pop(context);
+                              }
+                            });
+                          }
+                        },
+                      ),
+                      arrowDirection: Icons.arrow_drop_down,
+                      onArrowPressed: () {
+                        Navigator.pushNamed(context, AppRouter.logQueueRoute);
                       },
-                    ),
-                    arrowDirection: Icons.arrow_drop_down,
-                    onArrowPressed: () {
-                      Navigator.pushNamed(context, AppRouter.logQueueRoute);
-                    },
-                    logProvider: logProvider,
-                  );
+                      logProvider: logProvider,
+                    );
+                  },
+                )
+              : Text(widget.config.title),
+        ),
+        body: Column(
+          children: [
+            const SearchModeTabs(),
+            Expanded(
+              child: Consumer<SearchProvider>(
+                builder: (context, searchProvider, child) {
+                  return _buildBody(searchProvider.searchMode);
                 },
-              )
-            : Text(widget.config.title),
-      ),
-      body: Column(
-        children: [
-          const SearchModeTabs(),
-          Expanded(
-            child: Consumer<SearchProvider>(
-              builder: (context, searchProvider, child) {
-                return _buildBody(searchProvider.searchMode);
+              ),
+            ),
+            SearchRibbon(
+              isSearchActive: true,
+              focusNode: _focusNode,
+              onChanged: (query) {
+                Provider.of<SearchProvider>(
+                  context,
+                  listen: false,
+                ).textSearch(query);
+              },
+              onOffSearch: () {
+                Provider.of<SearchProvider>(
+                  context,
+                  listen: false,
+                ).performOffSearch();
               },
             ),
-          ),
-          SearchRibbon(
-            isSearchActive: true,
-            focusNode: _focusNode,
-            onChanged: (query) {
-              Provider.of<SearchProvider>(
-                context,
-                listen: false,
-              ).textSearch(query);
-            },
-            onOffSearch: () {
-              Provider.of<SearchProvider>(
-                context,
-                listen: false,
-              ).performOffSearch();
-            },
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

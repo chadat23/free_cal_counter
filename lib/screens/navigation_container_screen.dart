@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:free_cal_counter1/config/app_router.dart';
 import 'package:free_cal_counter1/providers/navigation_provider.dart';
+import 'package:free_cal_counter1/providers/log_provider.dart';
 import 'package:free_cal_counter1/screens/log_screen.dart';
 import 'package:free_cal_counter1/screens/overview_screen.dart';
 import 'package:free_cal_counter1/screens/settings_screen.dart';
@@ -64,7 +65,13 @@ class NavigationContainerScreen extends StatelessWidget {
               currentIndex: selectedIndex,
               selectedItemColor: Colors.amber[800],
               unselectedItemColor: Colors.grey,
-              onTap: (index) => navigationProvider.changeTab(index),
+              onTap: (index) {
+                if (index != 1 && selectedIndex == 1) {
+                  // Navigating away from Log tab: Clear the queue
+                  Provider.of<LogProvider>(context, listen: false).clearQueue();
+                }
+                navigationProvider.changeTab(index);
+              },
             )
           : null,
     );

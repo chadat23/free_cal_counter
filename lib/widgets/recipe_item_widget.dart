@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:free_cal_counter1/models/recipe_item.dart';
+import 'package:free_cal_counter1/widgets/food_image_widget.dart';
 
 class RecipeItemWidget extends StatelessWidget {
   final RecipeItem item;
@@ -16,12 +17,9 @@ class RecipeItemWidget extends StatelessWidget {
     final fiber = item.fiber * item.grams;
 
     return ListTile(
-      leading: const SizedBox(
-        width: 40,
-        height: 40,
-        child: Center(
-          child: Icon(Icons.restaurant_menu, size: 24, color: Colors.grey),
-        ),
+      leading: FoodImageWidget(
+        food: item.isFood ? item.food : item.recipe?.toFood(),
+        size: 40.0,
       ),
       title: Text(item.name),
       subtitle: Text(

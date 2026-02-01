@@ -536,7 +536,7 @@ class DatabaseService {
         );
       }
     }
-    return results;
+    return await _resolveLoggedPortionRecipes(results);
   }
 
   Future<int> saveFood(model.Food food) async {
@@ -678,6 +678,40 @@ class DatabaseService {
         return copied.id;
       }
     }
+  }
+
+  Future<List<model.LoggedPortion>> _resolveLoggedPortionRecipes(
+    List<model.LoggedPortion> portions,
+  ) async {
+    final recipeIds = portions
+        .where((p) => p.portion.food.source == 'recipe')
+        .map((p) => p.portion.food.id)
+        .toSet()
+        .toList();
+
+    if (recipeIds.isEmpty) {
+      return portions;
+    }
+
+    final recipesMap = await getRecipesByIds(recipeIds);
+
+    return portions.map((p) {
+      if (p.portion.food.source == 'recipe') {
+        final recipe = recipesMap[p.portion.food.id];
+        if (recipe != null) {
+          return model.LoggedPortion(
+            id: p.id,
+            timestamp: p.timestamp,
+            portion: model.FoodPortion(
+              food: recipe.toFood(),
+              grams: p.portion.grams,
+              unit: p.portion.unit,
+            ),
+          );
+        }
+      }
+      return p;
+    }).toList();
   }
 
   Future<void> deleteLoggedPortion(int id) async {

@@ -178,9 +178,28 @@ class LogProvider extends ChangeNotifier {
 
   // Database Operations
   Future<void> loadLoggedPortionsForDate(DateTime date) async {
-    _loggedPortion = await DatabaseService.instance.getLoggedPortionsForDate(
+    final portions = await DatabaseService.instance.getLoggedPortionsForDate(
       date,
     );
+
+    // Enrich with smart emojis
+    _loggedPortion = portions.map((p) {
+      final food = p.portion.food;
+      if (food.emoji == null || food.emoji == '🍴' || food.emoji == '') {
+        final enrichedFood = food.copyWith(emoji: emojiForFoodName(food.name));
+        return model.LoggedPortion(
+          id: p.id,
+          timestamp: p.timestamp,
+          portion: model.FoodPortion(
+            food: enrichedFood,
+            grams: p.portion.grams,
+            unit: p.portion.unit,
+          ),
+        );
+      }
+      return p;
+    }).toList();
+
     _isFasted = await DatabaseService.instance.isFastedOnDate(date);
     _recalculateLoggedMacros();
     notifyListeners();

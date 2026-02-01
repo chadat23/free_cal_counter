@@ -86,6 +86,8 @@ void main() {
     when(mockRecipeProvider.totalFat).thenReturn(0.0);
     when(mockRecipeProvider.totalCarbs).thenReturn(0.0);
     when(mockRecipeProvider.totalFiber).thenReturn(0.0);
+    when(mockRecipeProvider.emoji).thenReturn('🍴');
+    when(mockRecipeProvider.thumbnail).thenReturn(null);
 
     when(mockSearchProvider.searchResults).thenReturn([mockFood]);
     when(mockSearchProvider.isLoading).thenReturn(false);

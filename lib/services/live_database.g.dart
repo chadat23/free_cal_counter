@@ -1249,6 +1249,26 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, Recipe> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _emojiMeta = const VerificationMeta('emoji');
+  @override
+  late final GeneratedColumn<String> emoji = GeneratedColumn<String>(
+    'emoji',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _thumbnailMeta = const VerificationMeta(
+    'thumbnail',
+  );
+  @override
+  late final GeneratedColumn<String> thumbnail = GeneratedColumn<String>(
+    'thumbnail',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _servingsCreatedMeta = const VerificationMeta(
     'servingsCreated',
   );
@@ -1350,6 +1370,8 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, Recipe> {
   List<GeneratedColumn> get $columns => [
     id,
     name,
+    emoji,
+    thumbnail,
     servingsCreated,
     finalWeightGrams,
     portionName,
@@ -1381,6 +1403,18 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, Recipe> {
       );
     } else if (isInserting) {
       context.missing(_nameMeta);
+    }
+    if (data.containsKey('emoji')) {
+      context.handle(
+        _emojiMeta,
+        emoji.isAcceptableOrUnknown(data['emoji']!, _emojiMeta),
+      );
+    }
+    if (data.containsKey('thumbnail')) {
+      context.handle(
+        _thumbnailMeta,
+        thumbnail.isAcceptableOrUnknown(data['thumbnail']!, _thumbnailMeta),
+      );
     }
     if (data.containsKey('servings_created')) {
       context.handle(
@@ -1461,6 +1495,14 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, Recipe> {
         DriftSqlType.string,
         data['${effectivePrefix}name'],
       )!,
+      emoji: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}emoji'],
+      ),
+      thumbnail: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}thumbnail'],
+      ),
       servingsCreated: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}servings_created'],
@@ -1505,6 +1547,8 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, Recipe> {
 class Recipe extends DataClass implements Insertable<Recipe> {
   final int id;
   final String name;
+  final String? emoji;
+  final String? thumbnail;
   final double servingsCreated;
   final double? finalWeightGrams;
   final String portionName;
@@ -1516,6 +1560,8 @@ class Recipe extends DataClass implements Insertable<Recipe> {
   const Recipe({
     required this.id,
     required this.name,
+    this.emoji,
+    this.thumbnail,
     required this.servingsCreated,
     this.finalWeightGrams,
     required this.portionName,
@@ -1530,6 +1576,12 @@ class Recipe extends DataClass implements Insertable<Recipe> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
+    if (!nullToAbsent || emoji != null) {
+      map['emoji'] = Variable<String>(emoji);
+    }
+    if (!nullToAbsent || thumbnail != null) {
+      map['thumbnail'] = Variable<String>(thumbnail);
+    }
     map['servings_created'] = Variable<double>(servingsCreated);
     if (!nullToAbsent || finalWeightGrams != null) {
       map['final_weight_grams'] = Variable<double>(finalWeightGrams);
@@ -1551,6 +1603,12 @@ class Recipe extends DataClass implements Insertable<Recipe> {
     return RecipesCompanion(
       id: Value(id),
       name: Value(name),
+      emoji: emoji == null && nullToAbsent
+          ? const Value.absent()
+          : Value(emoji),
+      thumbnail: thumbnail == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thumbnail),
       servingsCreated: Value(servingsCreated),
       finalWeightGrams: finalWeightGrams == null && nullToAbsent
           ? const Value.absent()
@@ -1576,6 +1634,8 @@ class Recipe extends DataClass implements Insertable<Recipe> {
     return Recipe(
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
+      emoji: serializer.fromJson<String?>(json['emoji']),
+      thumbnail: serializer.fromJson<String?>(json['thumbnail']),
       servingsCreated: serializer.fromJson<double>(json['servingsCreated']),
       finalWeightGrams: serializer.fromJson<double?>(json['finalWeightGrams']),
       portionName: serializer.fromJson<String>(json['portionName']),
@@ -1592,6 +1652,8 @@ class Recipe extends DataClass implements Insertable<Recipe> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
+      'emoji': serializer.toJson<String?>(emoji),
+      'thumbnail': serializer.toJson<String?>(thumbnail),
       'servingsCreated': serializer.toJson<double>(servingsCreated),
       'finalWeightGrams': serializer.toJson<double?>(finalWeightGrams),
       'portionName': serializer.toJson<String>(portionName),
@@ -1606,6 +1668,8 @@ class Recipe extends DataClass implements Insertable<Recipe> {
   Recipe copyWith({
     int? id,
     String? name,
+    Value<String?> emoji = const Value.absent(),
+    Value<String?> thumbnail = const Value.absent(),
     double? servingsCreated,
     Value<double?> finalWeightGrams = const Value.absent(),
     String? portionName,
@@ -1617,6 +1681,8 @@ class Recipe extends DataClass implements Insertable<Recipe> {
   }) => Recipe(
     id: id ?? this.id,
     name: name ?? this.name,
+    emoji: emoji.present ? emoji.value : this.emoji,
+    thumbnail: thumbnail.present ? thumbnail.value : this.thumbnail,
     servingsCreated: servingsCreated ?? this.servingsCreated,
     finalWeightGrams: finalWeightGrams.present
         ? finalWeightGrams.value
@@ -1632,6 +1698,8 @@ class Recipe extends DataClass implements Insertable<Recipe> {
     return Recipe(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
+      emoji: data.emoji.present ? data.emoji.value : this.emoji,
+      thumbnail: data.thumbnail.present ? data.thumbnail.value : this.thumbnail,
       servingsCreated: data.servingsCreated.present
           ? data.servingsCreated.value
           : this.servingsCreated,
@@ -1658,6 +1726,8 @@ class Recipe extends DataClass implements Insertable<Recipe> {
     return (StringBuffer('Recipe(')
           ..write('id: $id, ')
           ..write('name: $name, ')
+          ..write('emoji: $emoji, ')
+          ..write('thumbnail: $thumbnail, ')
           ..write('servingsCreated: $servingsCreated, ')
           ..write('finalWeightGrams: $finalWeightGrams, ')
           ..write('portionName: $portionName, ')
@@ -1674,6 +1744,8 @@ class Recipe extends DataClass implements Insertable<Recipe> {
   int get hashCode => Object.hash(
     id,
     name,
+    emoji,
+    thumbnail,
     servingsCreated,
     finalWeightGrams,
     portionName,
@@ -1689,6 +1761,8 @@ class Recipe extends DataClass implements Insertable<Recipe> {
       (other is Recipe &&
           other.id == this.id &&
           other.name == this.name &&
+          other.emoji == this.emoji &&
+          other.thumbnail == this.thumbnail &&
           other.servingsCreated == this.servingsCreated &&
           other.finalWeightGrams == this.finalWeightGrams &&
           other.portionName == this.portionName &&
@@ -1702,6 +1776,8 @@ class Recipe extends DataClass implements Insertable<Recipe> {
 class RecipesCompanion extends UpdateCompanion<Recipe> {
   final Value<int> id;
   final Value<String> name;
+  final Value<String?> emoji;
+  final Value<String?> thumbnail;
   final Value<double> servingsCreated;
   final Value<double?> finalWeightGrams;
   final Value<String> portionName;
@@ -1713,6 +1789,8 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
   const RecipesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
+    this.emoji = const Value.absent(),
+    this.thumbnail = const Value.absent(),
     this.servingsCreated = const Value.absent(),
     this.finalWeightGrams = const Value.absent(),
     this.portionName = const Value.absent(),
@@ -1725,6 +1803,8 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
   RecipesCompanion.insert({
     this.id = const Value.absent(),
     required String name,
+    this.emoji = const Value.absent(),
+    this.thumbnail = const Value.absent(),
     this.servingsCreated = const Value.absent(),
     this.finalWeightGrams = const Value.absent(),
     this.portionName = const Value.absent(),
@@ -1738,6 +1818,8 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
   static Insertable<Recipe> custom({
     Expression<int>? id,
     Expression<String>? name,
+    Expression<String>? emoji,
+    Expression<String>? thumbnail,
     Expression<double>? servingsCreated,
     Expression<double>? finalWeightGrams,
     Expression<String>? portionName,
@@ -1750,6 +1832,8 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
+      if (emoji != null) 'emoji': emoji,
+      if (thumbnail != null) 'thumbnail': thumbnail,
       if (servingsCreated != null) 'servings_created': servingsCreated,
       if (finalWeightGrams != null) 'final_weight_grams': finalWeightGrams,
       if (portionName != null) 'portion_name': portionName,
@@ -1764,6 +1848,8 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
   RecipesCompanion copyWith({
     Value<int>? id,
     Value<String>? name,
+    Value<String?>? emoji,
+    Value<String?>? thumbnail,
     Value<double>? servingsCreated,
     Value<double?>? finalWeightGrams,
     Value<String>? portionName,
@@ -1776,6 +1862,8 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
     return RecipesCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
+      emoji: emoji ?? this.emoji,
+      thumbnail: thumbnail ?? this.thumbnail,
       servingsCreated: servingsCreated ?? this.servingsCreated,
       finalWeightGrams: finalWeightGrams ?? this.finalWeightGrams,
       portionName: portionName ?? this.portionName,
@@ -1795,6 +1883,12 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
+    }
+    if (emoji.present) {
+      map['emoji'] = Variable<String>(emoji.value);
+    }
+    if (thumbnail.present) {
+      map['thumbnail'] = Variable<String>(thumbnail.value);
     }
     if (servingsCreated.present) {
       map['servings_created'] = Variable<double>(servingsCreated.value);
@@ -1828,6 +1922,8 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
     return (StringBuffer('RecipesCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
+          ..write('emoji: $emoji, ')
+          ..write('thumbnail: $thumbnail, ')
           ..write('servingsCreated: $servingsCreated, ')
           ..write('finalWeightGrams: $finalWeightGrams, ')
           ..write('portionName: $portionName, ')
@@ -4924,6 +5020,8 @@ typedef $$RecipesTableCreateCompanionBuilder =
     RecipesCompanion Function({
       Value<int> id,
       required String name,
+      Value<String?> emoji,
+      Value<String?> thumbnail,
       Value<double> servingsCreated,
       Value<double?> finalWeightGrams,
       Value<String> portionName,
@@ -4937,6 +5035,8 @@ typedef $$RecipesTableUpdateCompanionBuilder =
     RecipesCompanion Function({
       Value<int> id,
       Value<String> name,
+      Value<String?> emoji,
+      Value<String?> thumbnail,
       Value<double> servingsCreated,
       Value<double?> finalWeightGrams,
       Value<String> portionName,
@@ -5069,6 +5169,16 @@ class $$RecipesTableFilterComposer
 
   ColumnFilters<String> get name => $composableBuilder(
     column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get emoji => $composableBuilder(
+    column: $table.emoji,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get thumbnail => $composableBuilder(
+    column: $table.thumbnail,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5250,6 +5360,16 @@ class $$RecipesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get emoji => $composableBuilder(
+    column: $table.emoji,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get thumbnail => $composableBuilder(
+    column: $table.thumbnail,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get servingsCreated => $composableBuilder(
     column: $table.servingsCreated,
     builder: (column) => ColumnOrderings(column),
@@ -5323,6 +5443,12 @@ class $$RecipesTableAnnotationComposer
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get emoji =>
+      $composableBuilder(column: $table.emoji, builder: (column) => column);
+
+  GeneratedColumn<String> get thumbnail =>
+      $composableBuilder(column: $table.thumbnail, builder: (column) => column);
 
   GeneratedColumn<double> get servingsCreated => $composableBuilder(
     column: $table.servingsCreated,
@@ -5516,6 +5642,8 @@ class $$RecipesTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
+                Value<String?> emoji = const Value.absent(),
+                Value<String?> thumbnail = const Value.absent(),
                 Value<double> servingsCreated = const Value.absent(),
                 Value<double?> finalWeightGrams = const Value.absent(),
                 Value<String> portionName = const Value.absent(),
@@ -5527,6 +5655,8 @@ class $$RecipesTableTableManager
               }) => RecipesCompanion(
                 id: id,
                 name: name,
+                emoji: emoji,
+                thumbnail: thumbnail,
                 servingsCreated: servingsCreated,
                 finalWeightGrams: finalWeightGrams,
                 portionName: portionName,
@@ -5540,6 +5670,8 @@ class $$RecipesTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 required String name,
+                Value<String?> emoji = const Value.absent(),
+                Value<String?> thumbnail = const Value.absent(),
                 Value<double> servingsCreated = const Value.absent(),
                 Value<double?> finalWeightGrams = const Value.absent(),
                 Value<String> portionName = const Value.absent(),
@@ -5551,6 +5683,8 @@ class $$RecipesTableTableManager
               }) => RecipesCompanion.insert(
                 id: id,
                 name: name,
+                emoji: emoji,
+                thumbnail: thumbnail,
                 servingsCreated: servingsCreated,
                 finalWeightGrams: finalWeightGrams,
                 portionName: portionName,

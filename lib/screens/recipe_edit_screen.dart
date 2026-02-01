@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:free_cal_counter1/config/app_router.dart';
@@ -22,6 +23,9 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:free_cal_counter1/models/food_portion.dart';
 import 'package:free_cal_counter1/services/emoji_service.dart';
 import 'package:free_cal_counter1/models/category.dart' as model_cat;
+import 'package:image_picker/image_picker.dart' as image_picker;
+import 'package:free_cal_counter1/widgets/food_image_widget.dart';
+import 'package:free_cal_counter1/services/image_storage_service.dart';
 
 class RecipeEditScreen extends StatefulWidget {
   const RecipeEditScreen({super.key});
@@ -36,6 +40,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
   late TextEditingController _portionNameController;
   late TextEditingController _weightController;
   late TextEditingController _notesController;
+  late TextEditingController _emojiController;
   List<model_cat.Category> _allCategories = [];
 
   @override
@@ -51,6 +56,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
       text: provider.finalWeightGrams?.toString() ?? '',
     );
     _notesController = TextEditingController(text: provider.notes);
+    _emojiController = TextEditingController(text: provider.emoji);
     _loadCategories();
   }
 
@@ -70,6 +76,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
     _portionNameController.dispose();
     _weightController.dispose();
     _notesController.dispose();
+    _emojiController.dispose();
     super.dispose();
   }
 
@@ -154,6 +161,8 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
                       createdTimestamp: DateTime.now().millisecondsSinceEpoch,
                       items: provider.items,
                       categories: provider.selectedCategories,
+                      emoji: provider.emoji,
+                      thumbnail: provider.thumbnail,
                     );
 
                     Navigator.pushNamed(
@@ -267,6 +276,29 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
         ),
         Row(
           children: [
+            SizedBox(
+              width: 60,
+              child: TextFormField(
+                controller: _emojiController,
+                textAlign: TextAlign.center,
+                decoration: const InputDecoration(labelText: 'Emoji'),
+                onChanged: provider.setEmoji,
+              ),
+            ),
+            const SizedBox(width: 16),
+            _buildImagePreview(provider),
+            const SizedBox(width: 16),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () => _pickImage(provider),
+                icon: const Icon(Icons.photo_camera),
+                label: const Text('Add Image'),
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
             Expanded(
               child: TextField(
                 controller: _portionsController,
@@ -371,6 +403,98 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
         ),
       ],
     );
+  }
+
+  Widget _buildImagePreview(RecipeProvider provider) {
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        color: Colors.grey[850],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey[600]!, width: 2),
+      ),
+      child: provider.thumbnail != null
+          ? FoodImageWidget(
+              thumbnail: provider.thumbnail,
+              emoji: provider.emoji,
+              size: 60,
+              onTap: () => _pickImage(provider),
+            )
+          : Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.image_outlined, size: 24, color: Colors.grey[600]),
+              ],
+            ),
+    );
+  }
+
+  Future<void> _pickImage(RecipeProvider provider) async {
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Image'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Camera'),
+              onTap: () => Navigator.pop(context, 'camera'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Gallery'),
+              onTap: () => Navigator.pop(context, 'gallery'),
+            ),
+            if (provider.thumbnail != null)
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text('Remove Image'),
+                onTap: () => Navigator.pop(context, 'remove'),
+              ),
+          ],
+        ),
+      ),
+    );
+
+    if (choice == null) return;
+
+    if (choice == 'remove') {
+      provider.setThumbnail(null);
+      return;
+    }
+
+    final imagePicker = image_picker.ImagePicker();
+    final image_picker.XFile? pickedFile;
+    if (choice == 'camera') {
+      pickedFile = await imagePicker.pickImage(
+        source: image_picker.ImageSource.camera,
+      );
+    } else {
+      pickedFile = await imagePicker.pickImage(
+        source: image_picker.ImageSource.gallery,
+      );
+    }
+
+    if (pickedFile == null) return;
+
+    try {
+      final guid = await ImageStorageService.instance.saveImage(
+        File(pickedFile.path),
+      );
+      provider.setThumbnail('${ImageStorageService.localPrefix}$guid');
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error saving image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _showCategorySelectionDialog() {

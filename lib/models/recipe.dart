@@ -14,6 +14,8 @@ class Recipe {
   final bool hidden;
   final int? parentId;
   final int createdTimestamp;
+  final String? emoji;
+  final String? thumbnail;
   final List<RecipeItem> items;
   final List<Category> categories;
 
@@ -27,6 +29,8 @@ class Recipe {
     this.isTemplate = false,
     this.hidden = false,
     this.parentId,
+    this.emoji,
+    this.thumbnail,
     required this.createdTimestamp,
     this.items = const [],
     this.categories = const [],
@@ -70,6 +74,8 @@ class Recipe {
       fat: fatPerGram,
       carbs: carbsPerGram,
       fiber: fiberPerGram,
+      emoji: emoji,
+      thumbnail: thumbnail,
       servings: [
         FoodServing(
           foodId: id,
@@ -93,6 +99,8 @@ class Recipe {
       isTemplate: json['isTemplate'] as bool? ?? false,
       hidden: json['hidden'] as bool? ?? false,
       parentId: json['parentId'] as int?,
+      emoji: json['emoji'] as String?,
+      thumbnail: json['thumbnail'] as String?,
       createdTimestamp: json['createdTimestamp'] as int,
       items:
           (json['items'] as List<dynamic>?)
@@ -118,6 +126,8 @@ class Recipe {
       'isTemplate': isTemplate,
       'hidden': hidden,
       'parentId': parentId,
+      'emoji': emoji,
+      'thumbnail': thumbnail,
       'createdTimestamp': createdTimestamp,
       'items': items.map((e) => e.toJson()).toList(),
       'categories': categories.map((e) => e.toJson()).toList(),

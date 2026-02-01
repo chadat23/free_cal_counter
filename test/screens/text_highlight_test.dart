@@ -66,6 +66,8 @@ void main() {
     when(mockRecipeProvider.notes).thenReturn('');
     when(mockRecipeProvider.isTemplate).thenReturn(false);
     when(mockRecipeProvider.caloriesPerPortion).thenReturn(0.0);
+    when(mockRecipeProvider.emoji).thenReturn('🍴');
+    when(mockRecipeProvider.thumbnail).thenReturn(null);
 
     when(mockGoalsProvider.currentGoals).thenReturn(MacroGoals.hardcoded());
     when(mockGoalsProvider.settings).thenReturn(GoalSettings.defaultSettings());

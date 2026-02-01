@@ -5,7 +5,7 @@ import 'package:free_cal_counter1/models/category.dart' as model_cat;
 import 'package:free_cal_counter1/services/database_service.dart';
 import 'package:free_cal_counter1/services/live_database.dart';
 import 'package:free_cal_counter1/services/reference_database.dart' as ref;
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' hide isNotNull;
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -157,6 +157,26 @@ void main() {
       final resultsAll = await databaseService.getRecipesBySearch('');
       expect(resultsAll.length, 2);
     });
+
+    test(
+      'saveRecipe and getRecipeById should handle emoji and thumbnail',
+      () async {
+        final recipe = model_recipe.Recipe(
+          id: 0,
+          name: 'Custom Recipe',
+          emoji: '🍰',
+          thumbnail: 'local://image123',
+          createdTimestamp: DateTime.now().millisecondsSinceEpoch,
+        );
+
+        final id = await databaseService.saveRecipe(recipe);
+        final loaded = await databaseService.getRecipeById(id);
+
+        expect(loaded, isNotNull);
+        expect(loaded!.emoji, '🍰');
+        expect(loaded.thumbnail, 'local://image123');
+      },
+    );
   });
 
   group('Recipe Model and Calculations', () {
@@ -172,6 +192,20 @@ void main() {
 
       final food = recipe.toFood();
       expect(food.servings.any((s) => s.unit == 'Cookie'), isTrue);
+    });
+
+    test('Recipe.toFood should preserve emoji and thumbnail', () {
+      final recipe = model_recipe.Recipe(
+        id: 1,
+        name: 'Cookie',
+        emoji: '🍪',
+        thumbnail: 'local://cookie.png',
+        createdTimestamp: 12345,
+      );
+
+      final food = recipe.toFood();
+      expect(food.emoji, '🍪');
+      expect(food.thumbnail, 'local://cookie.png');
     });
   });
 }

@@ -1202,6 +1202,8 @@ class DatabaseService {
     return model.Recipe(
       id: recipeData.id,
       name: recipeData.name,
+      emoji: recipeData.emoji,
+      thumbnail: recipeData.thumbnail,
       servingsCreated: recipeData.servingsCreated,
       finalWeightGrams: recipeData.finalWeightGrams,
       portionName: recipeData.portionName,
@@ -1252,6 +1254,8 @@ class DatabaseService {
             .insert(
               RecipesCompanion.insert(
                 name: recipe.name,
+                emoji: Value(recipe.emoji),
+                thumbnail: Value(recipe.thumbnail),
                 servingsCreated: Value(recipe.servingsCreated),
                 finalWeightGrams: Value(recipe.finalWeightGrams),
                 portionName: Value(recipe.portionName),
@@ -1271,6 +1275,8 @@ class DatabaseService {
         )..where((t) => t.id.equals(recipeId))).write(
           RecipesCompanion(
             name: Value(recipe.name),
+            emoji: Value(recipe.emoji),
+            thumbnail: Value(recipe.thumbnail),
             servingsCreated: Value(recipe.servingsCreated),
             finalWeightGrams: Value(recipe.finalWeightGrams),
             portionName: Value(recipe.portionName),
@@ -1294,6 +1300,8 @@ class DatabaseService {
             .insert(
               RecipesCompanion.insert(
                 name: recipe.name,
+                emoji: Value(recipe.emoji),
+                thumbnail: Value(recipe.thumbnail),
                 servingsCreated: Value(recipe.servingsCreated),
                 finalWeightGrams: Value(recipe.finalWeightGrams),
                 portionName: Value(recipe.portionName),

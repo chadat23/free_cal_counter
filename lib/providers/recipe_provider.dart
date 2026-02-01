@@ -17,6 +17,8 @@ class RecipeProvider extends ChangeNotifier {
   String _portionName = 'portion';
   String _notes = '';
   bool _isTemplate = false;
+  String _emoji = '🍴';
+  String? _thumbnail;
   List<RecipeItem> _items = [];
   List<Category> _selectedCategories = [];
   bool _ingredientsChanged = false;
@@ -35,6 +37,8 @@ class RecipeProvider extends ChangeNotifier {
   String get portionName => _portionName;
   String get notes => _notes;
   bool get isTemplate => _isTemplate;
+  String get emoji => _emoji;
+  String? get thumbnail => _thumbnail;
   List<RecipeItem> get items => List.unmodifiable(_items);
   List<Category> get selectedCategories =>
       List.unmodifiable(_selectedCategories);
@@ -70,6 +74,16 @@ class RecipeProvider extends ChangeNotifier {
 
   void setIsTemplate(bool val) {
     _isTemplate = val;
+    notifyListeners();
+  }
+
+  void setEmoji(String val) {
+    _emoji = val;
+    notifyListeners();
+  }
+
+  void setThumbnail(String? val) {
+    _thumbnail = val;
     notifyListeners();
   }
 
@@ -130,6 +144,8 @@ class RecipeProvider extends ChangeNotifier {
     _portionName = recipe.portionName;
     _notes = recipe.notes ?? '';
     _isTemplate = recipe.isTemplate;
+    _emoji = recipe.emoji ?? '🍴';
+    _thumbnail = recipe.thumbnail;
     _items = List.from(recipe.items);
     _selectedCategories = List.from(recipe.categories);
     _isLogged = isLogged;
@@ -189,6 +205,8 @@ class RecipeProvider extends ChangeNotifier {
         isTemplate: _isTemplate,
         hidden: false,
         parentId: targetParentId,
+        emoji: _emoji,
+        thumbnail: _thumbnail,
         createdTimestamp: DateTime.now().millisecondsSinceEpoch,
         items: _items,
         categories: _selectedCategories,
@@ -222,6 +240,8 @@ class RecipeProvider extends ChangeNotifier {
     _portionName = 'portion';
     _notes = '';
     _isTemplate = false;
+    _emoji = '🍴';
+    _thumbnail = null;
     _items = [];
     _selectedCategories = [];
     _errorMessage = null;

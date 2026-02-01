@@ -382,6 +382,17 @@ class MockRecipeProvider extends _i1.Mock implements _i13.RecipeProvider {
           as bool);
 
   @override
+  String get emoji =>
+      (super.noSuchMethod(
+            Invocation.getter(#emoji),
+            returnValue: _i10.dummyValue<String>(
+              this,
+              Invocation.getter(#emoji),
+            ),
+          )
+          as String);
+
+  @override
   List<_i14.RecipeItem> get items =>
       (super.noSuchMethod(
             Invocation.getter(#items),
@@ -481,6 +492,18 @@ class MockRecipeProvider extends _i1.Mock implements _i13.RecipeProvider {
   @override
   void setIsTemplate(bool? val) => super.noSuchMethod(
     Invocation.method(#setIsTemplate, [val]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void setEmoji(String? val) => super.noSuchMethod(
+    Invocation.method(#setEmoji, [val]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void setThumbnail(String? val) => super.noSuchMethod(
+    Invocation.method(#setThumbnail, [val]),
     returnValueForMissingStub: null,
   );
 

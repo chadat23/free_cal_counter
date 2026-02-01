@@ -25,7 +25,7 @@ class LiveDatabase extends _$LiveDatabase {
   LiveDatabase({required QueryExecutor connection}) : super(connection);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration {
@@ -57,6 +57,10 @@ class LiveDatabase extends _$LiveDatabase {
         // v7 and v8 skipped/handled
         if (from < 9) {
           await m.createTable(containers);
+        }
+        if (from < 10) {
+          await m.addColumn(recipes, recipes.emoji);
+          await m.addColumn(recipes, recipes.thumbnail);
         }
       },
       beforeOpen: (details) async {

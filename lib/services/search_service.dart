@@ -150,7 +150,9 @@ class SearchService {
     // Map recipes to foods
     final resultsWithEmoji = foods.map((food) {
       return food.copyWith(
-        emoji: emojiForFoodName(food.name),
+        emoji: (food.emoji == null || food.emoji == '🍴' || food.emoji == '')
+            ? emojiForFoodName(food.name)
+            : food.emoji,
         usageNote: usageNotes[food.id],
       );
     }).toList();
@@ -191,7 +193,9 @@ class SearchService {
 
     final resultsWithEmoji = limitedResults.map((food) {
       return food.copyWith(
-        emoji: emojiForFoodName(food.name),
+        emoji: (food.emoji == null || food.emoji == '🍴' || food.emoji == '')
+            ? emojiForFoodName(food.name)
+            : food.emoji,
         usageNote: usageNotes[food.id],
       );
     }).toList();

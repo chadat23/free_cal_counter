@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:free_cal_counter1/models/food.dart';
 import 'package:free_cal_counter1/services/image_storage_service.dart';
+import 'package:free_cal_counter1/services/emoji_service.dart';
 
 /// Widget for displaying food images with fallbacks.
 ///
-/// Priority: local image > network thumbnail > emoji > placeholder
+/// Priority: local image > network thumbnail > custom emoji (not default) > smart emoji > placeholder
 ///
 /// Usage with a Food object:
 /// ```dart
@@ -39,13 +40,15 @@ class FoodImageWidget extends StatelessWidget {
     final displayThumbnail = food?.thumbnail ?? thumbnail;
     final displayEmoji = food?.emoji ?? emoji;
 
-    // Priority: local image > OFF thumbnail > emoji > placeholder
+    // Priority: local image > network thumbnail > custom emoji (not default) > smart emoji > placeholder
     if (displayThumbnail != null &&
         displayThumbnail.startsWith(ImageStorageService.localPrefix)) {
       return _buildLocalImage(context, displayThumbnail);
     } else if (displayThumbnail != null && displayThumbnail.isNotEmpty) {
       return _buildNetworkImage(context, displayThumbnail);
-    } else if (displayEmoji != null && displayEmoji.isNotEmpty) {
+    } else if (displayEmoji != null &&
+        displayEmoji.isNotEmpty &&
+        displayEmoji != '🍴') {
       return _buildEmoji(context, displayEmoji);
     } else {
       return _buildPlaceholder(context);

@@ -40,11 +40,11 @@
 **Summary:** After selecting a food, provide a way to calculate exactly how many grams would hit the user's remaining quota for a specific macro (calories, protein, fat, carbs, or fiber).
 
 **Subtasks:**
-- [ ] Add UI element (button/menu) on quantity edit screen to trigger macro fill
-- [ ] Show picker for which macro to fill (calories, protein, fat, carbs, fiber)
+- [ ] Add UI element (button/menu) on quantity edit screen to trigger macro fill: maybe a button to the left of the Minus Container button
+- [ ] Show picker for which macro to fill (calories, protein, fat, carbs, fiber): maybe just use the selected target that already exists below ("unit" doesn't make sense, so maybe if it's selected then nothing should happen? or maybe a popup saying to select a valid macro?)
 - [ ] Calculate: `grams_needed = remaining_macro / food_macro_per_gram`
-- [ ] Pre-fill the quantity field with calculated grams
-- [ ] Handle edge cases: macro is 0 per gram, remaining is negative, result exceeds reasonable amount
+- [ ] Pre-fill the quantity field with calculated grams: seems like, we should also either auto select the grams unit, or prefill with the quantity that's right for the selected unit (if banana is selected, and a banana is 50 grams, and 25 grams are needed to hit target, then fill with 0.5 if banana is selected), I don't  know which is better, but forcing grams would be simpler to impliment so...
+- [ ] Handle edge cases: macro is 0 per gram, remaining is negative
 
 ---
 

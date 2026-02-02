@@ -80,8 +80,6 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
               _buildRecipeToggle(),
             const SizedBox(height: 24),
             _buildTargetSelection(),
-            const SizedBox(height: 16),
-            _buildResultDisplay(),
           ],
         ),
       ),
@@ -171,22 +169,53 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
           },
         ),
         const SizedBox(height: 16),
-        // Add Minus Container Button
-        Align(
-          alignment: Alignment.centerRight,
-          child: TextButton.icon(
-            onPressed: _showContainerSelection,
-            icon: const Icon(Icons.remove_circle_outline, size: 18),
-            label: const Text('Minus Container'),
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        // Action buttons row
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Fill to Target button (hidden in recipe context)
+            if (widget.config.context != QuantityEditContext.recipe)
+              TextButton.icon(
+                onPressed: _handleFillToTarget,
+                icon: const Icon(Icons.gps_fixed, size: 18),
+                label: const Text('Fill to Target'),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              )
+            else
+              const SizedBox.shrink(),
+            // Minus Container button
+            TextButton.icon(
+              onPressed: _showContainerSelection,
+              icon: const Icon(Icons.remove_circle_outline, size: 18),
+              label: const Text('Minus Container'),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
             ),
-          ),
+          ],
         ),
         const SizedBox(height: 8),
-        const Text('Unit', style: TextStyle(fontWeight: FontWeight.bold)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text('Unit', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              'Result: ${_calculateCurrentGrams().toStringAsFixed(0)}g',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -286,18 +315,12 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
     );
   }
 
-  Widget _buildResultDisplay() {
-    final currentGrams = _calculateCurrentGrams();
-    return Center(
-      child: Text(
-        'Result: ${currentGrams.toStringAsFixed(0)}g',
-        style: Theme.of(context).textTheme.bodySmall,
-      ),
-    );
-  }
-
   double _calculateCurrentGrams() {
-    final quantity = MathEvaluator.evaluate(_quantityController.text) ?? 0.0;
+    // Strip any trailing non-numeric text (e.g., " cal", " g protein")
+    final text = _quantityController.text
+        .replaceAll(RegExp(r'[^0-9.+\-*/() ]+$'), '')
+        .trim();
+    final quantity = MathEvaluator.evaluate(text) ?? 0.0;
     return QuantityEditUtils.calculateGrams(
       quantity: quantity,
       food: _food,
@@ -421,6 +444,139 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
     }
   }
 
+  void _handleFillToTarget() {
+    // Check if Unit target is selected
+    if (_selectedTargetIndex == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Select a macro target first')),
+      );
+      return;
+    }
+
+    // Get providers
+    final goalsProvider = Provider.of<GoalsProvider>(context, listen: false);
+    final logProvider = Provider.of<LogProvider>(context, listen: false);
+
+    // Calculate remaining
+    final goal = _getGoalForTarget(goalsProvider, _selectedTargetIndex);
+    final total = _getTotalForTarget(logProvider, _selectedTargetIndex);
+    final remaining = goal - total;
+
+    // Check if already at/over target
+    if (remaining <= 0) {
+      final macroName = _getMacroName(_selectedTargetIndex);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Already at or over target for $macroName')),
+      );
+      return;
+    }
+
+    // Check if food has this macro
+    final macroPerGram = _getFoodMacroPerGram(_food, _selectedTargetIndex);
+    if (macroPerGram <= 0) {
+      final macroName = _getMacroName(_selectedTargetIndex);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('This food has no $macroName')));
+      return;
+    }
+
+    // Fill quantity field with remaining macro value and label
+    setState(() {
+      final suffix = _getTargetSuffix();
+      final valueText = remaining.toStringAsFixed(1);
+      _quantityController.text = suffix != null ? '$valueText $suffix' : valueText;
+    });
+  }
+
+  double _getGoalForTarget(GoalsProvider provider, int targetIndex) {
+    final goals = provider.currentGoals;
+    switch (targetIndex) {
+      case 1:
+        return goals.calories;
+      case 2:
+        return goals.protein;
+      case 3:
+        return goals.fat;
+      case 4:
+        return goals.carbs;
+      case 5:
+        return goals.fiber;
+      default:
+        return 0;
+    }
+  }
+
+  double _getTotalForTarget(LogProvider provider, int targetIndex) {
+    switch (targetIndex) {
+      case 1:
+        return provider.totalCalories;
+      case 2:
+        return provider.totalProtein;
+      case 3:
+        return provider.totalFat;
+      case 4:
+        return provider.totalCarbs;
+      case 5:
+        return provider.totalFiber;
+      default:
+        return 0;
+    }
+  }
+
+  double _getFoodMacroPerGram(Food food, int targetIndex) {
+    switch (targetIndex) {
+      case 1:
+        return food.calories;
+      case 2:
+        return food.protein;
+      case 3:
+        return food.fat;
+      case 4:
+        return food.carbs;
+      case 5:
+        return food.fiber;
+      default:
+        return 0;
+    }
+  }
+
+  String _getMacroName(int targetIndex) {
+    switch (targetIndex) {
+      case 1:
+        return 'Calories';
+      case 2:
+        return 'Protein';
+      case 3:
+        return 'Fat';
+      case 4:
+        return 'Carbs';
+      case 5:
+        return 'Fiber';
+      default:
+        return '';
+    }
+  }
+
+  /// Returns suffix text for the amount field based on selected target.
+  /// Only shows suffix for macro targets, not for Unit target.
+  String? _getTargetSuffix() {
+    switch (_selectedTargetIndex) {
+      case 1:
+        return 'cal';
+      case 2:
+        return 'g protein';
+      case 3:
+        return 'g fat';
+      case 4:
+        return 'g carbs';
+      case 5:
+        return 'g fiber';
+      default:
+        return null; // No suffix for Unit target
+    }
+  }
+
   Future<void> _handleEditDefinition() async {
     try {
       final result = await Navigator.push<FoodEditResult>(
@@ -455,9 +611,11 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
           final logProvider = Provider.of<LogProvider>(context, listen: false);
           await logProvider.refreshFoodInQueue(result.foodId, updatedFood);
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Food definition updated')),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Food definition updated')),
+            );
+          }
         }
       }
     } catch (e) {
@@ -536,15 +694,9 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
 
       double weightToSubtract = selected.weight;
 
-      // Simple conversion check
+      // Minus Container assumes grams - warn if using a different unit
       if (_selectedUnit != 'g' && _selectedUnit != 'gram') {
-        // Try to find conversion based on food serving?
-        // Or just warn?
-        // "Minus Container" implies we are weighing in GRAMS largely?
-        // If I'm weighing yogurt in a container, I'm likely using a scale in Grams.
-        // If I'm using "Cups", I'm not weighing the container usually.
-        // So let's assume this feature is primarily for Grams input.
-        if (_selectedUnit != 'g' && _selectedUnit != 'gram') {
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text(
@@ -552,17 +704,19 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
               ),
             ),
           );
-          return;
         }
+        return;
       }
 
       final newValue = currentVal - weightToSubtract;
       if (newValue < 0) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Container weight is larger than total weight!'),
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Container weight is larger than total weight!'),
+            ),
+          );
+        }
       } else {
         setState(() {
           _quantityController.text = newValue.toStringAsFixed(0);

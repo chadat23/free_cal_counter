@@ -6,6 +6,7 @@ import 'package:free_cal_counter1/services/database_service.dart';
 import 'package:free_cal_counter1/services/image_storage_service.dart';
 import 'package:free_cal_counter1/widgets/screen_background.dart';
 import 'package:free_cal_counter1/widgets/food_image_widget.dart';
+import 'package:free_cal_counter1/widgets/serving_info_sheet.dart';
 import 'package:free_cal_counter1/config/app_colors.dart';
 import 'package:image_picker/image_picker.dart' as picker;
 
@@ -51,15 +52,36 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
   final _carbsController = TextEditingController();
   final _fiberController = TextEditingController();
 
+  // Primary serving controllers (for new foods / per-serving mode)
+  final _primaryServingQuantityController =
+      TextEditingController(text: '1');
+  final _primaryServingGramsController = TextEditingController();
+  String _primaryServingUnit = 'serving';
+  bool _isCustomUnit = false;
+  final _customUnitController = TextEditingController();
+
   List<FoodServing> _servings = [];
   bool _isPerServingMode = false;
   FoodServing? _selectedServingForMacroInput;
   String? _thumbnail;
 
+  // Available units from database
+  List<String> _availableUnits = [];
+
   @override
   void initState() {
     super.initState();
     _initData();
+    _loadAvailableUnits();
+  }
+
+  Future<void> _loadAvailableUnits() async {
+    final units = await DatabaseService.instance.getDistinctUnits();
+    if (mounted) {
+      setState(() {
+        _availableUnits = units;
+      });
+    }
   }
 
   void _initData() {
@@ -70,29 +92,39 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
     _thumbnail = food?.thumbnail;
 
     if (food != null) {
-      // Copy servings but ensure they are mutable
+      // Editing existing food
       _servings = List.from(food.servings);
 
-      // Initialize macro fields (always derived from per-100g base initially)
-      _updateMacroFieldsFromBase(food);
+      // Find first non-g serving to use as default
+      final primaryServing = _servings.firstWhere(
+        (s) => s.unit != 'g',
+        orElse: () => _servings.first,
+      );
+
+      if (primaryServing.unit != 'g') {
+        // Has a real serving, default to per-serving mode
+        _isPerServingMode = true;
+        _selectedServingForMacroInput = primaryServing;
+        _primaryServingUnit = primaryServing.unit;
+        _primaryServingQuantityController.text =
+            _formatQuantity(primaryServing.quantity);
+        _primaryServingGramsController.text =
+            primaryServing.grams.toStringAsFixed(0);
+        // Set macros for this serving
+        _updateMacroFieldsForServing(food, primaryServing);
+      } else {
+        // Only has grams, use per-100g mode
+        _isPerServingMode = false;
+        _updateMacroFieldsFromBase(food);
+      }
     } else {
-      // Default servings for new food
+      // New food - default to per-serving mode
+      _isPerServingMode = true;
       _servings = [
         const FoodServing(foodId: 0, unit: 'g', grams: 1.0, quantity: 1.0),
-        const FoodServing(
-          foodId: 0,
-          unit: 'serving',
-          grams: 100.0,
-          quantity: 1.0,
-        ),
       ];
+      // Primary serving will be created from the inline fields on save
     }
-
-    // Auto-select "serving" if available for per-serving mode
-    _selectedServingForMacroInput = _servings.firstWhere(
-      (s) => s.unit != 'g',
-      orElse: () => _servings.first,
-    );
 
     if (widget.isCopy) {
       _nameController.text = '${_nameController.text} - Copy';
@@ -100,7 +132,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
   }
 
   void _updateMacroFieldsFromBase(Food food) {
-    // Populate controllers based on stored 100g values
+    // Populate controllers based on stored per-100g values
     _caloriesController.text = _format(food.calories * 100);
     _proteinController.text = _format(food.protein * 100);
     _fatController.text = _format(food.fat * 100);
@@ -108,8 +140,26 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
     _fiberController.text = _format(food.fiber * 100);
   }
 
+  void _updateMacroFieldsForServing(Food food, FoodServing serving) {
+    // Calculate macros for this serving size
+    final grams = serving.grams;
+    _caloriesController.text = _format(food.calories * grams);
+    _proteinController.text = _format(food.protein * grams);
+    _fatController.text = _format(food.fat * grams);
+    _carbsController.text = _format(food.carbs * grams);
+    _fiberController.text = _format(food.fiber * grams);
+  }
+
   String _format(double val) {
+    if (val == 0) return '0';
+    if (val < 1) return val.toStringAsFixed(1);
     return val.toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '');
+  }
+
+  String _formatQuantity(double val) {
+    return val == val.roundToDouble()
+        ? val.round().toString()
+        : val.toStringAsFixed(1);
   }
 
   @override
@@ -122,6 +172,9 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
     _fatController.dispose();
     _carbsController.dispose();
     _fiberController.dispose();
+    _primaryServingQuantityController.dispose();
+    _primaryServingGramsController.dispose();
+    _customUnitController.dispose();
     super.dispose();
   }
 
@@ -130,16 +183,55 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
   Future<void> _save(bool useImmediately) async {
     if (!_formKey.currentState!.validate()) return;
 
-    // Calculate per-100g values
+    // Validation: require grams in per-serving mode
+    if (_isPerServingMode) {
+      final grams = _parse(_primaryServingGramsController.text);
+      if (grams <= 0) {
+        _showValidationError('Please enter the serving weight in grams');
+        return;
+      }
+    }
+
+    // Build primary serving from inline fields if in per-serving mode
+    if (_isPerServingMode) {
+      final unit = _isCustomUnit
+          ? _customUnitController.text.trim()
+          : _primaryServingUnit;
+      final quantity = _parse(_primaryServingQuantityController.text);
+      final grams = _parse(_primaryServingGramsController.text);
+
+      if (unit.isNotEmpty && grams > 0) {
+        final primaryServing = FoodServing(
+          foodId: widget.originalFood?.id ?? 0,
+          unit: unit,
+          grams: grams,
+          quantity: quantity > 0 ? quantity : 1.0,
+        );
+
+        // Update or add the primary serving
+        final existingIndex = _servings.indexWhere((s) => s.unit == unit);
+        if (existingIndex >= 0) {
+          _servings[existingIndex] = primaryServing;
+        } else {
+          // Insert after 'g' if exists, or at start
+          final gIndex = _servings.indexWhere((s) => s.unit == 'g');
+          if (gIndex >= 0) {
+            _servings.insert(gIndex + 1, primaryServing);
+          } else {
+            _servings.insert(0, primaryServing);
+          }
+        }
+        _selectedServingForMacroInput = primaryServing;
+      }
+    }
+
+    // Calculate per-gram values
     double factor = 1.0;
     if (_isPerServingMode && _selectedServingForMacroInput != null) {
-      // Input is for X grams (serving size), we want per 1g
-      // e.g. 200 cals per 50g -> 4 cals per 1g
       if (_selectedServingForMacroInput!.grams > 0) {
         factor = 1.0 / _selectedServingForMacroInput!.grams;
       }
     } else {
-      // Input is per 100g. 100g -> 1g is divide by 100
       factor = 0.01;
     }
 
@@ -156,8 +248,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
       fat: _parse(_fatController.text) * factor,
       carbs: _parse(_carbsController.text) * factor,
       fiber: _parse(_fiberController.text) * factor,
-      source:
-          widget.originalFood?.source ?? 'user', // Preserve source if editing
+      source: widget.originalFood?.source ?? 'user',
       servings: _servings,
     );
 
@@ -181,6 +272,22 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
     }
   }
 
+  void _showValidationError(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Missing Information'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScreenBackground(
@@ -191,7 +298,6 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
             widget.originalFood == null ? 'Create Food' : 'Edit Food',
           ),
           actions: [
-            // "Save" (Checkmark)
             IconButton(
               icon: const Icon(Icons.check),
               tooltip: 'Save',
@@ -205,6 +311,8 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
             padding: const EdgeInsets.all(16.0),
             children: [
               _buildMetadataSection(),
+              const SizedBox(height: 24),
+              _buildPrimaryServingSection(),
               const SizedBox(height: 24),
               _buildMacroSection(),
               const SizedBox(height: 24),
@@ -242,9 +350,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
                 controller: _emojiController,
                 textAlign: TextAlign.center,
                 decoration: const InputDecoration(labelText: 'Emoji'),
-                onChanged: (val) {
-                  // Basic validation or auto-picker hook could go here
-                },
+                onChanged: (val) {},
               ),
             ),
             const SizedBox(width: 16),
@@ -265,13 +371,10 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
           maxLines: 2,
         ),
         const SizedBox(height: 12),
-        // Image picker with preview
         Row(
           children: [
-            // Image preview frame
             _buildImagePreview(),
             const SizedBox(width: 16),
-            // Image picker button
             Expanded(
               child: ElevatedButton.icon(
                 onPressed: _pickImage,
@@ -304,7 +407,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
     );
   }
 
-  Widget _buildMacroSection() {
+  Widget _buildPrimaryServingSection() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -318,7 +421,10 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Nutrition', style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                'Serving Size',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               Row(
                 children: [
                   const Text('Per: '),
@@ -332,6 +438,18 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
                     onChanged: (val) {
                       setState(() {
                         _isPerServingMode = val!;
+                        // Recalculate macros when switching modes
+                        if (widget.originalFood != null) {
+                          if (_isPerServingMode &&
+                              _selectedServingForMacroInput != null) {
+                            _updateMacroFieldsForServing(
+                              widget.originalFood!,
+                              _selectedServingForMacroInput!,
+                            );
+                          } else {
+                            _updateMacroFieldsFromBase(widget.originalFood!);
+                          }
+                        }
                       });
                     },
                   ),
@@ -340,27 +458,215 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
             ],
           ),
           if (_isPerServingMode) ...[
-            const SizedBox(height: 8),
-            DropdownButtonFormField<FoodServing>(
-              value: _selectedServingForMacroInput,
-              decoration: const InputDecoration(labelText: 'Based on Serving'),
-              dropdownColor: Colors.grey[800],
-              items: _servings
-                  .where(
-                    (s) => s.unit != 'g',
-                  ) // Exclude 'g' as it's redundant for "Per Serving" usually
-                  .map(
-                    (s) => DropdownMenuItem(
-                      value: s,
-                      child: Text('${s.quantity} ${s.unit} (${s.grams}g)'),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                // Quantity field
+                SizedBox(
+                  width: 60,
+                  child: TextFormField(
+                    controller: _primaryServingQuantityController,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    textAlign: TextAlign.center,
+                    decoration: const InputDecoration(
+                      labelText: 'Qty',
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 8,
+                      ),
                     ),
-                  )
-                  .toList(),
-              onChanged: (val) {
-                setState(() => _selectedServingForMacroInput = val);
-              },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Unit dropdown
+                Expanded(
+                  child: _isCustomUnit
+                      ? TextFormField(
+                          controller: _customUnitController,
+                          decoration: InputDecoration(
+                            labelText: 'Unit name',
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 8,
+                            ),
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.close, size: 18),
+                              onPressed: () {
+                                setState(() {
+                                  _isCustomUnit = false;
+                                  _customUnitController.clear();
+                                });
+                              },
+                            ),
+                          ),
+                        )
+                      : _buildUnitDropdown(),
+                ),
+                const SizedBox(width: 8),
+                const Text('='),
+                const SizedBox(width: 8),
+                // Grams field
+                SizedBox(
+                  width: 80,
+                  child: TextFormField(
+                    controller: _primaryServingGramsController,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    textAlign: TextAlign.end,
+                    decoration: const InputDecoration(
+                      labelText: 'Grams',
+                      suffixText: 'g',
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 8,
+                      ),
+                    ),
+                    onChanged: (val) {
+                      // Auto-calculate macros if we have a food with existing data
+                      if (widget.originalFood != null) {
+                        final grams = _parse(val);
+                        if (grams > 0) {
+                          final food = widget.originalFood!;
+                          _caloriesController.text = _format(food.calories * grams);
+                          _proteinController.text = _format(food.protein * grams);
+                          _fatController.text = _format(food.fat * grams);
+                          _carbsController.text = _format(food.carbs * grams);
+                          _fiberController.text = _format(food.fiber * grams);
+                        }
+                      }
+                    },
+                  ),
+                ),
+              ],
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUnitDropdown() {
+    // Build list of unit options
+    final units = <String>['serving'];
+
+    // Add units from database that aren't already in the list
+    for (final unit in _availableUnits) {
+      if (!units.contains(unit)) {
+        units.add(unit);
+      }
+    }
+
+    // Add units from current food's servings
+    for (final serving in _servings) {
+      if (serving.unit != 'g' && !units.contains(serving.unit)) {
+        units.add(serving.unit);
+      }
+    }
+
+    // Ensure current selection is in the list
+    if (!units.contains(_primaryServingUnit)) {
+      units.insert(0, _primaryServingUnit);
+    }
+
+    return InputDecorator(
+      decoration: const InputDecoration(
+        labelText: 'Unit',
+        isDense: true,
+        contentPadding: EdgeInsets.symmetric(
+          vertical: 8,
+          horizontal: 8,
+        ),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _primaryServingUnit,
+          dropdownColor: Colors.grey[800],
+          isExpanded: true,
+          isDense: true,
+          items: [
+        ...units.map(
+          (unit) => DropdownMenuItem(
+            value: unit,
+            child: Text(unit),
+          ),
+        ),
+        const DropdownMenuItem(
+          value: '_custom_',
+          child: Text('Custom...'),
+        ),
+      ],
+          onChanged: (val) {
+            if (val == '_custom_') {
+              setState(() {
+                _isCustomUnit = true;
+              });
+            } else if (val != null) {
+              setState(() {
+                _primaryServingUnit = val;
+                // If selecting an existing serving, update grams field
+                final existingServing = _servings.firstWhere(
+                  (s) => s.unit == val,
+                  orElse: () => const FoodServing(
+                    foodId: 0,
+                    unit: '',
+                    grams: 0,
+                    quantity: 1,
+                  ),
+                );
+                if (existingServing.grams > 0) {
+                  _primaryServingGramsController.text =
+                      existingServing.grams.toStringAsFixed(0);
+                  _primaryServingQuantityController.text =
+                      _formatQuantity(existingServing.quantity);
+                  _selectedServingForMacroInput = existingServing;
+                  // Auto-calculate macros
+                  if (widget.originalFood != null) {
+                    _updateMacroFieldsForServing(
+                      widget.originalFood!,
+                      existingServing,
+                    );
+                  }
+                }
+              });
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMacroSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.largeWidgetBackground,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Nutrition', style: Theme.of(context).textTheme.titleMedium),
+          if (_isPerServingMode && _primaryServingGramsController.text.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                'Values for ${_primaryServingQuantityController.text} ${_isCustomUnit ? _customUnitController.text : _primaryServingUnit} (${_primaryServingGramsController.text}g)',
+                style: TextStyle(color: Colors.grey[400], fontSize: 12),
+              ),
+            ),
+          if (!_isPerServingMode)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                'Values per 100g',
+                style: TextStyle(color: Colors.grey[400], fontSize: 12),
+              ),
+            ),
           const SizedBox(height: 16),
           _buildMacroRow(_caloriesController, 'Calories', 'kcal'),
           _buildMacroRow(_proteinController, 'Protein', 'g'),
@@ -412,7 +718,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Servings / Units',
+              'Additional Servings',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             IconButton(
@@ -422,23 +728,25 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
           ],
         ),
         const SizedBox(height: 8),
-        if (_servings.isEmpty)
-          const Text(
-            'No servings defined. Defaults to grams only.',
-            style: TextStyle(color: Colors.grey),
-          ),
         ..._servings.asMap().entries.map((entry) {
           final index = entry.key;
           final serving = entry.value;
-          // Don't simplify editing of 'g' for now, it's a constant base
+          // Don't show 'g' unit or the primary serving being edited
           if (serving.unit == 'g') return const SizedBox.shrink();
+          if (_isPerServingMode &&
+              serving.unit ==
+                  (_isCustomUnit
+                      ? _customUnitController.text
+                      : _primaryServingUnit)) {
+            return const SizedBox.shrink();
+          }
 
           return Card(
-            color: Colors.white.withOpacity(0.05),
+            color: Colors.white.withValues(alpha: 0.05),
             margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
-              title: Text('${serving.quantity} ${serving.unit}'),
-              subtitle: Text('= ${serving.grams} g'),
+              title: Text(_formatServingLabel(serving)),
+              subtitle: Text('= ${serving.grams.toStringAsFixed(0)}g'),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -459,8 +767,53 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
             ),
           );
         }),
+        const SizedBox(height: 16),
+        // View Servings Info button
+        if (widget.originalFood != null || _servings.length > 1)
+          Center(
+            child: TextButton.icon(
+              onPressed: _showServingInfo,
+              icon: const Icon(Icons.info_outline, size: 18),
+              label: const Text('View Servings'),
+            ),
+          ),
       ],
     );
+  }
+
+  String _formatServingLabel(FoodServing serving) {
+    final qty = serving.quantity;
+    final qtyStr = qty == qty.roundToDouble()
+        ? qty.round().toString()
+        : qty.toStringAsFixed(1);
+    return '$qtyStr ${serving.unit}';
+  }
+
+  void _showServingInfo() {
+    // Build a temporary food with current state for the info sheet
+    final grams = _parse(_primaryServingGramsController.text);
+    double factor = 1.0;
+    if (_isPerServingMode && grams > 0) {
+      factor = 1.0 / grams;
+    } else {
+      factor = 0.01;
+    }
+
+    final tempFood = Food(
+      id: widget.originalFood?.id ?? 0,
+      name: _nameController.text.isNotEmpty
+          ? _nameController.text
+          : 'New Food',
+      source: 'user',
+      calories: _parse(_caloriesController.text) * factor,
+      protein: _parse(_proteinController.text) * factor,
+      fat: _parse(_fatController.text) * factor,
+      carbs: _parse(_carbsController.text) * factor,
+      fiber: _parse(_fiberController.text) * factor,
+      servings: _servings,
+    );
+
+    showServingInfoSheet(context, tempFood);
   }
 
   Future<void> _addServing() async {
@@ -473,8 +826,8 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
 
   void _deleteServing(int index) {
     setState(() {
-      _servings.removeAt(index);
-      if (_selectedServingForMacroInput == _servings[index]) {
+      final removed = _servings.removeAt(index);
+      if (_selectedServingForMacroInput?.unit == removed.unit) {
         _selectedServingForMacroInput = _servings.firstWhere(
           (s) => s.unit != 'g',
           orElse: () => _servings.first,
@@ -484,7 +837,6 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
   }
 
   Future<void> _pickImage() async {
-    // Show dialog with options
     final choice = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
@@ -516,7 +868,6 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
     if (choice == null) return;
 
     if (choice == 'remove') {
-      // Delete old image if exists
       if (_thumbnail != null) {
         final guid = widget.originalFood?.getLocalImageGuid();
         if (guid != null) {
@@ -529,7 +880,6 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
       return;
     }
 
-    // Pick image from camera or gallery
     final imagePicker = picker.ImagePicker();
     final picker.XFile? pickedFile;
     if (choice == 'camera') {
@@ -544,13 +894,11 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
 
     if (pickedFile == null) return;
 
-    // Save image (cropping to be added later)
     try {
       final guid = await ImageStorageService.instance.saveImage(
         File(pickedFile.path),
       );
 
-      // Delete old image if exists
       if (_thumbnail != null) {
         final oldGuid = widget.originalFood?.getLocalImageGuid();
         if (oldGuid != null) {
@@ -637,11 +985,6 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
                     _servings[index] = newServing;
                   } else {
                     _servings.add(newServing);
-                  }
-                  // Select new/edited serving if we are in per-serving mode and none selected
-                  if (_isPerServingMode &&
-                      _selectedServingForMacroInput == null) {
-                    _selectedServingForMacroInput = newServing;
                   }
                 });
                 Navigator.pop(context);

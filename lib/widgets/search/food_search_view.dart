@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/models/food.dart' as model_food;
 import 'package:free_cal_counter1/models/food_portion.dart' as model_portion;
 import 'package:free_cal_counter1/models/quantity_edit_config.dart';
 import 'package:free_cal_counter1/models/search_config.dart';
@@ -40,20 +39,12 @@ class FoodSearchView extends StatelessWidget {
           backgroundColor: Colors.orange,
         ),
         onPressed: () async {
-          final food = await showDialog<model_food.Food>(
+          final portion = await showDialog<model_portion.FoodPortion>(
             context: context,
             builder: (context) => const QuickAddDialog(),
           );
 
-          if (food != null && context.mounted) {
-            // Create portion with quantity 1, using entered macros as total
-            // The Food object stores macros per 100g, so we use 1g to get the correct total
-            final portion = model_portion.FoodPortion(
-              food: food,
-              grams: 1.0,
-              unit: 'serving',
-            );
-
+          if (portion != null && context.mounted) {
             if (config.onSaveOverride != null) {
               config.onSaveOverride!(portion);
             } else {
@@ -62,8 +53,9 @@ class FoodSearchView extends StatelessWidget {
                 listen: false,
               ).addFoodToQueue(portion);
 
+              final calories = portion.grams.toStringAsFixed(0);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Added ${food.name} to log')),
+                SnackBar(content: Text('Added $calories kcal to log')),
               );
             }
           }

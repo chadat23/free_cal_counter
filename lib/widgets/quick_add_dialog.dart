@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/models/food.dart';
-import 'package:free_cal_counter1/models/food_serving.dart';
+import 'package:free_cal_counter1/models/food_portion.dart';
 import 'package:free_cal_counter1/services/database_service.dart';
 
+/// A simplified Quick Add dialog that only asks for calories.
+/// Uses a system "Quick Add" food where 1 gram = 1 calorie.
+/// Returns a FoodPortion with grams equal to the entered calories.
 class QuickAddDialog extends StatefulWidget {
   const QuickAddDialog({super.key});
 
@@ -12,57 +14,35 @@ class QuickAddDialog extends StatefulWidget {
 
 class _QuickAddDialogState extends State<QuickAddDialog> {
   final _formKey = GlobalKey<FormState>();
-  String _name = 'Quick Add';
-  double _calories = 0;
-  double _protein = 0;
-  double _fat = 0;
-  double _carbs = 0;
-  double _fiber = 0;
+  final _caloriesController = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _caloriesController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Quick Add'),
-      content: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                initialValue: _name,
-                decoration: const InputDecoration(labelText: 'Name'),
-                onSaved: (val) => _name = val ?? 'Quick Add',
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Calories (kcal)'),
-                keyboardType: TextInputType.number,
-                validator: (val) =>
-                    val == null || val.isEmpty ? 'Required' : null,
-                onSaved: (val) => _calories = double.tryParse(val ?? '0') ?? 0,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Protein (g)'),
-                keyboardType: TextInputType.number,
-                onSaved: (val) => _protein = double.tryParse(val ?? '0') ?? 0,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Fat (g)'),
-                keyboardType: TextInputType.number,
-                onSaved: (val) => _fat = double.tryParse(val ?? '0') ?? 0,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Carbs (g)'),
-                keyboardType: TextInputType.number,
-                onSaved: (val) => _carbs = double.tryParse(val ?? '0') ?? 0,
-              ),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Fiber (g)'),
-                keyboardType: TextInputType.number,
-                onSaved: (val) => _fiber = double.tryParse(val ?? '0') ?? 0,
-              ),
-            ],
+      content: Form(
+        key: _formKey,
+        child: TextFormField(
+          controller: _caloriesController,
+          decoration: const InputDecoration(
+            labelText: 'Calories',
+            suffixText: 'kcal',
           ),
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          autofocus: true,
+          validator: (val) {
+            if (val == null || val.isEmpty) return 'Required';
+            final parsed = double.tryParse(val);
+            if (parsed == null || parsed <= 0) return 'Enter a positive number';
+            return null;
+          },
         ),
       ),
       actions: [
@@ -70,44 +50,49 @@ class _QuickAddDialogState extends State<QuickAddDialog> {
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
-        ElevatedButton(onPressed: _submit, child: const Text('Add')),
+        ElevatedButton(
+          onPressed: _isLoading ? null : _submit,
+          child: _isLoading
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Add'),
+        ),
       ],
     );
   }
 
   Future<void> _submit() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      _formKey.currentState?.save();
+    if (!(_formKey.currentState?.validate() ?? false)) return;
 
-      // Create a hidden food entry
-      final food = Food(
-        id: 0,
-        name: _name,
-        source: 'live',
-        calories: _calories,
-        protein: _protein,
-        fat: _fat,
-        carbs: _carbs,
-        fiber: _fiber,
-        hidden: true,
-        servings: [
-          FoodServing(
-            foodId: 0,
-            unit: 'serving',
-            quantity: 1,
-            grams: 100,
-          ), // Dummy unit
-        ],
+    setState(() => _isLoading = true);
+
+    try {
+      final calories = double.parse(_caloriesController.text);
+      final quickAddFood =
+          await DatabaseService.instance.getSystemQuickAddFood();
+
+      // Create portion where grams = calories (since food is 1 cal/gram)
+      final portion = FoodPortion(
+        food: quickAddFood,
+        grams: calories,
+        unit: 'g',
       );
 
-      final savedFoodId = await DatabaseService.instance.saveFood(food);
-      final savedFood = await DatabaseService.instance.getFoodById(
-        savedFoodId,
-        'live',
-      );
-
-      if (mounted && savedFood != null) {
-        Navigator.pop(context, savedFood);
+      if (mounted) {
+        Navigator.pop(context, portion);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        setState(() => _isLoading = false);
       }
     }
   }

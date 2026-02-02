@@ -38,10 +38,14 @@ class _SearchResultTileState extends State<SearchResultTile> {
     super.initState();
     _availableServings = List.of(widget.food.servings);
 
-    // 'g' is guaranteed to be present by the service layer
+    // Default to first non-g serving (the "primary serving")
+    // Fall back to 'g' if no other servings exist
     _selectedUnit = _availableServings.firstWhere(
-      (u) => u.unit == 'g',
-      orElse: () => _availableServings.first,
+      (u) => u.unit != 'g',
+      orElse: () => _availableServings.firstWhere(
+        (u) => u.unit == 'g',
+        orElse: () => _availableServings.first,
+      ),
     );
     _displayQuantity = _selectedUnit.quantity;
 
@@ -194,9 +198,14 @@ class _SearchResultTileState extends State<SearchResultTile> {
             items: _availableServings.map((unit) {
               // Show _displayQuantity for selected unit, serving definition for others
               final qty = (unit == _selectedUnit) ? _displayQuantity : unit.quantity;
+              // For 'g' unit, just show "1 g" (no redundant grams display)
+              // For other units, show "1 serving (27g)"
+              final label = unit.unit == 'g'
+                  ? '$qty ${unit.unit}'
+                  : '$qty ${unit.unit} (${(unit.gramsPerUnit * qty).toStringAsFixed(0)}g)';
               return DropdownMenuItem(
                 value: unit,
-                child: Text('$qty ${unit.unit}'),
+                child: Text(label),
               );
             }).toList(),
             onChanged: (unit) {

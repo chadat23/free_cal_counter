@@ -55,7 +55,7 @@
 
 **Subtasks:**
 - [ ] Redesign food creation flow:
-  1. Enter portion name (e.g., "1 bar", "1 cup") (quantity and name should be seperate fields)
+  1. Enter portion name (e.g., "1 bar", "1 cup") (quantity and name should be seperate fields): maybe default to "1 serving"
   2. Enter grams per portion
   3. Enter macros per portion
   4. Auto-calculate and display per-100g values (is there actually any value in displaying these values to the user during the food creation process?)

@@ -13,6 +13,7 @@ import 'package:free_cal_counter1/models/food.dart';
 import 'package:free_cal_counter1/utils/ui_utils.dart';
 import 'package:free_cal_counter1/widgets/food_image_widget.dart';
 import 'package:free_cal_counter1/models/food_container.dart';
+import 'package:free_cal_counter1/widgets/serving_info_sheet.dart';
 
 class QuantityEditScreen extends StatefulWidget {
   final QuantityEditConfig config;
@@ -80,6 +81,14 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
               _buildRecipeToggle(),
             const SizedBox(height: 24),
             _buildTargetSelection(),
+            const SizedBox(height: 32),
+            Center(
+              child: TextButton.icon(
+                onPressed: () => showServingInfoSheet(context, _food),
+                icon: const Icon(Icons.info_outline, size: 18),
+                label: const Text('View Servings'),
+              ),
+            ),
           ],
         ),
       ),

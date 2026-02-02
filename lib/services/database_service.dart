@@ -60,6 +60,7 @@ class DatabaseService {
   Future<void> init() async {
     _liveDb = LiveDatabase(connection: openLiveConnection());
     _referenceDb = ReferenceDatabase(connection: openReferenceConnection());
+    await _ensureSystemQuickAddFood();
   }
 
   Future<void> restoreDatabase(File backupFile) async {
@@ -1971,5 +1972,86 @@ class DatabaseService {
     return referenceFoods
         .where((refFood) => !liveSourceIds.contains(refFood.id))
         .toList();
+  }
+
+  /// Get distinct unit names from food portions (excluding 'g')
+  /// Used for populating unit dropdown in food edit screen
+  Future<List<String>> getDistinctUnits() async {
+    final query = _liveDb.selectOnly(_liveDb.foodPortions, distinct: true)
+      ..addColumns([_liveDb.foodPortions.unit])
+      ..where(_liveDb.foodPortions.unit.isNotValue('g'));
+
+    final results = await query.get();
+    return results
+        .map((row) => row.read(_liveDb.foodPortions.unit))
+        .whereType<String>()
+        .toList()
+      ..sort();
+  }
+
+  /// Get the system Quick Add food, creating it if it doesn't exist.
+  /// This food has 1 calorie per gram, 0 for other macros.
+  Future<model.Food> getSystemQuickAddFood() async {
+    // Try to find existing system Quick Add food
+    final existingData = await (_liveDb.select(_liveDb.foods)
+          ..where((f) => f.name.equals('Quick Add'))
+          ..where((f) => f.source.equals('system')))
+        .getSingleOrNull();
+
+    if (existingData != null) {
+      final servings = await getServingsForFood(existingData.id, 'live');
+      return _mapFoodData(existingData, servings);
+    }
+
+    // Create the system Quick Add food
+    final foodId = await _liveDb.into(_liveDb.foods).insert(
+      FoodsCompanion.insert(
+        name: 'Quick Add',
+        source: 'system',
+        caloriesPerGram: 1.0, // 1 cal per gram
+        proteinPerGram: 0.0,
+        fatPerGram: 0.0,
+        carbsPerGram: 0.0,
+        fiberPerGram: 0.0,
+        emoji: const Value('⚡'),
+        hidden: const Value(true),
+      ),
+    );
+
+    // Add gram serving
+    await _liveDb.into(_liveDb.foodPortions).insert(
+      FoodPortionsCompanion.insert(
+        foodId: foodId,
+        unit: 'g',
+        grams: 1.0,
+        quantity: 1.0,
+      ),
+    );
+
+    return model.Food(
+      id: foodId,
+      name: 'Quick Add',
+      source: 'system',
+      calories: 1.0,
+      protein: 0.0,
+      fat: 0.0,
+      carbs: 0.0,
+      fiber: 0.0,
+      emoji: '⚡',
+      hidden: true,
+      servings: [
+        const model_serving.FoodServing(
+          foodId: 0,
+          unit: 'g',
+          grams: 1.0,
+          quantity: 1.0,
+        ),
+      ],
+    );
+  }
+
+  /// Ensures the system Quick Add food exists. Called during init.
+  Future<void> _ensureSystemQuickAddFood() async {
+    await getSystemQuickAddFood();
   }
 }

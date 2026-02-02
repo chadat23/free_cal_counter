@@ -140,6 +140,7 @@ class TextSearchView extends StatelessWidget {
                 final initialUnit = existingPortion != null
                     ? existingPortion.unit
                     : selectedUnit.unit;
+                // Use quantity from dropdown (which now includes last logged info)
                 final initialQuantity =
                     existingPortion != null && unitServing != null
                     ? unitServing.quantityFromGrams(existingPortion.grams)
@@ -325,10 +326,10 @@ class TextSearchView extends StatelessWidget {
 
     final initialUnit = existingPortion?.unit ?? unitServing.unit;
 
-    // For new items, default to 1 qty of the default unit
+    // For new items, use serving quantity (which includes last logged info if available)
     final initialQuantity = existingPortion != null
         ? unitServing.quantityFromGrams(existingPortion.grams)
-        : 1.0;
+        : unitServing.quantity;
 
     final originalGrams = existingPortion?.grams ?? 0.0;
 

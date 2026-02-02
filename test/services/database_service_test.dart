@@ -215,6 +215,189 @@ void main() {
     });
   });
 
+  group('getLastLoggedInfo', () {
+    test('should return null if no logs exist for the food', () async {
+      final info = await databaseService.getLastLoggedInfo(1);
+      expect(info, matcher.isNull);
+    });
+
+    test('should return unit, quantity, and grams from the most recent log',
+        () async {
+      // Arrange
+      const foodId = 1;
+      await liveDatabase
+          .into(liveDatabase.foods)
+          .insert(
+            FoodsCompanion.insert(
+              id: const Value(foodId),
+              name: 'Test Food',
+              source: 'user_created',
+              caloriesPerGram: 1.0,
+              proteinPerGram: 0.0,
+              fatPerGram: 0.0,
+              carbsPerGram: 0.0,
+              fiberPerGram: 0.0,
+            ),
+          );
+
+      // Insert logs with different timestamps
+      await liveDatabase
+          .into(liveDatabase.loggedPortions)
+          .insert(
+            LoggedPortionsCompanion.insert(
+              foodId: const Value(foodId),
+              logTimestamp: 1000,
+              grams: 100,
+              unit: 'old_unit',
+              quantity: 1.0,
+            ),
+          );
+      await liveDatabase
+          .into(liveDatabase.loggedPortions)
+          .insert(
+            LoggedPortionsCompanion.insert(
+              foodId: const Value(foodId),
+              logTimestamp: 2000,
+              grams: 250,
+              unit: 'slice',
+              quantity: 2.5,
+            ),
+          );
+
+      // Act
+      final info = await databaseService.getLastLoggedInfo(foodId);
+
+      // Assert
+      expect(info, matcher.isNotNull);
+      expect(info!.unit, 'slice');
+      expect(info.quantity, 2.5);
+      expect(info.grams, 250);
+    });
+
+    test('should work via sourceFdcId for reference foods', () async {
+      // Arrange
+      // Create a reference food in the reference database
+      const refFoodId = 100;
+      await referenceDatabase
+          .into(referenceDatabase.foods)
+          .insert(
+            ref.FoodsCompanion.insert(
+              id: const Value(refFoodId),
+              name: 'Reference Bread',
+              source: 'FOUNDATION',
+              caloriesPerGram: 2.5,
+              proteinPerGram: 0.08,
+              fatPerGram: 0.03,
+              carbsPerGram: 0.50,
+              fiberPerGram: 0.02,
+            ),
+          );
+
+      // Create a live copy that points to the reference via sourceFdcId
+      const liveFoodId = 1;
+      await liveDatabase
+          .into(liveDatabase.foods)
+          .insert(
+            FoodsCompanion.insert(
+              id: const Value(liveFoodId),
+              name: 'Reference Bread',
+              source: 'live',
+              sourceFdcId: const Value(refFoodId),
+              caloriesPerGram: 2.5,
+              proteinPerGram: 0.08,
+              fatPerGram: 0.03,
+              carbsPerGram: 0.50,
+              fiberPerGram: 0.02,
+            ),
+          );
+
+      // Log the live copy
+      await liveDatabase
+          .into(liveDatabase.loggedPortions)
+          .insert(
+            LoggedPortionsCompanion.insert(
+              foodId: const Value(liveFoodId),
+              logTimestamp: 3000,
+              grams: 60,
+              unit: 'slice',
+              quantity: 2.0,
+            ),
+          );
+
+      // Act - Query using the REFERENCE food ID
+      final info = await databaseService.getLastLoggedInfo(refFoodId);
+
+      // Assert - Should find the log via sourceFdcId
+      expect(info, matcher.isNotNull);
+      expect(info!.unit, 'slice');
+      expect(info.quantity, 2.0);
+      expect(info.grams, 60);
+    });
+
+    test('should return most recent when multiple logs exist', () async {
+      // Arrange
+      const foodId = 1;
+      await liveDatabase
+          .into(liveDatabase.foods)
+          .insert(
+            FoodsCompanion.insert(
+              id: const Value(foodId),
+              name: 'Test Food',
+              source: 'user_created',
+              caloriesPerGram: 1.0,
+              proteinPerGram: 0.0,
+              fatPerGram: 0.0,
+              carbsPerGram: 0.0,
+              fiberPerGram: 0.0,
+            ),
+          );
+
+      // Insert multiple logs
+      await liveDatabase
+          .into(liveDatabase.loggedPortions)
+          .insert(
+            LoggedPortionsCompanion.insert(
+              foodId: const Value(foodId),
+              logTimestamp: 1000,
+              grams: 100,
+              unit: 'g',
+              quantity: 100,
+            ),
+          );
+      await liveDatabase
+          .into(liveDatabase.loggedPortions)
+          .insert(
+            LoggedPortionsCompanion.insert(
+              foodId: const Value(foodId),
+              logTimestamp: 3000,
+              grams: 150,
+              unit: 'cup',
+              quantity: 1.5,
+            ),
+          );
+      await liveDatabase
+          .into(liveDatabase.loggedPortions)
+          .insert(
+            LoggedPortionsCompanion.insert(
+              foodId: const Value(foodId),
+              logTimestamp: 2000,
+              grams: 200,
+              unit: 'slice',
+              quantity: 2.0,
+            ),
+          );
+
+      // Act
+      final info = await databaseService.getLastLoggedInfo(foodId);
+
+      // Assert - Should return the log with timestamp 3000
+      expect(info, matcher.isNotNull);
+      expect(info!.unit, 'cup');
+      expect(info.quantity, 1.5);
+      expect(info.grams, 150);
+    });
+  });
+
   group('getLoggedMacrosForDateRange', () {
     test('should return macro DTOs for logs within range', () async {
       // Arrange

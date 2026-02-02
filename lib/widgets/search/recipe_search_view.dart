@@ -322,6 +322,7 @@ class _RecipeSearchViewState extends State<RecipeSearchView> {
                             final initialUnit = existingPortion != null
                                 ? existingPortion.unit
                                 : selectedUnit.unit;
+                            // Use quantity from dropdown (which now includes last logged info)
                             final initialQuantity =
                                 (existingPortion != null && unitServing != null)
                                 ? unitServing.quantityFromGrams(

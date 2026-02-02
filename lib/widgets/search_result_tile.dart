@@ -31,6 +31,7 @@ class SearchResultTile extends StatefulWidget {
 class _SearchResultTileState extends State<SearchResultTile> {
   late model_unit.FoodServing _selectedUnit;
   late List<model_unit.FoodServing> _availableServings;
+  late double _displayQuantity;
 
   @override
   void initState() {
@@ -42,32 +43,34 @@ class _SearchResultTileState extends State<SearchResultTile> {
       (u) => u.unit == 'g',
       orElse: () => _availableServings.first,
     );
+    _displayQuantity = _selectedUnit.quantity;
 
     if (widget.food.id != 0) {
-      _loadLastLoggedUnit();
+      _loadLastLoggedInfo();
     }
   }
 
-  Future<void> _loadLastLoggedUnit() async {
+  Future<void> _loadLastLoggedInfo() async {
     try {
-      final lastUnit = await DatabaseService.instance.getLastLoggedUnit(
+      final lastInfo = await DatabaseService.instance.getLastLoggedInfo(
         widget.food.id,
       );
-      if (lastUnit != null && mounted) {
+      if (lastInfo != null && mounted) {
         final servingIndex = _availableServings.indexWhere(
-          (s) => s.unit == lastUnit,
+          (s) => s.unit == lastInfo.unit,
         );
         if (servingIndex != -1) {
           setState(() {
             final serving = _availableServings.removeAt(servingIndex);
             _availableServings.insert(0, serving);
             _selectedUnit = serving;
+            _displayQuantity = lastInfo.quantity;
           });
         }
       }
     } catch (e) {
       // Ignore DB errors in UI
-      debugPrint('Error loading last logged unit: $e');
+      debugPrint('Error loading last logged info: $e');
     }
   }
 
@@ -136,13 +139,25 @@ class _SearchResultTileState extends State<SearchResultTile> {
     );
   }
 
+  /// Creates a FoodServing with the current display quantity
+  model_unit.FoodServing _getServingWithDisplayQuantity() {
+    return model_unit.FoodServing(
+      id: _selectedUnit.id,
+      foodId: _selectedUnit.foodId,
+      unit: _selectedUnit.unit,
+      grams: _selectedUnit.gramsPerUnit * _displayQuantity,
+      quantity: _displayQuantity,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final calories = widget.food.calories * _selectedUnit.grams;
-    final protein = widget.food.protein * _selectedUnit.grams;
-    final fat = widget.food.fat * _selectedUnit.grams;
-    final carbs = widget.food.carbs * _selectedUnit.grams;
-    final fiber = widget.food.fiber * _selectedUnit.grams;
+    final displayGrams = _selectedUnit.gramsPerUnit * _displayQuantity;
+    final calories = widget.food.calories * displayGrams;
+    final protein = widget.food.protein * displayGrams;
+    final fat = widget.food.fat * displayGrams;
+    final carbs = widget.food.carbs * displayGrams;
+    final fiber = widget.food.fiber * displayGrams;
 
     return ListTile(
       tileColor: _getBackgroundColor(context),
@@ -177,15 +192,18 @@ class _SearchResultTileState extends State<SearchResultTile> {
           DropdownButton<model_unit.FoodServing>(
             value: _selectedUnit,
             items: _availableServings.map((unit) {
+              // Show _displayQuantity for selected unit, serving definition for others
+              final qty = (unit == _selectedUnit) ? _displayQuantity : unit.quantity;
               return DropdownMenuItem(
                 value: unit,
-                child: Text('${unit.quantity} ${unit.unit}'),
+                child: Text('$qty ${unit.unit}'),
               );
             }).toList(),
             onChanged: (unit) {
               if (unit != null) {
                 setState(() {
                   _selectedUnit = unit;
+                  _displayQuantity = unit.quantity; // Reset to serving definition
                 });
               }
             },
@@ -195,8 +213,9 @@ class _SearchResultTileState extends State<SearchResultTile> {
       trailing: IconButton(
         icon: Icon(widget.isUpdate ? Icons.edit : Icons.add),
         onPressed: () {
+          final servingToPass = _getServingWithDisplayQuantity();
           if (widget.onAdd != null) {
-            widget.onAdd!(_selectedUnit);
+            widget.onAdd!(servingToPass);
           } else {
             final logProvider = Provider.of<LogProvider>(
               context,
@@ -204,14 +223,14 @@ class _SearchResultTileState extends State<SearchResultTile> {
             );
             final serving = FoodPortion(
               food: widget.food,
-              grams: _selectedUnit.grams,
-              unit: _selectedUnit.unit,
+              grams: servingToPass.grams,
+              unit: servingToPass.unit,
             );
             logProvider.addFoodToQueue(serving);
           }
         },
       ),
-      onTap: () => widget.onTap(_selectedUnit),
+      onTap: () => widget.onTap(_getServingWithDisplayQuantity()),
     );
   }
 }

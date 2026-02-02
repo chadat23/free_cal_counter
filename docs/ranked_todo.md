@@ -55,10 +55,10 @@
 
 **Subtasks:**
 - [ ] Redesign food creation flow:
-  1. Enter portion name (e.g., "1 bar", "1 cup")
+  1. Enter portion name (e.g., "1 bar", "1 cup") (quantity and name should be seperate fields)
   2. Enter grams per portion
   3. Enter macros per portion
-  4. Auto-calculate and display per-100g values
+  4. Auto-calculate and display per-100g values (is there actually any value in displaying these values to the user during the food creation process?)
 - [ ] Add ability to define additional portion sizes after initial creation
 - [ ] Update UI to make the flow clear and intuitive
 - [ ] Ensure backwards compatibility with existing food editing

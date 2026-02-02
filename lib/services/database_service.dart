@@ -19,6 +19,19 @@ import 'package:free_cal_counter1/models/food_usage_stats.dart';
 import 'package:free_cal_counter1/models/food_container.dart';
 import 'package:free_cal_counter1/services/image_storage_service.dart';
 
+/// Holds information about the last logged unit and quantity for a food.
+class LastLoggedInfo {
+  final String unit;
+  final double quantity;
+  final double grams;
+
+  const LastLoggedInfo({
+    required this.unit,
+    required this.quantity,
+    required this.grams,
+  });
+}
+
 class DatabaseService {
   late LiveDatabase _liveDb;
   late ReferenceDatabase _referenceDb;
@@ -313,6 +326,40 @@ class DatabaseService {
     final row = await query.getSingleOrNull();
     if (row != null) {
       return row.readTable(_liveDb.loggedPortions).unit;
+    }
+    return null;
+  }
+
+  /// Returns the last logged unit, quantity, and grams for a food.
+  /// Matches by foodId directly or via sourceFdcId for reference foods.
+  Future<LastLoggedInfo?> getLastLoggedInfo(int originalFoodId) async {
+    final query =
+        _liveDb.select(_liveDb.loggedPortions).join([
+            innerJoin(
+              _liveDb.foods,
+              _liveDb.foods.id.equalsExp(_liveDb.loggedPortions.foodId),
+            ),
+          ])
+          ..where(
+            _liveDb.loggedPortions.foodId.equals(originalFoodId) |
+                _liveDb.foods.sourceFdcId.equals(originalFoodId),
+          )
+          ..orderBy([
+            OrderingTerm(
+              expression: _liveDb.loggedPortions.logTimestamp,
+              mode: OrderingMode.desc,
+            ),
+          ])
+          ..limit(1);
+
+    final row = await query.getSingleOrNull();
+    if (row != null) {
+      final loggedPortion = row.readTable(_liveDb.loggedPortions);
+      return LastLoggedInfo(
+        unit: loggedPortion.unit,
+        quantity: loggedPortion.quantity,
+        grams: loggedPortion.grams,
+      );
     }
     return null;
   }

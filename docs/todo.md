@@ -1,6 +1,6 @@
 While there may be exceptions, I want most if not all numeric values to default to showing zero decimal places. Right now there are tons of toStringAsFixed(0) calls and this seems messy. Is this an optimal solution? Would it be better to switch to package:intl.dart DumberFormat('0')? Is there a better way?
 
-When making recipes, the ingredient list ingredient widgets don't properly show emogies or pictures. They all just show a generic food icon. 
+~~When making recipes, the ingredient list ingredient widgets don't properly show emogies or pictures. They all just show a generic food icon.~~ DONE - Fixed with FoodImageWidget refactor (now uses smart emoji fallback)
 
 I want to be able to handle more than just jpgs (I think that that's all we can do). This isn't worth dramatically complexifying things over, but it'd be nice to be able to handle all of the common image types found on the internet so that images can be downloaded and used without having to pay a lot of attention to format. And maybe that means we want to be able to display lots of image types, or maybe as part of the downsizing, we convert other image types to jpegs.
 

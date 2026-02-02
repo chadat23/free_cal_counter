@@ -94,16 +94,17 @@ void main() {
       expect(find.text('S'), findsNWidgets(2)); // Saturday and Sunday
     });
 
-    testWidgets('renders formatted nutrient values', (
+    testWidgets('renders formatted nutrient values for selected day (defaults to today/day 6)', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(buildTestWidget());
 
-      expect(find.text('2134 🔥\n of 2143'), findsOneWidget);
-      expect(find.text('159 P\n of 141g'), findsOneWidget);
-      expect(find.text('70 F\n of 71g'), findsOneWidget);
-      expect(find.text('241 C\n of 233g'), findsOneWidget);
-      expect(find.text('25 Fb\n of 30g'), findsOneWidget);
+      // Values come from dailyAmounts[6] (today), not thisAmount
+      expect(find.text('2143 🔥\n of 2143'), findsOneWidget);
+      expect(find.text('143 P\n of 141g'), findsOneWidget);
+      expect(find.text('69 F\n of 71g'), findsOneWidget);
+      expect(find.text('242 C\n of 233g'), findsOneWidget);
+      expect(find.text('26 Fb\n of 30g'), findsOneWidget);
     });
 
     testWidgets('renders "Consumed" and "Remaining" buttons', (
@@ -120,27 +121,47 @@ void main() {
     ) async {
       await tester.pumpWidget(buildTestWidget());
 
-      // Initially shows Consumed
-      expect(find.text('2134 🔥\n of 2143'), findsOneWidget);
-      expect(find.text('159 P\n of 141g'), findsOneWidget);
+      // Initially shows Consumed (from dailyAmounts[6])
+      expect(find.text('2143 🔥\n of 2143'), findsOneWidget);
+      expect(find.text('143 P\n of 141g'), findsOneWidget);
 
       // Tap Remaining
       await tester.tap(find.text('Remaining'));
       await tester.pumpAndSettle();
 
-      // Should show Remaining: target - consumed
-      // 2143 - 2134 = 9
-      // 141 - 159 = -18
-      expect(find.text('9 🔥\n of 2143'), findsOneWidget);
-      expect(find.text('-18 P\n of 141g'), findsOneWidget);
+      // Should show Remaining: target - dailyAmounts[6]
+      // 2143 - 2143 = 0
+      // 141 - 143.82 = -2
+      expect(find.text('0 🔥\n of 2143'), findsOneWidget);
+      expect(find.text('-2 P\n of 141g'), findsOneWidget);
 
       // Tap Consumed
       await tester.tap(find.text('Consumed'));
       await tester.pumpAndSettle();
 
       // Should show Consumed again
-      expect(find.text('2134 🔥\n of 2143'), findsOneWidget);
-      expect(find.text('159 P\n of 141g'), findsOneWidget);
+      expect(find.text('2143 🔥\n of 2143'), findsOneWidget);
+      expect(find.text('143 P\n of 141g'), findsOneWidget);
+    });
+
+    testWidgets('tapping a day column updates selection and displayed values', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(buildTestWidget());
+
+      // Initially selected is day 6 (today) with values from dailyAmounts[6]
+      expect(find.text('2143 🔥\n of 2143'), findsOneWidget);
+
+      // Find and tap the first day column (Monday, index 0)
+      // The bars are in GestureDetector widgets
+      final gestureDetectors = find.byType(GestureDetector);
+      // Tap the first one (Monday's column)
+      await tester.tap(gestureDetectors.first);
+      await tester.pumpAndSettle();
+
+      // Should now show values from dailyAmounts[0]
+      // Calories: 1714.4 -> 1714
+      expect(find.text('1714 🔥\n of 2143'), findsOneWidget);
     });
   });
 }

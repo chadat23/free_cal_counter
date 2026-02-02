@@ -4,6 +4,7 @@ import 'package:free_cal_counter1/services/database_service.dart';
 import 'package:free_cal_counter1/services/live_database.dart' hide Food;
 import 'package:free_cal_counter1/services/reference_database.dart' hide Food;
 import 'package:drift/native.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -13,6 +14,7 @@ void main() {
   late DatabaseService dbService;
 
   setUp(() async {
+    SharedPreferences.setMockInitialValues({});
     liveDb = LiveDatabase(connection: NativeDatabase.memory());
     refDb = ReferenceDatabase(connection: NativeDatabase.memory());
     dbService = DatabaseService.forTesting(liveDb, refDb);

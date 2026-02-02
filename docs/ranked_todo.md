@@ -193,15 +193,15 @@
 **Subtasks:**
 - [ ] Define data requirements:
   - Minimum days needed for calculation (14?)
-  - How to handle gaps in logging
-  - What constitutes "sufficient" data for a day
+  - How to handle gaps in logging: maybe we just estimate based on a best fit curve
+  - What constitutes "sufficient" data for a day: we assume that the day's accurate unless it's empty with no "fasted" note
 - [ ] Create constant for required days (single source of truth)
 - [ ] Cold boot handling:
   - Use initial estimates until Monday after sufficient data collected
   - Track when sufficient data threshold is reached
 - [ ] Dirty data handling:
   - Define "missed day" (no logs? partial logs?)
-  - Strategy: skip missed days? use averages? require X of Y days?
+  - Strategy: skip missed days? use averages? require X of Y days?: we could also estimate based on a best fit curve if that works better depending on the behavior of the function/equation
 - [ ] Monday boundary logic:
   - Only recalculate on Mondays
   - Store last calculation date

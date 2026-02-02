@@ -5,10 +5,19 @@ import 'package:free_cal_counter1/models/nutrition_target.dart';
 import 'package:free_cal_counter1/providers/navigation_provider.dart';
 import 'package:provider/provider.dart';
 
-class NutritionTargetsOverviewChart extends StatelessWidget {
+class NutritionTargetsOverviewChart extends StatefulWidget {
   final List<NutritionTarget> nutritionData;
 
   const NutritionTargetsOverviewChart({super.key, required this.nutritionData});
+
+  @override
+  State<NutritionTargetsOverviewChart> createState() =>
+      _NutritionTargetsOverviewChartState();
+}
+
+class _NutritionTargetsOverviewChartState
+    extends State<NutritionTargetsOverviewChart> {
+  int _selectedDayIndex = 6; // Default to today (last day in 7-day array)
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +53,8 @@ class NutritionTargetsOverviewChart extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Column(
-                    children: List.generate(nutritionData.length, (index) {
+                    children:
+                        List.generate(widget.nutritionData.length, (index) {
                       return const Padding(
                         padding: EdgeInsets.symmetric(vertical: 4.0),
                         child: SizedBox(height: 48),
@@ -58,38 +68,61 @@ class NutritionTargetsOverviewChart extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: List.generate(7, (dayIndex) {
-                            return Column(
-                              children: List.generate(nutritionData.length, (
-                                nutrientIndex,
-                              ) {
-                                final NutritionTarget data =
-                                    nutritionData[nutrientIndex];
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 4.0,
-                                  ),
-                                  child: VerticalMiniBarChart(
-                                    consumed: data.dailyAmounts[dayIndex],
-                                    target: data.targetAmount,
-                                    color: data.color,
-                                    notInverted: showConsumed,
-                                  ),
-                                );
-                              }),
+                            final isSelected = dayIndex == _selectedDayIndex;
+                            return GestureDetector(
+                              onTap: () =>
+                                  setState(() => _selectedDayIndex = dayIndex),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? const Color(0xFF5C1A1A) // Maroon highlight
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                  vertical: 4,
+                                ),
+                                child: Column(
+                                  children: List.generate(
+                                      widget.nutritionData.length,
+                                      (nutrientIndex) {
+                                    final NutritionTarget data =
+                                        widget.nutritionData[nutrientIndex];
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 4.0,
+                                      ),
+                                      child: VerticalMiniBarChart(
+                                        consumed: data.dailyAmounts[dayIndex],
+                                        target: data.targetAmount,
+                                        color: data.color,
+                                        notInverted: showConsumed,
+                                      ),
+                                    );
+                                  }),
+                                ),
+                              ),
                             );
                           }),
                         ),
                         const SizedBox(height: 8),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: weekdays
-                              .map(
-                                (day) => Text(
-                                  day,
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              )
-                              .toList(),
+                          children: List.generate(weekdays.length, (index) {
+                            final isSelected = index == _selectedDayIndex;
+                            return Text(
+                              weekdays[index],
+                              style: TextStyle(
+                                color: isSelected
+                                    ? Colors.white
+                                    : Colors.white60,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                            );
+                          }),
                         ),
                       ],
                     ),
@@ -98,10 +131,12 @@ class NutritionTargetsOverviewChart extends StatelessWidget {
                   Column(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: nutritionData.map((data) {
+                    children: widget.nutritionData.map((data) {
+                      final selectedAmount =
+                          data.dailyAmounts[_selectedDayIndex];
                       final displayAmount = showConsumed
-                          ? data.thisAmount
-                          : (data.targetAmount - data.thisAmount);
+                          ? selectedAmount
+                          : (data.targetAmount - selectedAmount);
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4.0),

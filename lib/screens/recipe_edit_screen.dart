@@ -414,19 +414,13 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey[600]!, width: 2),
       ),
-      child: provider.thumbnail != null
-          ? FoodImageWidget(
-              thumbnail: provider.thumbnail,
-              emoji: provider.emoji,
-              size: 60,
-              onTap: () => _pickImage(provider),
-            )
-          : Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.image_outlined, size: 24, color: Colors.grey[600]),
-              ],
-            ),
+      child: FoodImageWidget(
+        thumbnail: provider.thumbnail,
+        emoji: provider.emoji,
+        name: provider.name,
+        size: 60,
+        onTap: () => _pickImage(provider),
+      ),
     );
   }
 

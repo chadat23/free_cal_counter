@@ -52,7 +52,7 @@ void main() {
   });
 
   testWidgets(
-    'RecipeItemWidget displays placeholder for food without emoji/image',
+    'RecipeItemWidget displays fallback emoji for food without emoji/image',
     (tester) async {
       final item = RecipeItem(
         id: 2,
@@ -68,9 +68,10 @@ void main() {
       );
 
       expect(find.byType(FoodImageWidget), findsOneWidget);
-      // FoodImageWidget internal placeholder is Icons.restaurant (not Icons.restaurant_menu)
-      expect(find.byIcon(Icons.restaurant), findsOneWidget);
-      expect(find.byIcon(Icons.restaurant_menu), findsNothing);
+      // FoodImageWidget now shows smart emoji (or default '🍴') instead of grey icon
+      // "Generic Food" doesn't match any food in emoji map, so falls back to '🍴'
+      expect(find.text('🍴'), findsOneWidget);
+      expect(find.byIcon(Icons.restaurant), findsNothing);
     },
   );
 }

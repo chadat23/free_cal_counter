@@ -294,32 +294,13 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey[600]!, width: 2),
       ),
-      child: _thumbnail != null
-          ? _buildThumbnailImage()
-          : _buildEmptyPlaceholder(),
-    );
-  }
-
-  Widget _buildThumbnailImage() {
-    return FoodImageWidget(
-      thumbnail: _thumbnail,
-      emoji: _emojiController.text,
-      size: 80,
-      onTap: _pickImage,
-    );
-  }
-
-  Widget _buildEmptyPlaceholder() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(Icons.image_outlined, size: 32, color: Colors.grey[600]),
-        const SizedBox(height: 4),
-        Text(
-          'No Image',
-          style: TextStyle(fontSize: 10, color: Colors.grey[600]),
-        ),
-      ],
+      child: FoodImageWidget(
+        thumbnail: _thumbnail,
+        emoji: _emojiController.text,
+        name: _nameController.text,
+        size: 80,
+        onTap: _pickImage,
+      ),
     );
   }
 

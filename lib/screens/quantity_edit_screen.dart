@@ -26,7 +26,9 @@ class QuantityEditScreen extends StatefulWidget {
 
 class _QuantityEditScreenState extends State<QuantityEditScreen> {
   final TextEditingController _quantityController = TextEditingController();
+  final FocusNode _quantityFocusNode = FocusNode();
   late String _selectedUnit;
+  bool _isQuantityFocused = false;
   int _selectedTargetIndex = 0; // 0: Unit, 1: Cal, 2: Protein, 3: Fat, 4: Carbs
   bool _isPerServing = false;
   late Food _food;
@@ -37,17 +39,95 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
     _food = widget.config.food;
     _quantityController.text = widget.config.initialQuantity.toString();
     _selectedUnit = widget.config.initialUnit;
+    _quantityFocusNode.addListener(_onQuantityFocusChange);
   }
 
   @override
   void dispose() {
+    _quantityFocusNode.removeListener(_onQuantityFocusChange);
+    _quantityFocusNode.dispose();
     _quantityController.dispose();
     super.dispose();
   }
 
+  void _onQuantityFocusChange() {
+    setState(() {
+      _isQuantityFocused = _quantityFocusNode.hasFocus;
+    });
+    if (!_quantityFocusNode.hasFocus) {
+      _evaluateAndReplaceExpression();
+    }
+  }
+
+  void _insertOperator(String op) {
+    final text = _quantityController.text;
+    final selection = _quantityController.selection;
+    final cursorPos = selection.isValid ? selection.baseOffset : text.length;
+
+    final newText = text.substring(0, cursorPos) + op + text.substring(cursorPos);
+
+    _quantityController.value = TextEditingValue(
+      text: newText,
+      selection: TextSelection.collapsed(offset: cursorPos + op.length),
+    );
+  }
+
+  void _evaluateAndReplaceExpression() {
+    final text = _quantityController.text;
+    if (text.isEmpty) return;
+
+    // Extract suffix if present (e.g., " cal", " g protein")
+    final suffixMatch = RegExp(r'(\s+[a-zA-Z].*)$').firstMatch(text);
+    final suffix = suffixMatch?.group(0) ?? '';
+    final expression = text
+        .replaceAll(RegExp(r'\s+[a-zA-Z].*$'), '')
+        .trim();
+
+    // Skip if it's already just a number (no math operators)
+    if (double.tryParse(expression) != null) return;
+
+    // Skip if expression is empty after stripping
+    if (expression.isEmpty) return;
+
+    final result = MathEvaluator.evaluate(expression);
+
+    if (result == null || result.isInfinite || result.isNaN) {
+      // Invalid expression - show error, refocus
+      _showExpressionError();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _quantityFocusNode.requestFocus();
+      });
+      return;
+    }
+
+    // Format result and replace
+    final formatted = _formatResult(result);
+    setState(() {
+      _quantityController.text =
+          suffix.isNotEmpty ? '$formatted$suffix' : formatted;
+    });
+  }
+
+  String _formatResult(double value) {
+    if (value == value.roundToDouble()) {
+      return value.toStringAsFixed(0);
+    }
+    return value.toStringAsFixed(2);
+  }
+
+  void _showExpressionError() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Invalid expression')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final showOperatorBar = _isQuantityFocused && keyboardHeight > 0;
+
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -64,33 +144,64 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildFoodHeader(),
-            const SizedBox(height: 16),
-            _buildMacroDisplay(),
-            const SizedBox(height: 32),
-            _buildResultsActions(),
-            const SizedBox(height: 24),
-            _buildInputSection(),
-            const SizedBox(height: 16),
-            if (widget.config.context == QuantityEditContext.recipe)
-              _buildRecipeToggle(),
-            const SizedBox(height: 24),
-            _buildTargetSelection(),
-            const SizedBox(height: 32),
-            Center(
-              child: TextButton.icon(
-                onPressed: () => showServingInfoSheet(context, _food),
-                icon: const Icon(Icons.info_outline, size: 18),
-                label: const Text('View Servings'),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: EdgeInsets.only(
+              left: 16.0,
+              right: 16.0,
+              top: 16.0,
+              bottom: 16.0 + (showOperatorBar ? 48 + keyboardHeight : 0),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildFoodHeader(),
+                const SizedBox(height: 8),
+                _buildMacroDisplay(),
+                const SizedBox(height: 12),
+                _buildResultsActions(),
+                const SizedBox(height: 12),
+                _buildInputSection(),
+                const SizedBox(height: 8),
+                if (widget.config.context == QuantityEditContext.recipe)
+                  _buildRecipeToggle(),
+                const SizedBox(height: 24),
+                _buildTargetSelection(),
+                const SizedBox(height: 32),
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () => showServingInfoSheet(context, _food),
+                    icon: const Icon(Icons.info_outline, size: 18),
+                    label: const Text('View Servings'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (showOperatorBar)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: keyboardHeight,
+              child: Container(
+                height: 48,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                color: const Color(0xFF1C1C1E),
+                child: Row(
+                  children: [
+                    _buildOperatorButton('+'),
+                    _buildOperatorDivider(),
+                    _buildOperatorButton('-'),
+                    _buildOperatorDivider(),
+                    _buildOperatorButton('*'),
+                    _buildOperatorDivider(),
+                    _buildOperatorButton('/'),
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -164,6 +275,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
       children: [
         TextField(
           controller: _quantityController,
+          focusNode: _quantityFocusNode,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           decoration: const InputDecoration(
             labelText: 'Amount',
@@ -325,9 +437,9 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
   }
 
   double _calculateCurrentGrams() {
-    // Strip any trailing non-numeric text (e.g., " cal", " g protein")
+    // Strip any trailing suffix text (e.g., " cal", " g protein")
     final text = _quantityController.text
-        .replaceAll(RegExp(r'[^0-9.+\-*/() ]+$'), '')
+        .replaceAll(RegExp(r'\s+[a-zA-Z].*$'), '')
         .trim();
     final quantity = MathEvaluator.evaluate(text) ?? 0.0;
     return QuantityEditUtils.calculateGrams(
@@ -439,6 +551,32 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
         ),
       ],
     );
+  }
+
+  Widget _buildOperatorButton(String op) {
+    return Expanded(
+      child: Material(
+        color: const Color(0xFF323236),
+        borderRadius: BorderRadius.circular(6),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(6),
+          onTap: () => _insertOperator(op),
+          child: SizedBox(
+            height: 40,
+            child: Center(
+              child: Text(
+                op,
+                style: const TextStyle(fontSize: 22, color: Colors.white, fontWeight: FontWeight.w500),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOperatorDivider() {
+    return const SizedBox(width: 8);
   }
 
   void _handleSave() {

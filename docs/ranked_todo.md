@@ -89,15 +89,14 @@
 ### 6. Calculator Inputs
 **Complexity:** Medium | **Risk:** Medium
 
-**Summary:** Allow basic math expressions (+, -, *, /) in all numeric input fields. Evaluate expression on blur (when focus leaves field).
+**Summary:** Allow basic math expressions (+, -, *, /) in the Quantity Edit Screen quantity input. Evaluate expression on blur (when focus leaves field).
 
 **Subtasks:**
 - [ ] Create or reuse math expression parser (note: `MathEvaluator` may already exist based on tests)
 - [ ] Create wrapper widget or mixin for numeric TextFields
 - [ ] On blur: parse input, evaluate if it's an expression, replace with result
 - [ ] Handle invalid expressions gracefully (show error or revert)
-- [ ] Apply to all numeric inputs (quantity, macros, serving sizes, etc.)
-- [ ] Decide: should goals/targets screens also have this? (user said "maybe not setup page")
+- [ ] Use an implimentation that allows for easy resuse on other numeric inputs
 - [ ] Test with various expressions: `100+50`, `3*4`, `10/3`, `1+2*3`
 
 ---

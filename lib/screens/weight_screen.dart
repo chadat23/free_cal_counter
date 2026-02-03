@@ -6,7 +6,6 @@ import 'package:free_cal_counter1/providers/goals_provider.dart';
 import 'package:free_cal_counter1/providers/navigation_provider.dart';
 import 'package:free_cal_counter1/widgets/screen_background.dart';
 import 'package:free_cal_counter1/config/app_colors.dart';
-import 'package:free_cal_counter1/utils/math_evaluator.dart';
 import 'package:free_cal_counter1/utils/ui_utils.dart';
 
 class WeightScreen extends StatefulWidget {
@@ -67,7 +66,7 @@ class _WeightScreenState extends State<WeightScreen> {
   }
 
   void _submitWeight() {
-    final weightValue = MathEvaluator.evaluate(_weightController.text);
+    final weightValue = double.tryParse(_weightController.text);
     if (weightValue != null) {
       Provider.of<WeightProvider>(
         context,

@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:archive/archive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:free_cal_counter1/models/food.dart' as model;
 import 'package:free_cal_counter1/models/food_serving.dart' as model_serving;
@@ -89,6 +91,26 @@ class DatabaseService {
               final targetFile = File('${imagesDir.path}/$relativePath');
               await targetFile.parent.create(recursive: true);
               await targetFile.writeAsBytes(file.content as List<int>);
+            } else if (file.name == 'settings.json') {
+              // Restore goal settings and macro targets
+              final settingsJson = utf8.decode(file.content as List<int>);
+              final settingsData =
+                  jsonDecode(settingsJson) as Map<String, dynamic>;
+
+              final prefs = await SharedPreferences.getInstance();
+
+              if (settingsData.containsKey('goal_settings')) {
+                await prefs.setString(
+                  'goal_settings',
+                  jsonEncode(settingsData['goal_settings']),
+                );
+              }
+              if (settingsData.containsKey('macro_targets')) {
+                await prefs.setString(
+                  'macro_targets',
+                  jsonEncode(settingsData['macro_targets']),
+                );
+              }
             }
           }
         }
@@ -103,7 +125,7 @@ class DatabaseService {
     }
   }
 
-  /// Exports the live database and all images as a zip archive
+  /// Exports the live database, images, and settings as a zip archive
   Future<File> exportBackupAsZip() async {
     final liveFile = await getLiveDbFile();
     final imgService = ImageStorageService.instance;
@@ -128,11 +150,34 @@ class DatabaseService {
       }
     }
 
+    // Add settings.json with goal settings and macro targets
+    final prefs = await SharedPreferences.getInstance();
+    final goalSettingsJson = prefs.getString('goal_settings');
+    final macroTargetsJson = prefs.getString('macro_targets');
+
+    final settingsData = <String, dynamic>{
+      'version': 1,
+      if (goalSettingsJson != null)
+        'goal_settings': jsonDecode(goalSettingsJson),
+      if (macroTargetsJson != null)
+        'macro_targets': jsonDecode(macroTargetsJson),
+    };
+
+    final settingsBytes = utf8.encode(jsonEncode(settingsData));
+    archive.addFile(
+      ArchiveFile('settings.json', settingsBytes.length, settingsBytes),
+    );
+
     final zipBytes = ZipEncoder().encode(archive);
     if (zipBytes == null) throw Exception('Failed to encode zip');
 
+    // Generate timestamped filename: free_cal_backup_YYYY-MM-DD_HH-mm-ss.zip
+    final now = DateTime.now();
+    final timestamp =
+        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}_${now.hour.toString().padLeft(2, '0')}-${now.minute.toString().padLeft(2, '0')}-${now.second.toString().padLeft(2, '0')}';
+
     final tempDir = await Directory.systemTemp.createTemp();
-    final zipFile = File('${tempDir.path}/free_cal_backup.zip');
+    final zipFile = File('${tempDir.path}/free_cal_backup_$timestamp.zip');
     await zipFile.writeAsBytes(zipBytes);
 
     return zipFile;

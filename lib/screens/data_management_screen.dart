@@ -11,6 +11,8 @@ import 'package:free_cal_counter1/services/background_backup_worker.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:intl/intl.dart';
 import 'package:free_cal_counter1/utils/ui_utils.dart';
+import 'package:provider/provider.dart';
+import 'package:free_cal_counter1/providers/goals_provider.dart';
 
 class DataManagementScreen extends StatefulWidget {
   final GoogleDriveService? googleDriveService;
@@ -296,9 +298,13 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
 
       if (confirmed == true) {
         setState(() => _isRestoring = true);
+        // Capture provider before async gap
+        final goalsProvider = context.read<GoalsProvider>();
         try {
           final backupFile = File(result.files.single.path!);
           await DatabaseService.instance.restoreDatabase(backupFile);
+          // Reload goal settings from restored SharedPreferences
+          await goalsProvider.reload();
           if (mounted) {
             await UiUtils.showAutoDismissDialog(
               context,
@@ -312,7 +318,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
             ).showSnackBar(SnackBar(content: Text('Restore failed: $e')));
           }
         } finally {
-          setState(() => _isRestoring = false);
+          if (mounted) setState(() => _isRestoring = false);
         }
       }
     }
@@ -395,12 +401,16 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
         );
 
         if (confirmed == true) {
+          // Capture provider before async gap
+          final goalsProvider = context.read<GoalsProvider>();
           final tempFile = await driveService.downloadBackup(
             selectedBackup.id!,
           );
           if (tempFile != null) {
             await DatabaseService.instance.restoreDatabase(tempFile);
             await tempFile.delete();
+            // Reload goal settings from restored SharedPreferences
+            await goalsProvider.reload();
             if (mounted) {
               await UiUtils.showAutoDismissDialog(
                 context,

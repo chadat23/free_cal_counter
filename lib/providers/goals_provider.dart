@@ -124,6 +124,11 @@ class GoalsProvider extends ChangeNotifier {
     }
   }
 
+  /// Reloads settings from SharedPreferences. Call after backup restore.
+  Future<void> reload() async {
+    await _loadFromPrefs();
+  }
+
   /// Checks if today is Monday and if we need to update the weekly targets.
   Future<void> checkWeeklyUpdate() async {
     final now = DateTime.now();

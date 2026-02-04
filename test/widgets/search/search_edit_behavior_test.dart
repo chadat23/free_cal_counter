@@ -52,6 +52,8 @@ void main() {
 
       when(mockSearchProvider.isLoading).thenReturn(false);
       when(mockSearchProvider.errorMessage).thenReturn(null);
+      when(mockSearchProvider.isBarcodeSearch).thenReturn(false);
+      when(mockSearchProvider.lastScannedBarcode).thenReturn(null);
       when(mockRecipeProvider.totalCalories).thenReturn(0.0);
       when(mockRecipeProvider.totalProtein).thenReturn(0.0);
       when(mockRecipeProvider.totalFat).thenReturn(0.0);

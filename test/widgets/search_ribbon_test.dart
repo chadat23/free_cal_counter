@@ -37,6 +37,8 @@ void main() {
     when(mockSearchProvider.errorMessage).thenReturn(null); // ADDED
     when(mockSearchProvider.isLoading).thenReturn(false); // ADDED
     when(mockSearchProvider.searchMode).thenReturn(SearchMode.text);
+    when(mockSearchProvider.isBarcodeSearch).thenReturn(false);
+    when(mockSearchProvider.lastScannedBarcode).thenReturn(null);
     when(mockLogProvider.totalCalories).thenReturn(0.0);
     when(mockLogProvider.totalProtein).thenReturn(0.0);
     when(mockLogProvider.totalFat).thenReturn(0.0);

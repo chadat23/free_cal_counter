@@ -32,10 +32,15 @@ void main() {
 
     expect(find.text('Create Food'), findsOneWidget);
     expect(find.text('Food Name'), findsOneWidget);
+
+    // Scroll down to see Nutrition section (pushed down by barcode section)
+    await tester.drag(find.byType(ListView), const Offset(0, -300));
+    await tester.pumpAndSettle();
+
     expect(find.text('Nutrition'), findsOneWidget);
 
-    // Scroll down to see bottom elements
-    await tester.drag(find.byType(ListView), const Offset(0, -500));
+    // Scroll down more to see bottom elements
+    await tester.drag(find.byType(ListView), const Offset(0, -300));
     await tester.pumpAndSettle();
 
     expect(find.text('Additional Servings'), findsOneWidget);
@@ -124,6 +129,10 @@ void main() {
       find.widgetWithText(TextFormField, 'Grams'),
       '30',
     );
+
+    // Scroll down to see Calories field (pushed down by barcode section)
+    await tester.drag(find.byType(ListView), const Offset(0, -300));
+    await tester.pumpAndSettle();
 
     // Enter 100 calories per Slice (30g)
     // So per gram: 100 / 30 = 3.333

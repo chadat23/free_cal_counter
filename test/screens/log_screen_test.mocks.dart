@@ -616,9 +616,23 @@ class MockSearchProvider extends _i1.Mock implements _i17.SearchProvider {
           as _i19.SearchMode);
 
   @override
+  bool get isBarcodeSearch =>
+      (super.noSuchMethod(
+            Invocation.getter(#isBarcodeSearch),
+            returnValue: false,
+          )
+          as bool);
+
+  @override
   bool get hasListeners =>
       (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
           as bool);
+
+  @override
+  void clearBarcodeSearchState() => super.noSuchMethod(
+    Invocation.method(#clearBarcodeSearchState, []),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void setSearchMode(_i19.SearchMode? mode) => super.noSuchMethod(
@@ -774,6 +788,50 @@ class MockDatabaseService extends _i1.Mock implements _i3.DatabaseService {
   _i14.Future<_i8.Food?> getFoodByBarcode(String? barcode) =>
       (super.noSuchMethod(
             Invocation.method(#getFoodByBarcode, [barcode]),
+            returnValue: _i14.Future<_i8.Food?>.value(),
+          )
+          as _i14.Future<_i8.Food?>);
+
+  @override
+  _i14.Future<List<String>> getBarcodesByFoodId(int? foodId) =>
+      (super.noSuchMethod(
+            Invocation.method(#getBarcodesByFoodId, [foodId]),
+            returnValue: _i14.Future<List<String>>.value(<String>[]),
+          )
+          as _i14.Future<List<String>>);
+
+  @override
+  _i14.Future<bool> addBarcodeToFood(int? foodId, String? barcode) =>
+      (super.noSuchMethod(
+            Invocation.method(#addBarcodeToFood, [foodId, barcode]),
+            returnValue: _i14.Future<bool>.value(false),
+          )
+          as _i14.Future<bool>);
+
+  @override
+  _i14.Future<void> removeBarcodeFromFood(int? foodId, String? barcode) =>
+      (super.noSuchMethod(
+            Invocation.method(#removeBarcodeFromFood, [foodId, barcode]),
+            returnValue: _i14.Future<void>.value(),
+            returnValueForMissingStub: _i14.Future<void>.value(),
+          )
+          as _i14.Future<void>);
+
+  @override
+  _i14.Future<List<_i8.Food>> getFoodsByBarcode(String? barcode) =>
+      (super.noSuchMethod(
+            Invocation.method(#getFoodsByBarcode, [barcode]),
+            returnValue: _i14.Future<List<_i8.Food>>.value(<_i8.Food>[]),
+          )
+          as _i14.Future<List<_i8.Food>>);
+
+  @override
+  _i14.Future<_i8.Food?> isBarcodeOnOtherFood(
+    String? barcode,
+    int? excludeFoodId,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#isBarcodeOnOtherFood, [barcode, excludeFoodId]),
             returnValue: _i14.Future<_i8.Food?>.value(),
           )
           as _i14.Future<_i8.Food?>);
@@ -1322,6 +1380,15 @@ class MockGoalsProvider extends _i1.Mock implements _i25.GoalsProvider {
   _i14.Future<void> markWelcomeSeen() =>
       (super.noSuchMethod(
             Invocation.method(#markWelcomeSeen, []),
+            returnValue: _i14.Future<void>.value(),
+            returnValueForMissingStub: _i14.Future<void>.value(),
+          )
+          as _i14.Future<void>);
+
+  @override
+  _i14.Future<void> reload() =>
+      (super.noSuchMethod(
+            Invocation.method(#reload, []),
             returnValue: _i14.Future<void>.value(),
             returnValueForMissingStub: _i14.Future<void>.value(),
           )

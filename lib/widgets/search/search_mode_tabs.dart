@@ -2,9 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:free_cal_counter1/models/search_mode.dart';
 import 'package:free_cal_counter1/providers/search_provider.dart';
+import 'package:free_cal_counter1/screens/barcode_scanner_screen.dart';
 
 class SearchModeTabs extends StatelessWidget {
   const SearchModeTabs({super.key});
+
+  Future<void> _handleScanTap(BuildContext context) async {
+    final provider = Provider.of<SearchProvider>(context, listen: false);
+
+    // Launch the barcode scanner
+    final barcode = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
+    );
+
+    // If a barcode was scanned, perform the search
+    if (barcode != null && barcode.isNotEmpty) {
+      provider.barcodeSearch(barcode);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,12 +37,7 @@ class SearchModeTabs extends StatelessWidget {
           child: Row(
             children: [
               _buildTab(context, provider, SearchMode.text, Icons.search),
-              _buildTab(
-                context,
-                provider,
-                SearchMode.scan,
-                Icons.qr_code_scanner,
-              ),
+              _buildScanTab(context, provider),
               _buildTab(
                 context,
                 provider,
@@ -38,6 +49,27 @@ class SearchModeTabs extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildScanTab(BuildContext context, SearchProvider provider) {
+    // Scan tab is never "selected" since it immediately launches scanner
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _handleScanTap(context),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          child: const Icon(
+            Icons.qr_code_scanner,
+            color: Colors.grey,
+            size: 24,
+          ),
+        ),
+      ),
     );
   }
 

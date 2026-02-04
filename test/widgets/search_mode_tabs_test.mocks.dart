@@ -120,9 +120,23 @@ class MockSearchProvider extends _i1.Mock implements _i5.SearchProvider {
           as _i8.SearchMode);
 
   @override
+  bool get isBarcodeSearch =>
+      (super.noSuchMethod(
+            Invocation.getter(#isBarcodeSearch),
+            returnValue: false,
+          )
+          as bool);
+
+  @override
   bool get hasListeners =>
       (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
           as bool);
+
+  @override
+  void clearBarcodeSearchState() => super.noSuchMethod(
+    Invocation.method(#clearBarcodeSearchState, []),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void setSearchMode(_i8.SearchMode? mode) => super.noSuchMethod(

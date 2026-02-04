@@ -806,9 +806,23 @@ class MockSearchProvider extends _i1.Mock implements _i18.SearchProvider {
           as _i19.SearchMode);
 
   @override
+  bool get isBarcodeSearch =>
+      (super.noSuchMethod(
+            Invocation.getter(#isBarcodeSearch),
+            returnValue: false,
+          )
+          as bool);
+
+  @override
   bool get hasListeners =>
       (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
           as bool);
+
+  @override
+  void clearBarcodeSearchState() => super.noSuchMethod(
+    Invocation.method(#clearBarcodeSearchState, []),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void setSearchMode(_i19.SearchMode? mode) => super.noSuchMethod(
@@ -1057,6 +1071,50 @@ class MockDatabaseService extends _i1.Mock implements _i3.DatabaseService {
   _i12.Future<_i8.Food?> getFoodByBarcode(String? barcode) =>
       (super.noSuchMethod(
             Invocation.method(#getFoodByBarcode, [barcode]),
+            returnValue: _i12.Future<_i8.Food?>.value(),
+          )
+          as _i12.Future<_i8.Food?>);
+
+  @override
+  _i12.Future<List<String>> getBarcodesByFoodId(int? foodId) =>
+      (super.noSuchMethod(
+            Invocation.method(#getBarcodesByFoodId, [foodId]),
+            returnValue: _i12.Future<List<String>>.value(<String>[]),
+          )
+          as _i12.Future<List<String>>);
+
+  @override
+  _i12.Future<bool> addBarcodeToFood(int? foodId, String? barcode) =>
+      (super.noSuchMethod(
+            Invocation.method(#addBarcodeToFood, [foodId, barcode]),
+            returnValue: _i12.Future<bool>.value(false),
+          )
+          as _i12.Future<bool>);
+
+  @override
+  _i12.Future<void> removeBarcodeFromFood(int? foodId, String? barcode) =>
+      (super.noSuchMethod(
+            Invocation.method(#removeBarcodeFromFood, [foodId, barcode]),
+            returnValue: _i12.Future<void>.value(),
+            returnValueForMissingStub: _i12.Future<void>.value(),
+          )
+          as _i12.Future<void>);
+
+  @override
+  _i12.Future<List<_i8.Food>> getFoodsByBarcode(String? barcode) =>
+      (super.noSuchMethod(
+            Invocation.method(#getFoodsByBarcode, [barcode]),
+            returnValue: _i12.Future<List<_i8.Food>>.value(<_i8.Food>[]),
+          )
+          as _i12.Future<List<_i8.Food>>);
+
+  @override
+  _i12.Future<_i8.Food?> isBarcodeOnOtherFood(
+    String? barcode,
+    int? excludeFoodId,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#isBarcodeOnOtherFood, [barcode, excludeFoodId]),
             returnValue: _i12.Future<_i8.Food?>.value(),
           )
           as _i12.Future<_i8.Food?>);

@@ -65,6 +65,9 @@ dependencies:
   qr_flutter: ^4.1.0
   mobile_scanner: ^6.0.4
 
+  # Permissions
+  permission_handler: ^11.3.0
+
   # Cloud Backup
   google_sign_in: ^6.2.1
   googleapis: ^13.1.0

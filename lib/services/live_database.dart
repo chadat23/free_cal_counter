@@ -19,13 +19,14 @@ part 'live_database.g.dart';
     LoggedPortions,
     Weights,
     Containers,
+    FoodBarcodes,
   ],
 )
 class LiveDatabase extends _$LiveDatabase {
   LiveDatabase({required QueryExecutor connection}) : super(connection);
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration {
@@ -74,6 +75,9 @@ class LiveDatabase extends _$LiveDatabase {
               AND ri.id < recipe_items.id
             )
           ''');
+        }
+        if (from < 12) {
+          await m.createTable(foodBarcodes);
         }
       },
       beforeOpen: (details) async {

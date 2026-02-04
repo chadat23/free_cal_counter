@@ -10,7 +10,6 @@ import 'package:free_cal_counter1/widgets/search_ribbon.dart';
 import 'package:free_cal_counter1/models/search_mode.dart';
 import 'package:free_cal_counter1/widgets/search/search_mode_tabs.dart';
 import 'package:free_cal_counter1/widgets/search/text_search_view.dart';
-import 'package:free_cal_counter1/widgets/search/scan_search_view.dart';
 import 'package:free_cal_counter1/widgets/search/recipe_search_view.dart';
 import 'package:free_cal_counter1/widgets/search/food_search_view.dart';
 import 'package:free_cal_counter1/models/search_config.dart';
@@ -148,9 +147,10 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget _buildBody(SearchMode searchMode) {
     switch (searchMode) {
       case SearchMode.text:
-        return TextSearchView(config: widget.config);
       case SearchMode.scan:
-        return const ScanSearchView();
+        // Scan mode now immediately launches scanner and returns to text mode
+        // with results, so both cases show the text search view
+        return TextSearchView(config: widget.config);
       case SearchMode.recipe:
         return RecipeSearchView(config: widget.config);
       case SearchMode.food:

@@ -62,6 +62,8 @@ void main() {
     when(mockSearchProvider.isLoading).thenReturn(false);
     when(mockSearchProvider.errorMessage).thenReturn(null);
     when(mockSearchProvider.searchMode).thenReturn(SearchMode.text);
+    when(mockSearchProvider.isBarcodeSearch).thenReturn(false);
+    when(mockSearchProvider.lastScannedBarcode).thenReturn(null);
 
     // Default mocks for macros to avoid null errors in LogQueueTopRibbon
     when(mockLogProvider.totalCalories).thenReturn(0.0);

@@ -504,9 +504,23 @@ class MockSearchProvider extends _i1.Mock implements _i15.SearchProvider {
           as _i17.SearchMode);
 
   @override
+  bool get isBarcodeSearch =>
+      (super.noSuchMethod(
+            Invocation.getter(#isBarcodeSearch),
+            returnValue: false,
+          )
+          as bool);
+
+  @override
   bool get hasListeners =>
       (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
           as bool);
+
+  @override
+  void clearBarcodeSearchState() => super.noSuchMethod(
+    Invocation.method(#clearBarcodeSearchState, []),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void setSearchMode(_i17.SearchMode? mode) => super.noSuchMethod(
@@ -1047,6 +1061,15 @@ class MockGoalsProvider extends _i1.Mock implements _i22.GoalsProvider {
   _i12.Future<void> markWelcomeSeen() =>
       (super.noSuchMethod(
             Invocation.method(#markWelcomeSeen, []),
+            returnValue: _i12.Future<void>.value(),
+            returnValueForMissingStub: _i12.Future<void>.value(),
+          )
+          as _i12.Future<void>);
+
+  @override
+  _i12.Future<void> reload() =>
+      (super.noSuchMethod(
+            Invocation.method(#reload, []),
             returnValue: _i12.Future<void>.value(),
             returnValueForMissingStub: _i12.Future<void>.value(),
           )

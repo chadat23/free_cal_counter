@@ -417,6 +417,78 @@ class DatabaseService {
     return food == null ? null : _mapFoodData(food, []);
   }
 
+  // ========== BARCODE OPERATIONS (NEW TABLE) ==========
+
+  /// Get all barcodes associated with a food
+  Future<List<String>> getBarcodesByFoodId(int foodId) async {
+    final rows = await (_liveDb.select(_liveDb.foodBarcodes)
+          ..where((b) => b.foodId.equals(foodId)))
+        .get();
+    return rows.map((r) => r.barcode).toList();
+  }
+
+  /// Add a barcode to a food. Returns false if already exists on this food.
+  Future<bool> addBarcodeToFood(int foodId, String barcode) async {
+    // Check if barcode already exists on this food
+    final existing = await (_liveDb.select(_liveDb.foodBarcodes)
+          ..where((b) => b.foodId.equals(foodId) & b.barcode.equals(barcode)))
+        .getSingleOrNull();
+
+    if (existing != null) {
+      return false; // Already exists on this food
+    }
+
+    await _liveDb.into(_liveDb.foodBarcodes).insert(
+          FoodBarcodesCompanion.insert(
+            foodId: foodId,
+            barcode: barcode,
+          ),
+        );
+    BackupConfigService.instance.markDirty();
+    return true;
+  }
+
+  /// Remove a barcode from a food
+  Future<void> removeBarcodeFromFood(int foodId, String barcode) async {
+    await (_liveDb.delete(_liveDb.foodBarcodes)
+          ..where((b) => b.foodId.equals(foodId) & b.barcode.equals(barcode)))
+        .go();
+    BackupConfigService.instance.markDirty();
+  }
+
+  /// Get all foods that have a specific barcode (searches new table)
+  Future<List<model.Food>> getFoodsByBarcode(String barcode) async {
+    final barcodeRows = await (_liveDb.select(_liveDb.foodBarcodes)
+          ..where((b) => b.barcode.equals(barcode)))
+        .get();
+
+    if (barcodeRows.isEmpty) {
+      return [];
+    }
+
+    final foodIds = barcodeRows.map((r) => r.foodId).toList().cast<int>();
+    final foodsMap = await getFoodsByIds(foodIds, 'live');
+
+    // Filter out hidden foods
+    return foodsMap.values.where((f) => !f.hidden).toList();
+  }
+
+  /// Check if a barcode is assigned to another food (not the excluded one)
+  /// Returns the other food if found, null otherwise
+  Future<model.Food?> isBarcodeOnOtherFood(
+      String barcode, int excludeFoodId) async {
+    final barcodeRow = await (_liveDb.select(_liveDb.foodBarcodes)
+          ..where(
+              (b) => b.barcode.equals(barcode) & b.foodId.isNotValue(excludeFoodId)))
+        .getSingleOrNull();
+
+    if (barcodeRow == null) {
+      return null;
+    }
+
+    return await getFoodById(barcodeRow.foodId, 'live');
+  }
+
   Future<model.Food?> getFoodBySourceFdcId(int fdcId) async {
     final food = await (_liveDb.select(
       _liveDb.foods,
@@ -1675,6 +1747,25 @@ class DatabaseService {
           ),
         );
 
+        // Add barcode to existing food if not already present
+        if (sourceFood.sourceBarcode != null &&
+            sourceFood.sourceBarcode!.isNotEmpty) {
+          final existingBarcode = await (_liveDb.select(_liveDb.foodBarcodes)
+                ..where((b) =>
+                    b.foodId.equals(existing.id) &
+                    b.barcode.equals(sourceFood.sourceBarcode!)))
+              .getSingleOrNull();
+
+          if (existingBarcode == null) {
+            await _liveDb.into(_liveDb.foodBarcodes).insert(
+                  FoodBarcodesCompanion.insert(
+                    foodId: existing.id,
+                    barcode: sourceFood.sourceBarcode!,
+                  ),
+                );
+          }
+        }
+
         final servings = await getServingsForFood(existing.id, 'live');
         return _mapFoodData(existing, servings);
       }
@@ -1716,6 +1807,26 @@ class DatabaseService {
                 quantity: serving.quantity,
               ),
             );
+      }
+
+      // Add barcode to food_barcodes table if present
+      if (sourceFood.sourceBarcode != null &&
+          sourceFood.sourceBarcode!.isNotEmpty) {
+        // Check if this barcode is already on this food (shouldn't happen, but be safe)
+        final existingBarcode = await (_liveDb.select(_liveDb.foodBarcodes)
+              ..where((b) =>
+                  b.foodId.equals(foodId) &
+                  b.barcode.equals(sourceFood.sourceBarcode!)))
+            .getSingleOrNull();
+
+        if (existingBarcode == null) {
+          await _liveDb.into(_liveDb.foodBarcodes).insert(
+                FoodBarcodesCompanion.insert(
+                  foodId: foodId,
+                  barcode: sourceFood.sourceBarcode!,
+                ),
+              );
+        }
       }
 
       final servings = await getServingsForFood(foodId, 'live');

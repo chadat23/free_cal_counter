@@ -165,6 +165,50 @@ class MockDatabaseService extends _i1.Mock implements _i5.DatabaseService {
           as _i8.Future<_i4.Food?>);
 
   @override
+  _i8.Future<List<String>> getBarcodesByFoodId(int? foodId) =>
+      (super.noSuchMethod(
+            Invocation.method(#getBarcodesByFoodId, [foodId]),
+            returnValue: _i8.Future<List<String>>.value(<String>[]),
+          )
+          as _i8.Future<List<String>>);
+
+  @override
+  _i8.Future<bool> addBarcodeToFood(int? foodId, String? barcode) =>
+      (super.noSuchMethod(
+            Invocation.method(#addBarcodeToFood, [foodId, barcode]),
+            returnValue: _i8.Future<bool>.value(false),
+          )
+          as _i8.Future<bool>);
+
+  @override
+  _i8.Future<void> removeBarcodeFromFood(int? foodId, String? barcode) =>
+      (super.noSuchMethod(
+            Invocation.method(#removeBarcodeFromFood, [foodId, barcode]),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
+          )
+          as _i8.Future<void>);
+
+  @override
+  _i8.Future<List<_i4.Food>> getFoodsByBarcode(String? barcode) =>
+      (super.noSuchMethod(
+            Invocation.method(#getFoodsByBarcode, [barcode]),
+            returnValue: _i8.Future<List<_i4.Food>>.value(<_i4.Food>[]),
+          )
+          as _i8.Future<List<_i4.Food>>);
+
+  @override
+  _i8.Future<_i4.Food?> isBarcodeOnOtherFood(
+    String? barcode,
+    int? excludeFoodId,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#isBarcodeOnOtherFood, [barcode, excludeFoodId]),
+            returnValue: _i8.Future<_i4.Food?>.value(),
+          )
+          as _i8.Future<_i4.Food?>);
+
+  @override
   _i8.Future<_i4.Food?> getFoodBySourceFdcId(int? fdcId) =>
       (super.noSuchMethod(
             Invocation.method(#getFoodBySourceFdcId, [fdcId]),

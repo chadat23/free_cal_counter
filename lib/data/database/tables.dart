@@ -107,3 +107,16 @@ class Containers extends Table {
   TextColumn get thumbnail => text().nullable()();
   BoolColumn get hidden => boolean().withDefault(const Constant(false))();
 }
+
+@DataClassName('FoodBarcode')
+class FoodBarcodes extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get foodId =>
+      integer().references(Foods, #id, onDelete: KeyAction.cascade)();
+  TextColumn get barcode => text()();
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+        {foodId, barcode},
+      ];
+}

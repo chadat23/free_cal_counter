@@ -3916,6 +3916,261 @@ class ContainersCompanion extends UpdateCompanion<ContainerEntity> {
   }
 }
 
+class $FoodBarcodesTable extends FoodBarcodes
+    with TableInfo<$FoodBarcodesTable, FoodBarcode> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FoodBarcodesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _foodIdMeta = const VerificationMeta('foodId');
+  @override
+  late final GeneratedColumn<int> foodId = GeneratedColumn<int>(
+    'food_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES foods (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _barcodeMeta = const VerificationMeta(
+    'barcode',
+  );
+  @override
+  late final GeneratedColumn<String> barcode = GeneratedColumn<String>(
+    'barcode',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, foodId, barcode];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'food_barcodes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<FoodBarcode> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('food_id')) {
+      context.handle(
+        _foodIdMeta,
+        foodId.isAcceptableOrUnknown(data['food_id']!, _foodIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_foodIdMeta);
+    }
+    if (data.containsKey('barcode')) {
+      context.handle(
+        _barcodeMeta,
+        barcode.isAcceptableOrUnknown(data['barcode']!, _barcodeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_barcodeMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {foodId, barcode},
+  ];
+  @override
+  FoodBarcode map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FoodBarcode(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      foodId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}food_id'],
+      )!,
+      barcode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}barcode'],
+      )!,
+    );
+  }
+
+  @override
+  $FoodBarcodesTable createAlias(String alias) {
+    return $FoodBarcodesTable(attachedDatabase, alias);
+  }
+}
+
+class FoodBarcode extends DataClass implements Insertable<FoodBarcode> {
+  final int id;
+  final int foodId;
+  final String barcode;
+  const FoodBarcode({
+    required this.id,
+    required this.foodId,
+    required this.barcode,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['food_id'] = Variable<int>(foodId);
+    map['barcode'] = Variable<String>(barcode);
+    return map;
+  }
+
+  FoodBarcodesCompanion toCompanion(bool nullToAbsent) {
+    return FoodBarcodesCompanion(
+      id: Value(id),
+      foodId: Value(foodId),
+      barcode: Value(barcode),
+    );
+  }
+
+  factory FoodBarcode.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FoodBarcode(
+      id: serializer.fromJson<int>(json['id']),
+      foodId: serializer.fromJson<int>(json['foodId']),
+      barcode: serializer.fromJson<String>(json['barcode']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'foodId': serializer.toJson<int>(foodId),
+      'barcode': serializer.toJson<String>(barcode),
+    };
+  }
+
+  FoodBarcode copyWith({int? id, int? foodId, String? barcode}) => FoodBarcode(
+    id: id ?? this.id,
+    foodId: foodId ?? this.foodId,
+    barcode: barcode ?? this.barcode,
+  );
+  FoodBarcode copyWithCompanion(FoodBarcodesCompanion data) {
+    return FoodBarcode(
+      id: data.id.present ? data.id.value : this.id,
+      foodId: data.foodId.present ? data.foodId.value : this.foodId,
+      barcode: data.barcode.present ? data.barcode.value : this.barcode,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FoodBarcode(')
+          ..write('id: $id, ')
+          ..write('foodId: $foodId, ')
+          ..write('barcode: $barcode')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, foodId, barcode);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FoodBarcode &&
+          other.id == this.id &&
+          other.foodId == this.foodId &&
+          other.barcode == this.barcode);
+}
+
+class FoodBarcodesCompanion extends UpdateCompanion<FoodBarcode> {
+  final Value<int> id;
+  final Value<int> foodId;
+  final Value<String> barcode;
+  const FoodBarcodesCompanion({
+    this.id = const Value.absent(),
+    this.foodId = const Value.absent(),
+    this.barcode = const Value.absent(),
+  });
+  FoodBarcodesCompanion.insert({
+    this.id = const Value.absent(),
+    required int foodId,
+    required String barcode,
+  }) : foodId = Value(foodId),
+       barcode = Value(barcode);
+  static Insertable<FoodBarcode> custom({
+    Expression<int>? id,
+    Expression<int>? foodId,
+    Expression<String>? barcode,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (foodId != null) 'food_id': foodId,
+      if (barcode != null) 'barcode': barcode,
+    });
+  }
+
+  FoodBarcodesCompanion copyWith({
+    Value<int>? id,
+    Value<int>? foodId,
+    Value<String>? barcode,
+  }) {
+    return FoodBarcodesCompanion(
+      id: id ?? this.id,
+      foodId: foodId ?? this.foodId,
+      barcode: barcode ?? this.barcode,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (foodId.present) {
+      map['food_id'] = Variable<int>(foodId.value);
+    }
+    if (barcode.present) {
+      map['barcode'] = Variable<String>(barcode.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FoodBarcodesCompanion(')
+          ..write('id: $id, ')
+          ..write('foodId: $foodId, ')
+          ..write('barcode: $barcode')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$LiveDatabase extends GeneratedDatabase {
   _$LiveDatabase(QueryExecutor e) : super(e);
   $LiveDatabaseManager get managers => $LiveDatabaseManager(this);
@@ -3929,6 +4184,7 @@ abstract class _$LiveDatabase extends GeneratedDatabase {
   late final $LoggedPortionsTable loggedPortions = $LoggedPortionsTable(this);
   late final $WeightsTable weights = $WeightsTable(this);
   late final $ContainersTable containers = $ContainersTable(this);
+  late final $FoodBarcodesTable foodBarcodes = $FoodBarcodesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3943,7 +4199,18 @@ abstract class _$LiveDatabase extends GeneratedDatabase {
     loggedPortions,
     weights,
     containers,
+    foodBarcodes,
   ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'foods',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('food_barcodes', kind: UpdateKind.delete)],
+    ),
+  ]);
 }
 
 typedef $$FoodsTableCreateCompanionBuilder =
@@ -4057,6 +4324,24 @@ final class $$FoodsTableReferences
     ).filter((f) => f.foodId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_loggedPortionsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$FoodBarcodesTable, List<FoodBarcode>>
+  _foodBarcodesRefsTable(_$LiveDatabase db) => MultiTypedResultKey.fromTable(
+    db.foodBarcodes,
+    aliasName: $_aliasNameGenerator(db.foods.id, db.foodBarcodes.foodId),
+  );
+
+  $$FoodBarcodesTableProcessedTableManager get foodBarcodesRefs {
+    final manager = $$FoodBarcodesTableTableManager(
+      $_db,
+      $_db.foodBarcodes,
+    ).filter((f) => f.foodId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_foodBarcodesRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -4230,6 +4515,31 @@ class $$FoodsTableFilterComposer extends Composer<_$LiveDatabase, $FoodsTable> {
           }) => $$LoggedPortionsTableFilterComposer(
             $db: $db,
             $table: $db.loggedPortions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> foodBarcodesRefs(
+    Expression<bool> Function($$FoodBarcodesTableFilterComposer f) f,
+  ) {
+    final $$FoodBarcodesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.foodBarcodes,
+      getReferencedColumn: (t) => t.foodId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FoodBarcodesTableFilterComposer(
+            $db: $db,
+            $table: $db.foodBarcodes,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -4505,6 +4815,31 @@ class $$FoodsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> foodBarcodesRefs<T extends Object>(
+    Expression<T> Function($$FoodBarcodesTableAnnotationComposer a) f,
+  ) {
+    final $$FoodBarcodesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.foodBarcodes,
+      getReferencedColumn: (t) => t.foodId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FoodBarcodesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.foodBarcodes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$FoodsTableTableManager
@@ -4525,6 +4860,7 @@ class $$FoodsTableTableManager
             bool foodPortionsRefs,
             bool recipeItemsRefs,
             bool loggedPortionsRefs,
+            bool foodBarcodesRefs,
           })
         > {
   $$FoodsTableTableManager(_$LiveDatabase db, $FoodsTable table)
@@ -4618,6 +4954,7 @@ class $$FoodsTableTableManager
                 foodPortionsRefs = false,
                 recipeItemsRefs = false,
                 loggedPortionsRefs = false,
+                foodBarcodesRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -4625,6 +4962,7 @@ class $$FoodsTableTableManager
                     if (foodPortionsRefs) db.foodPortions,
                     if (recipeItemsRefs) db.recipeItems,
                     if (loggedPortionsRefs) db.loggedPortions,
+                    if (foodBarcodesRefs) db.foodBarcodes,
                   ],
                   addJoins:
                       <
@@ -4723,6 +5061,27 @@ class $$FoodsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (foodBarcodesRefs)
+                        await $_getPrefetchedData<
+                          Food,
+                          $FoodsTable,
+                          FoodBarcode
+                        >(
+                          currentTable: table,
+                          referencedTable: $$FoodsTableReferences
+                              ._foodBarcodesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$FoodsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).foodBarcodesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.foodId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -4748,6 +5107,7 @@ typedef $$FoodsTableProcessedTableManager =
         bool foodPortionsRefs,
         bool recipeItemsRefs,
         bool loggedPortionsRefs,
+        bool foodBarcodesRefs,
       })
     >;
 typedef $$FoodPortionsTableCreateCompanionBuilder =
@@ -7872,6 +8232,280 @@ typedef $$ContainersTableProcessedTableManager =
       ContainerEntity,
       PrefetchHooks Function()
     >;
+typedef $$FoodBarcodesTableCreateCompanionBuilder =
+    FoodBarcodesCompanion Function({
+      Value<int> id,
+      required int foodId,
+      required String barcode,
+    });
+typedef $$FoodBarcodesTableUpdateCompanionBuilder =
+    FoodBarcodesCompanion Function({
+      Value<int> id,
+      Value<int> foodId,
+      Value<String> barcode,
+    });
+
+final class $$FoodBarcodesTableReferences
+    extends BaseReferences<_$LiveDatabase, $FoodBarcodesTable, FoodBarcode> {
+  $$FoodBarcodesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $FoodsTable _foodIdTable(_$LiveDatabase db) => db.foods.createAlias(
+    $_aliasNameGenerator(db.foodBarcodes.foodId, db.foods.id),
+  );
+
+  $$FoodsTableProcessedTableManager get foodId {
+    final $_column = $_itemColumn<int>('food_id')!;
+
+    final manager = $$FoodsTableTableManager(
+      $_db,
+      $_db.foods,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_foodIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$FoodBarcodesTableFilterComposer
+    extends Composer<_$LiveDatabase, $FoodBarcodesTable> {
+  $$FoodBarcodesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get barcode => $composableBuilder(
+    column: $table.barcode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$FoodsTableFilterComposer get foodId {
+    final $$FoodsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.foodId,
+      referencedTable: $db.foods,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FoodsTableFilterComposer(
+            $db: $db,
+            $table: $db.foods,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$FoodBarcodesTableOrderingComposer
+    extends Composer<_$LiveDatabase, $FoodBarcodesTable> {
+  $$FoodBarcodesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get barcode => $composableBuilder(
+    column: $table.barcode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$FoodsTableOrderingComposer get foodId {
+    final $$FoodsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.foodId,
+      referencedTable: $db.foods,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FoodsTableOrderingComposer(
+            $db: $db,
+            $table: $db.foods,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$FoodBarcodesTableAnnotationComposer
+    extends Composer<_$LiveDatabase, $FoodBarcodesTable> {
+  $$FoodBarcodesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get barcode =>
+      $composableBuilder(column: $table.barcode, builder: (column) => column);
+
+  $$FoodsTableAnnotationComposer get foodId {
+    final $$FoodsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.foodId,
+      referencedTable: $db.foods,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FoodsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.foods,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$FoodBarcodesTableTableManager
+    extends
+        RootTableManager<
+          _$LiveDatabase,
+          $FoodBarcodesTable,
+          FoodBarcode,
+          $$FoodBarcodesTableFilterComposer,
+          $$FoodBarcodesTableOrderingComposer,
+          $$FoodBarcodesTableAnnotationComposer,
+          $$FoodBarcodesTableCreateCompanionBuilder,
+          $$FoodBarcodesTableUpdateCompanionBuilder,
+          (FoodBarcode, $$FoodBarcodesTableReferences),
+          FoodBarcode,
+          PrefetchHooks Function({bool foodId})
+        > {
+  $$FoodBarcodesTableTableManager(_$LiveDatabase db, $FoodBarcodesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FoodBarcodesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FoodBarcodesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$FoodBarcodesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> foodId = const Value.absent(),
+                Value<String> barcode = const Value.absent(),
+              }) => FoodBarcodesCompanion(
+                id: id,
+                foodId: foodId,
+                barcode: barcode,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int foodId,
+                required String barcode,
+              }) => FoodBarcodesCompanion.insert(
+                id: id,
+                foodId: foodId,
+                barcode: barcode,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$FoodBarcodesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({foodId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (foodId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.foodId,
+                                referencedTable: $$FoodBarcodesTableReferences
+                                    ._foodIdTable(db),
+                                referencedColumn: $$FoodBarcodesTableReferences
+                                    ._foodIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$FoodBarcodesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$LiveDatabase,
+      $FoodBarcodesTable,
+      FoodBarcode,
+      $$FoodBarcodesTableFilterComposer,
+      $$FoodBarcodesTableOrderingComposer,
+      $$FoodBarcodesTableAnnotationComposer,
+      $$FoodBarcodesTableCreateCompanionBuilder,
+      $$FoodBarcodesTableUpdateCompanionBuilder,
+      (FoodBarcode, $$FoodBarcodesTableReferences),
+      FoodBarcode,
+      PrefetchHooks Function({bool foodId})
+    >;
 
 class $LiveDatabaseManager {
   final _$LiveDatabase _db;
@@ -7894,4 +8528,6 @@ class $LiveDatabaseManager {
       $$WeightsTableTableManager(_db, _db.weights);
   $$ContainersTableTableManager get containers =>
       $$ContainersTableTableManager(_db, _db.containers);
+  $$FoodBarcodesTableTableManager get foodBarcodes =>
+      $$FoodBarcodesTableTableManager(_db, _db.foodBarcodes);
 }

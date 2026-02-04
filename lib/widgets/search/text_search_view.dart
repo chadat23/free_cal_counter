@@ -11,14 +11,33 @@ import 'package:free_cal_counter1/models/food.dart' as model_food;
 import 'package:free_cal_counter1/services/database_service.dart';
 import 'package:free_cal_counter1/screens/food_edit_screen.dart';
 
-class TextSearchView extends StatelessWidget {
+class TextSearchView extends StatefulWidget {
   final SearchConfig config;
   const TextSearchView({super.key, required this.config});
+
+  @override
+  State<TextSearchView> createState() => _TextSearchViewState();
+}
+
+class _TextSearchViewState extends State<TextSearchView> {
+  String? _handledBarcode;
+
+  SearchConfig get config => widget.config;
 
   @override
   Widget build(BuildContext context) {
     return Consumer<SearchProvider>(
       builder: (context, searchProvider, child) {
+        // Handle barcode search results
+        if (searchProvider.isBarcodeSearch &&
+            !searchProvider.isLoading &&
+            searchProvider.lastScannedBarcode != _handledBarcode) {
+          // Schedule the handling for after build completes
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _handleBarcodeSearchResult(context, searchProvider);
+          });
+        }
+
         if (searchProvider.errorMessage != null) {
           return Center(
             child: Text(
@@ -34,6 +53,10 @@ class TextSearchView extends StatelessWidget {
         }
 
         if (searchProvider.searchResults.isEmpty) {
+          // Show different message for barcode search with no results
+          if (searchProvider.isBarcodeSearch) {
+            return const Center(child: Text('No food found for this barcode'));
+          }
           return const Center(child: Text('Search for a food to begin'));
         }
 
@@ -374,5 +397,112 @@ class TextSearchView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _handleBarcodeSearchResult(
+    BuildContext context,
+    SearchProvider searchProvider,
+  ) {
+    if (!mounted) return;
+
+    final barcode = searchProvider.lastScannedBarcode;
+    if (barcode == null) return;
+
+    // Mark this barcode as handled
+    setState(() {
+      _handledBarcode = barcode;
+    });
+
+    final results = searchProvider.searchResults;
+
+    if (results.isEmpty) {
+      // Show "not found" dialog
+      _showBarcodeNotFoundDialog(context, barcode, searchProvider);
+    } else if (results.length == 1) {
+      // Auto-navigate to quantity edit for single result
+      final food = results.first;
+      _openQuantityEdit(context, food, config, isUpdate: false);
+      // Clear barcode search state after navigation
+      searchProvider.clearBarcodeSearchState();
+    }
+    // If multiple results, just show them in the list (already handled)
+  }
+
+  Future<void> _showBarcodeNotFoundDialog(
+    BuildContext context,
+    String barcode,
+    SearchProvider searchProvider,
+  ) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Barcode Not Found'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('No food was found for this barcode:'),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.grey[800],
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: SelectableText(
+                barcode,
+                style: const TextStyle(fontFamily: 'monospace'),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text('Would you like to create a new food with this barcode?'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Create New Food'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true && mounted) {
+      // Navigate to food edit screen with barcode pre-populated
+      final editResult = await Navigator.push<FoodEditResult>(
+        context,
+        MaterialPageRoute(
+          builder: (context) => FoodEditScreen(
+            originalFood: null,
+            contextType: FoodEditContext.search,
+            isCopy: false,
+            initialBarcode: barcode,
+          ),
+        ),
+      );
+
+      if (editResult != null && mounted) {
+        // If food was created and user wants to use it immediately
+        if (editResult.useImmediately) {
+          final newFood = await DatabaseService.instance
+              .getFoodById(editResult.foodId, 'live');
+          if (mounted && newFood != null) {
+            _openQuantityEdit(
+              context,
+              newFood,
+              config,
+              isUpdate: false,
+            );
+          }
+        }
+      }
+    }
+
+    // Clear barcode search state
+    searchProvider.clearBarcodeSearchState();
   }
 }

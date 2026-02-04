@@ -8,6 +8,7 @@ import 'package:free_cal_counter1/widgets/screen_background.dart';
 import 'package:free_cal_counter1/widgets/food_image_widget.dart';
 import 'package:free_cal_counter1/widgets/serving_info_sheet.dart';
 import 'package:free_cal_counter1/config/app_colors.dart';
+import 'package:free_cal_counter1/screens/barcode_scanner_screen.dart';
 import 'package:image_picker/image_picker.dart' as picker;
 
 enum FoodEditContext {
@@ -26,12 +27,14 @@ class FoodEditScreen extends StatefulWidget {
   final Food? originalFood; // Null for new food
   final FoodEditContext contextType;
   final bool isCopy; // If true, originalFood is used as template but ID is 0
+  final String? initialBarcode; // Pre-populated barcode for new food from scan
 
   const FoodEditScreen({
     super.key,
     this.originalFood,
     this.contextType = FoodEditContext.search,
     this.isCopy = false,
+    this.initialBarcode,
   });
 
   @override
@@ -68,11 +71,17 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
   // Available units from database
   List<String> _availableUnits = [];
 
+  // Barcode management
+  List<String> _barcodes = [];
+  List<String> _originalBarcodes = [];
+  final _barcodeInputController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     _initData();
     _loadAvailableUnits();
+    _loadBarcodes();
   }
 
   Future<void> _loadAvailableUnits() async {
@@ -81,6 +90,31 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
       setState(() {
         _availableUnits = units;
       });
+    }
+  }
+
+  Future<void> _loadBarcodes() async {
+    // Load barcodes for existing food
+    if (widget.originalFood != null && !widget.isCopy) {
+      final barcodes = await DatabaseService.instance
+          .getBarcodesByFoodId(widget.originalFood!.id);
+      if (mounted) {
+        setState(() {
+          _barcodes = barcodes;
+          _originalBarcodes = List.from(barcodes);
+        });
+      }
+    }
+
+    // Handle initial barcode from scan (for new food)
+    if (widget.initialBarcode != null) {
+      if (mounted) {
+        setState(() {
+          if (!_barcodes.contains(widget.initialBarcode)) {
+            _barcodes.add(widget.initialBarcode!);
+          }
+        });
+      }
     }
   }
 
@@ -254,6 +288,10 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
 
     try {
       final id = await DatabaseService.instance.saveFood(newFood);
+
+      // Sync barcodes
+      await _syncBarcodes(id);
+
       if (mounted) {
         Navigator.pop(
           context,
@@ -269,6 +307,24 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
           ),
         );
       }
+    }
+  }
+
+  Future<void> _syncBarcodes(int foodId) async {
+    // Find barcodes to add (in _barcodes but not in _originalBarcodes)
+    final toAdd = _barcodes.where((b) => !_originalBarcodes.contains(b));
+
+    // Find barcodes to remove (in _originalBarcodes but not in _barcodes)
+    final toRemove = _originalBarcodes.where((b) => !_barcodes.contains(b));
+
+    // Add new barcodes
+    for (final barcode in toAdd) {
+      await DatabaseService.instance.addBarcodeToFood(foodId, barcode);
+    }
+
+    // Remove deleted barcodes
+    for (final barcode in toRemove) {
+      await DatabaseService.instance.removeBarcodeFromFood(foodId, barcode);
     }
   }
 
@@ -384,8 +440,180 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
             ),
           ],
         ),
+        const SizedBox(height: 16),
+        _buildBarcodeSection(),
       ],
     );
+  }
+
+  Widget _buildBarcodeSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Barcodes',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey,
+          ),
+        ),
+        const SizedBox(height: 8),
+        // List of existing barcodes
+        if (_barcodes.isNotEmpty) ...[
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.grey[850],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              children: _barcodes.map((barcode) {
+                return ListTile(
+                  dense: true,
+                  title: Text(
+                    barcode,
+                    style: const TextStyle(fontFamily: 'monospace'),
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.close, size: 20),
+                    onPressed: () => _removeBarcode(barcode),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+        // Add barcode row
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _barcodeInputController,
+                decoration: const InputDecoration(
+                  hintText: 'Type barcode...',
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 12,
+                  ),
+                ),
+                keyboardType: TextInputType.number,
+                onSubmitted: (_) => _addBarcodeFromInput(),
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: _addBarcodeFromInput,
+              tooltip: 'Add barcode',
+            ),
+            IconButton(
+              icon: const Icon(Icons.qr_code_scanner),
+              onPressed: _scanBarcode,
+              tooltip: 'Scan barcode',
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Future<void> _addBarcodeFromInput() async {
+    final barcode = _barcodeInputController.text.trim();
+    if (barcode.isEmpty) return;
+
+    await _addBarcode(barcode);
+    _barcodeInputController.clear();
+  }
+
+  Future<void> _addBarcode(String barcode) async {
+    // Check if already on this food
+    if (_barcodes.contains(barcode)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Barcode already assigned to this food')),
+        );
+      }
+      return;
+    }
+
+    // Check if on another food (only for existing foods)
+    if (widget.originalFood != null && !widget.isCopy) {
+      final otherFood = await DatabaseService.instance
+          .isBarcodeOnOtherFood(barcode, widget.originalFood!.id);
+      if (otherFood != null && mounted) {
+        final useAnyway = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Barcode Already Used'),
+            content: Text(
+              'This barcode is already assigned to "${otherFood.name}". '
+              'Do you want to add it anyway?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Use Anyway'),
+              ),
+            ],
+          ),
+        );
+        if (useAnyway != true) return;
+      }
+    } else {
+      // For new foods, check against all foods
+      final foods = await DatabaseService.instance.getFoodsByBarcode(barcode);
+      if (foods.isNotEmpty && mounted) {
+        final otherFood = foods.first;
+        final useAnyway = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Barcode Already Used'),
+            content: Text(
+              'This barcode is already assigned to "${otherFood.name}". '
+              'Do you want to add it anyway?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Use Anyway'),
+              ),
+            ],
+          ),
+        );
+        if (useAnyway != true) return;
+      }
+    }
+
+    setState(() {
+      _barcodes.add(barcode);
+    });
+  }
+
+  void _removeBarcode(String barcode) {
+    setState(() {
+      _barcodes.remove(barcode);
+    });
+  }
+
+  Future<void> _scanBarcode() async {
+    final barcode = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
+    );
+
+    if (barcode != null && barcode.isNotEmpty && mounted) {
+      await _addBarcode(barcode);
+    }
   }
 
   Widget _buildImagePreview() {

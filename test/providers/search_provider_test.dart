@@ -240,8 +240,8 @@ void main() {
         source: 'off',
       );
       when(
-        mockDatabaseService.getFoodByBarcode(any),
-      ).thenAnswer((_) async => null);
+        mockDatabaseService.getFoodsByBarcode(any),
+      ).thenAnswer((_) async => []); // New method returns empty list
       when(
         mockOffApiService.fetchFoodByBarcode(any),
       ).thenAnswer((_) async => mockFood);
@@ -251,8 +251,57 @@ void main() {
 
       // Assert
       expect(searchProvider.searchResults, [mockFood]);
-      verify(mockDatabaseService.getFoodByBarcode('12345')).called(1);
+      expect(searchProvider.isBarcodeSearch, isTrue);
+      expect(searchProvider.lastScannedBarcode, '12345');
+      verify(mockDatabaseService.getFoodsByBarcode('12345')).called(1);
       verify(mockOffApiService.fetchFoodByBarcode('12345')).called(1);
+    });
+
+    test('should return local food if found in database', () async {
+      // Arrange
+      final localFood = model.Food(
+        id: 1,
+        name: 'Local Food',
+        emoji: '',
+        calories: 100,
+        protein: 10,
+        fat: 5,
+        carbs: 15,
+        fiber: 0.0,
+        source: 'live',
+      );
+      when(
+        mockDatabaseService.getFoodsByBarcode(any),
+      ).thenAnswer((_) async => [localFood]);
+
+      // Act
+      await searchProvider.barcodeSearch('12345');
+
+      // Assert
+      expect(searchProvider.searchResults, [localFood]);
+      expect(searchProvider.isBarcodeSearch, isTrue);
+      verify(mockDatabaseService.getFoodsByBarcode('12345')).called(1);
+      verifyNever(mockOffApiService.fetchFoodByBarcode(any));
+    });
+
+    test('should clear barcode search state', () async {
+      // Arrange
+      when(
+        mockDatabaseService.getFoodsByBarcode(any),
+      ).thenAnswer((_) async => []);
+      when(
+        mockOffApiService.fetchFoodByBarcode(any),
+      ).thenAnswer((_) async => null);
+
+      // Act
+      await searchProvider.barcodeSearch('12345');
+      expect(searchProvider.isBarcodeSearch, isTrue);
+
+      searchProvider.clearBarcodeSearchState();
+
+      // Assert
+      expect(searchProvider.isBarcodeSearch, isFalse);
+      expect(searchProvider.lastScannedBarcode, isNull);
     });
   });
   group('searchMode', () {

@@ -61,18 +61,19 @@
 ### 10. Barcode Search
 **Complexity:** High | **Risk:** High
 
-**Summary:** Implement barcode scanning to search for foods. Also add ability to add/edit barcodes on existing foods.
+**Summary:** Implement barcode scanning to search for foods. Also add ability to add/edit barcodes on existing foods and for new foods via picture.
 
 **Subtasks:**
-- [ ] Add barcode scanning library (e.g., `mobile_scanner` - already in pubspec?)
+- [ ] Add a barcode scanning library (e.g., `mobile_scanner` - already in pubspec?)
 - [ ] Implement camera permission handling
 - [ ] Create barcode scan UI on Search screen (replace placeholder tab)
 - [ ] Integrate with food database API that supports barcode lookup (OpenFoodFacts?)
+    - should default to local first, then non-local
+    - deally looks up food, but can just return a name
 - [ ] Handle: barcode found, barcode not found, scan error
 - [ ] Add barcode field to Food model (if not present)
 - [ ] Add barcode input/edit to Food Edit screen
 - [ ] Allow scanning to add barcode to existing food
-- [ ] Consider: save barcode-to-food mapping locally for faster future lookups
 
 ---
 

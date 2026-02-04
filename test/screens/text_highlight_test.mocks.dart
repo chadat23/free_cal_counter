@@ -798,6 +798,15 @@ class MockGoalsProvider extends _i1.Mock implements _i16.GoalsProvider {
           as _i9.Future<void>);
 
   @override
+  _i9.Future<void> reload() =>
+      (super.noSuchMethod(
+            Invocation.method(#reload, []),
+            returnValue: _i9.Future<void>.value(),
+            returnValueForMissingStub: _i9.Future<void>.value(),
+          )
+          as _i9.Future<void>);
+
+  @override
   _i9.Future<void> checkWeeklyUpdate() =>
       (super.noSuchMethod(
             Invocation.method(#checkWeeklyUpdate, []),

@@ -35,6 +35,18 @@ class SearchProvider extends ChangeNotifier {
   int? _selectedCategoryId;
   int? get selectedCategoryId => _selectedCategoryId;
 
+  // Barcode search state
+  bool _isBarcodeSearch = false;
+  bool get isBarcodeSearch => _isBarcodeSearch;
+
+  String? _lastScannedBarcode;
+  String? get lastScannedBarcode => _lastScannedBarcode;
+
+  void clearBarcodeSearchState() {
+    _isBarcodeSearch = false;
+    _lastScannedBarcode = null;
+  }
+
   void setSearchMode(SearchMode mode) {
     _searchMode = mode;
     _searchResults = []; // Clear results when switching modes
@@ -106,14 +118,27 @@ class SearchProvider extends ChangeNotifier {
 
   Future<void> barcodeSearch(String barcode) async {
     _isLoading = true;
+    _isBarcodeSearch = true;
+    _lastScannedBarcode = barcode;
     _clearErrorMessage();
     notifyListeners();
 
     try {
-      model.Food? food = await databaseService.getFoodByBarcode(barcode);
-      food ??= await offApiService.fetchFoodByBarcode(barcode);
+      // First check local database using the new barcodes table
+      List<model.Food> foods = await databaseService.getFoodsByBarcode(barcode);
 
-      _searchResults = food == null ? [] : [food];
+      // If not found locally, try OpenFoodFacts
+      if (foods.isEmpty) {
+        final offFood = await offApiService.fetchFoodByBarcode(barcode);
+        if (offFood != null) {
+          foods = [offFood];
+        }
+      }
+
+      _searchResults = foods;
+
+      // Switch to text mode to display results
+      _searchMode = SearchMode.text;
     } catch (e) {
       _errorMessage = 'Failed to search by barcode: ${e.toString()}';
       _searchResults = [];

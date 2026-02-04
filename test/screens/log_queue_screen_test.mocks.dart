@@ -149,6 +149,14 @@ class MockDatabaseService extends _i1.Mock implements _i5.DatabaseService {
           as _i8.Future<String?>);
 
   @override
+  _i8.Future<_i5.LastLoggedInfo?> getLastLoggedInfo(int? originalFoodId) =>
+      (super.noSuchMethod(
+            Invocation.method(#getLastLoggedInfo, [originalFoodId]),
+            returnValue: _i8.Future<_i5.LastLoggedInfo?>.value(),
+          )
+          as _i8.Future<_i5.LastLoggedInfo?>);
+
+  @override
   _i8.Future<_i4.Food?> getFoodByBarcode(String? barcode) =>
       (super.noSuchMethod(
             Invocation.method(#getFoodByBarcode, [barcode]),
@@ -593,6 +601,24 @@ class MockDatabaseService extends _i1.Mock implements _i5.DatabaseService {
             returnValue: _i8.Future<List<_i4.Food>>.value(<_i4.Food>[]),
           )
           as _i8.Future<List<_i4.Food>>);
+
+  @override
+  _i8.Future<List<String>> getDistinctUnits() =>
+      (super.noSuchMethod(
+            Invocation.method(#getDistinctUnits, []),
+            returnValue: _i8.Future<List<String>>.value(<String>[]),
+          )
+          as _i8.Future<List<String>>);
+
+  @override
+  _i8.Future<_i4.Food> getSystemQuickAddFood() =>
+      (super.noSuchMethod(
+            Invocation.method(#getSystemQuickAddFood, []),
+            returnValue: _i8.Future<_i4.Food>.value(
+              _FakeFood_2(this, Invocation.method(#getSystemQuickAddFood, [])),
+            ),
+          )
+          as _i8.Future<_i4.Food>);
 }
 
 /// A class which mocks [OffApiService].

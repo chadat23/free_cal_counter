@@ -7,6 +7,7 @@ class RecipeItem {
   final Recipe? recipe;
   final double grams;
   final String unit;
+  final int position;
 
   RecipeItem({
     required this.id,
@@ -14,6 +15,7 @@ class RecipeItem {
     this.recipe,
     required this.grams,
     required this.unit,
+    this.position = 0,
   }) : assert(
          food != null || recipe != null,
          'Either food or recipe must be provided',
@@ -25,6 +27,7 @@ class RecipeItem {
     Recipe? recipe,
     double? grams,
     String? unit,
+    int? position,
   }) {
     return RecipeItem(
       id: id ?? this.id,
@@ -32,6 +35,7 @@ class RecipeItem {
       recipe: recipe ?? this.recipe,
       grams: grams ?? this.grams,
       unit: unit ?? this.unit,
+      position: position ?? this.position,
     );
   }
 
@@ -57,6 +61,7 @@ class RecipeItem {
           : null,
       grams: (json['grams'] as num).toDouble(),
       unit: json['unit'] as String,
+      position: (json['position'] as int?) ?? 0,
     );
   }
 
@@ -67,6 +72,7 @@ class RecipeItem {
       'recipe': recipe?.toJson(),
       'grams': grams,
       'unit': unit,
+      'position': position,
     };
   }
 }

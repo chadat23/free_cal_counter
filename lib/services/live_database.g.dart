@@ -2015,6 +2015,18 @@ class $RecipeItemsTable extends RecipeItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _positionMeta = const VerificationMeta(
+    'position',
+  );
+  @override
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+    'position',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2023,6 +2035,7 @@ class $RecipeItemsTable extends RecipeItems
     ingredientRecipeId,
     grams,
     unit,
+    position,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2081,6 +2094,12 @@ class $RecipeItemsTable extends RecipeItems
     } else if (isInserting) {
       context.missing(_unitMeta);
     }
+    if (data.containsKey('position')) {
+      context.handle(
+        _positionMeta,
+        position.isAcceptableOrUnknown(data['position']!, _positionMeta),
+      );
+    }
     return context;
   }
 
@@ -2114,6 +2133,10 @@ class $RecipeItemsTable extends RecipeItems
         DriftSqlType.string,
         data['${effectivePrefix}unit'],
       )!,
+      position: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}position'],
+      )!,
     );
   }
 
@@ -2130,6 +2153,7 @@ class RecipeItem extends DataClass implements Insertable<RecipeItem> {
   final int? ingredientRecipeId;
   final double grams;
   final String unit;
+  final int position;
   const RecipeItem({
     required this.id,
     required this.recipeId,
@@ -2137,6 +2161,7 @@ class RecipeItem extends DataClass implements Insertable<RecipeItem> {
     this.ingredientRecipeId,
     required this.grams,
     required this.unit,
+    required this.position,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2151,6 +2176,7 @@ class RecipeItem extends DataClass implements Insertable<RecipeItem> {
     }
     map['grams'] = Variable<double>(grams);
     map['unit'] = Variable<String>(unit);
+    map['position'] = Variable<int>(position);
     return map;
   }
 
@@ -2166,6 +2192,7 @@ class RecipeItem extends DataClass implements Insertable<RecipeItem> {
           : Value(ingredientRecipeId),
       grams: Value(grams),
       unit: Value(unit),
+      position: Value(position),
     );
   }
 
@@ -2181,6 +2208,7 @@ class RecipeItem extends DataClass implements Insertable<RecipeItem> {
       ingredientRecipeId: serializer.fromJson<int?>(json['ingredientRecipeId']),
       grams: serializer.fromJson<double>(json['grams']),
       unit: serializer.fromJson<String>(json['unit']),
+      position: serializer.fromJson<int>(json['position']),
     );
   }
   @override
@@ -2193,6 +2221,7 @@ class RecipeItem extends DataClass implements Insertable<RecipeItem> {
       'ingredientRecipeId': serializer.toJson<int?>(ingredientRecipeId),
       'grams': serializer.toJson<double>(grams),
       'unit': serializer.toJson<String>(unit),
+      'position': serializer.toJson<int>(position),
     };
   }
 
@@ -2203,6 +2232,7 @@ class RecipeItem extends DataClass implements Insertable<RecipeItem> {
     Value<int?> ingredientRecipeId = const Value.absent(),
     double? grams,
     String? unit,
+    int? position,
   }) => RecipeItem(
     id: id ?? this.id,
     recipeId: recipeId ?? this.recipeId,
@@ -2214,6 +2244,7 @@ class RecipeItem extends DataClass implements Insertable<RecipeItem> {
         : this.ingredientRecipeId,
     grams: grams ?? this.grams,
     unit: unit ?? this.unit,
+    position: position ?? this.position,
   );
   RecipeItem copyWithCompanion(RecipeItemsCompanion data) {
     return RecipeItem(
@@ -2227,6 +2258,7 @@ class RecipeItem extends DataClass implements Insertable<RecipeItem> {
           : this.ingredientRecipeId,
       grams: data.grams.present ? data.grams.value : this.grams,
       unit: data.unit.present ? data.unit.value : this.unit,
+      position: data.position.present ? data.position.value : this.position,
     );
   }
 
@@ -2238,7 +2270,8 @@ class RecipeItem extends DataClass implements Insertable<RecipeItem> {
           ..write('ingredientFoodId: $ingredientFoodId, ')
           ..write('ingredientRecipeId: $ingredientRecipeId, ')
           ..write('grams: $grams, ')
-          ..write('unit: $unit')
+          ..write('unit: $unit, ')
+          ..write('position: $position')
           ..write(')'))
         .toString();
   }
@@ -2251,6 +2284,7 @@ class RecipeItem extends DataClass implements Insertable<RecipeItem> {
     ingredientRecipeId,
     grams,
     unit,
+    position,
   );
   @override
   bool operator ==(Object other) =>
@@ -2261,7 +2295,8 @@ class RecipeItem extends DataClass implements Insertable<RecipeItem> {
           other.ingredientFoodId == this.ingredientFoodId &&
           other.ingredientRecipeId == this.ingredientRecipeId &&
           other.grams == this.grams &&
-          other.unit == this.unit);
+          other.unit == this.unit &&
+          other.position == this.position);
 }
 
 class RecipeItemsCompanion extends UpdateCompanion<RecipeItem> {
@@ -2271,6 +2306,7 @@ class RecipeItemsCompanion extends UpdateCompanion<RecipeItem> {
   final Value<int?> ingredientRecipeId;
   final Value<double> grams;
   final Value<String> unit;
+  final Value<int> position;
   const RecipeItemsCompanion({
     this.id = const Value.absent(),
     this.recipeId = const Value.absent(),
@@ -2278,6 +2314,7 @@ class RecipeItemsCompanion extends UpdateCompanion<RecipeItem> {
     this.ingredientRecipeId = const Value.absent(),
     this.grams = const Value.absent(),
     this.unit = const Value.absent(),
+    this.position = const Value.absent(),
   });
   RecipeItemsCompanion.insert({
     this.id = const Value.absent(),
@@ -2286,6 +2323,7 @@ class RecipeItemsCompanion extends UpdateCompanion<RecipeItem> {
     this.ingredientRecipeId = const Value.absent(),
     required double grams,
     required String unit,
+    this.position = const Value.absent(),
   }) : recipeId = Value(recipeId),
        grams = Value(grams),
        unit = Value(unit);
@@ -2296,6 +2334,7 @@ class RecipeItemsCompanion extends UpdateCompanion<RecipeItem> {
     Expression<int>? ingredientRecipeId,
     Expression<double>? grams,
     Expression<String>? unit,
+    Expression<int>? position,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2305,6 +2344,7 @@ class RecipeItemsCompanion extends UpdateCompanion<RecipeItem> {
         'ingredient_recipe_id': ingredientRecipeId,
       if (grams != null) 'grams': grams,
       if (unit != null) 'unit': unit,
+      if (position != null) 'position': position,
     });
   }
 
@@ -2315,6 +2355,7 @@ class RecipeItemsCompanion extends UpdateCompanion<RecipeItem> {
     Value<int?>? ingredientRecipeId,
     Value<double>? grams,
     Value<String>? unit,
+    Value<int>? position,
   }) {
     return RecipeItemsCompanion(
       id: id ?? this.id,
@@ -2323,6 +2364,7 @@ class RecipeItemsCompanion extends UpdateCompanion<RecipeItem> {
       ingredientRecipeId: ingredientRecipeId ?? this.ingredientRecipeId,
       grams: grams ?? this.grams,
       unit: unit ?? this.unit,
+      position: position ?? this.position,
     );
   }
 
@@ -2347,6 +2389,9 @@ class RecipeItemsCompanion extends UpdateCompanion<RecipeItem> {
     if (unit.present) {
       map['unit'] = Variable<String>(unit.value);
     }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
+    }
     return map;
   }
 
@@ -2358,7 +2403,8 @@ class RecipeItemsCompanion extends UpdateCompanion<RecipeItem> {
           ..write('ingredientFoodId: $ingredientFoodId, ')
           ..write('ingredientRecipeId: $ingredientRecipeId, ')
           ..write('grams: $grams, ')
-          ..write('unit: $unit')
+          ..write('unit: $unit, ')
+          ..write('position: $position')
           ..write(')'))
         .toString();
   }
@@ -5874,6 +5920,7 @@ typedef $$RecipeItemsTableCreateCompanionBuilder =
       Value<int?> ingredientRecipeId,
       required double grams,
       required String unit,
+      Value<int> position,
     });
 typedef $$RecipeItemsTableUpdateCompanionBuilder =
     RecipeItemsCompanion Function({
@@ -5883,6 +5930,7 @@ typedef $$RecipeItemsTableUpdateCompanionBuilder =
       Value<int?> ingredientRecipeId,
       Value<double> grams,
       Value<String> unit,
+      Value<int> position,
     });
 
 final class $$RecipeItemsTableReferences
@@ -5968,6 +6016,11 @@ class $$RecipeItemsTableFilterComposer
 
   ColumnFilters<String> get unit => $composableBuilder(
     column: $table.unit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get position => $composableBuilder(
+    column: $table.position,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6065,6 +6118,11 @@ class $$RecipeItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$RecipesTableOrderingComposer get recipeId {
     final $$RecipesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -6152,6 +6210,9 @@ class $$RecipeItemsTableAnnotationComposer
 
   GeneratedColumn<String> get unit =>
       $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
 
   $$RecipesTableAnnotationComposer get recipeId {
     final $$RecipesTableAnnotationComposer composer = $composerBuilder(
@@ -6261,6 +6322,7 @@ class $$RecipeItemsTableTableManager
                 Value<int?> ingredientRecipeId = const Value.absent(),
                 Value<double> grams = const Value.absent(),
                 Value<String> unit = const Value.absent(),
+                Value<int> position = const Value.absent(),
               }) => RecipeItemsCompanion(
                 id: id,
                 recipeId: recipeId,
@@ -6268,6 +6330,7 @@ class $$RecipeItemsTableTableManager
                 ingredientRecipeId: ingredientRecipeId,
                 grams: grams,
                 unit: unit,
+                position: position,
               ),
           createCompanionCallback:
               ({
@@ -6277,6 +6340,7 @@ class $$RecipeItemsTableTableManager
                 Value<int?> ingredientRecipeId = const Value.absent(),
                 required double grams,
                 required String unit,
+                Value<int> position = const Value.absent(),
               }) => RecipeItemsCompanion.insert(
                 id: id,
                 recipeId: recipeId,
@@ -6284,6 +6348,7 @@ class $$RecipeItemsTableTableManager
                 ingredientRecipeId: ingredientRecipeId,
                 grams: grams,
                 unit: unit,
+                position: position,
               ),
           withReferenceMapper: (p0) => p0
               .map(

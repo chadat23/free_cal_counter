@@ -677,14 +677,18 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
       );
     }
 
-    return ListView.builder(
+    return ReorderableListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      buildDefaultDragHandles: false,
       itemCount: provider.items.length,
+      onReorder: (oldIndex, newIndex) => provider.reorderItem(oldIndex, newIndex),
       itemBuilder: (context, index) {
         final item = provider.items[index];
         return SlidableRecipeItemWidget(
+          key: ValueKey('${item.id}_$index'),
           item: item,
+          index: index,
           onDelete: () => provider.removeItem(index),
           onEdit: () async {
             // Determine food object (either food itself or converted recipe)

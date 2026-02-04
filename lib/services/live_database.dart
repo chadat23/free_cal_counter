@@ -25,7 +25,7 @@ class LiveDatabase extends _$LiveDatabase {
   LiveDatabase({required QueryExecutor connection}) : super(connection);
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration {
@@ -61,6 +61,19 @@ class LiveDatabase extends _$LiveDatabase {
         if (from < 10) {
           await m.addColumn(recipes, recipes.emoji);
           await m.addColumn(recipes, recipes.thumbnail);
+        }
+        if (from < 11) {
+          await m.addColumn(recipeItems, recipeItems.position);
+          // Backfill: assign position based on existing ID order per recipe
+          await customStatement('''
+            UPDATE recipe_items
+            SET position = (
+              SELECT COUNT(*)
+              FROM recipe_items AS ri
+              WHERE ri.recipe_id = recipe_items.recipe_id
+              AND ri.id < recipe_items.id
+            )
+          ''');
         }
       },
       beforeOpen: (details) async {

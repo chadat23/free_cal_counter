@@ -642,6 +642,12 @@ class MockRecipeProvider extends _i1.Mock implements _i14.RecipeProvider {
   );
 
   @override
+  void reorderItem(int? oldIndex, int? newIndex) => super.noSuchMethod(
+    Invocation.method(#reorderItem, [oldIndex, newIndex]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
   void toggleCategory(_i17.Category? category) => super.noSuchMethod(
     Invocation.method(#toggleCategory, [category]),
     returnValueForMissingStub: null,
@@ -1038,6 +1044,14 @@ class MockDatabaseService extends _i1.Mock implements _i3.DatabaseService {
             returnValue: _i12.Future<String?>.value(),
           )
           as _i12.Future<String?>);
+
+  @override
+  _i12.Future<_i3.LastLoggedInfo?> getLastLoggedInfo(int? originalFoodId) =>
+      (super.noSuchMethod(
+            Invocation.method(#getLastLoggedInfo, [originalFoodId]),
+            returnValue: _i12.Future<_i3.LastLoggedInfo?>.value(),
+          )
+          as _i12.Future<_i3.LastLoggedInfo?>);
 
   @override
   _i12.Future<_i8.Food?> getFoodByBarcode(String? barcode) =>
@@ -1484,4 +1498,22 @@ class MockDatabaseService extends _i1.Mock implements _i3.DatabaseService {
             returnValue: _i12.Future<List<_i8.Food>>.value(<_i8.Food>[]),
           )
           as _i12.Future<List<_i8.Food>>);
+
+  @override
+  _i12.Future<List<String>> getDistinctUnits() =>
+      (super.noSuchMethod(
+            Invocation.method(#getDistinctUnits, []),
+            returnValue: _i12.Future<List<String>>.value(<String>[]),
+          )
+          as _i12.Future<List<String>>);
+
+  @override
+  _i12.Future<_i8.Food> getSystemQuickAddFood() =>
+      (super.noSuchMethod(
+            Invocation.method(#getSystemQuickAddFood, []),
+            returnValue: _i12.Future<_i8.Food>.value(
+              _FakeFood_6(this, Invocation.method(#getSystemQuickAddFood, [])),
+            ),
+          )
+          as _i12.Future<_i8.Food>);
 }

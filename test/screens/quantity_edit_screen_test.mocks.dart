@@ -613,6 +613,12 @@ class MockRecipeProvider extends _i1.Mock implements _i12.RecipeProvider {
   );
 
   @override
+  void reorderItem(int? oldIndex, int? newIndex) => super.noSuchMethod(
+    Invocation.method(#reorderItem, [oldIndex, newIndex]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
   void toggleCategory(_i15.Category? category) => super.noSuchMethod(
     Invocation.method(#toggleCategory, [category]),
     returnValueForMissingStub: null,

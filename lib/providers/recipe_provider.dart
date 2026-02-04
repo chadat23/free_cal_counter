@@ -110,6 +110,16 @@ class RecipeProvider extends ChangeNotifier {
     }
   }
 
+  void reorderItem(int oldIndex, int newIndex) {
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    final item = _items.removeAt(oldIndex);
+    _items.insert(newIndex, item);
+    _ingredientsChanged = true;
+    notifyListeners();
+  }
+
   // Category Operations
   void toggleCategory(Category category) {
     if (_selectedCategories.any((c) => c.id == category.id)) {

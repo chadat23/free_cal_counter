@@ -74,6 +74,7 @@ class RecipeItems extends Table {
       integer().nullable().references(Recipes, #id)();
   RealColumn get grams => real()();
   TextColumn get unit => text()();
+  IntColumn get position => integer().withDefault(const Constant(0))();
 }
 
 @DataClassName('LoggedPortion')

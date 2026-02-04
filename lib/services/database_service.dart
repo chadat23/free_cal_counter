@@ -1253,9 +1253,10 @@ class DatabaseService {
       _liveDb.recipes,
     )..where((t) => t.id.equals(id))).getSingle();
 
-    final itemsData = await (_liveDb.select(
-      _liveDb.recipeItems,
-    )..where((t) => t.recipeId.equals(id))).get();
+    final itemsData = await (_liveDb.select(_liveDb.recipeItems)
+          ..where((t) => t.recipeId.equals(id))
+          ..orderBy([(t) => OrderingTerm.asc(t.position)]))
+        .get();
 
     final items = <model.RecipeItem>[];
     for (final item in itemsData) {
@@ -1275,6 +1276,7 @@ class DatabaseService {
           recipe: subRecipe,
           grams: item.grams,
           unit: item.unit,
+          position: item.position,
         ),
       );
     }
@@ -1396,7 +1398,8 @@ class DatabaseService {
             );
       }
 
-      for (final item in recipe.items) {
+      for (int i = 0; i < recipe.items.length; i++) {
+        final item = recipe.items[i];
         int? foodId;
         int? subRecipeId;
 
@@ -1416,6 +1419,7 @@ class DatabaseService {
                 ingredientRecipeId: Value(subRecipeId),
                 grams: item.grams,
                 unit: item.unit,
+                position: Value(i),
               ),
             );
       }

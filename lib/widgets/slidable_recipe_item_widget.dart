@@ -5,12 +5,14 @@ import 'package:free_cal_counter1/widgets/recipe_item_widget.dart';
 
 class SlidableRecipeItemWidget extends StatelessWidget {
   final RecipeItem item;
+  final int index;
   final VoidCallback onDelete;
   final VoidCallback? onEdit;
 
   const SlidableRecipeItemWidget({
     super.key,
     required this.item,
+    required this.index,
     required this.onDelete,
     this.onEdit,
   });
@@ -47,7 +49,18 @@ class SlidableRecipeItemWidget extends StatelessWidget {
       ),
       child: Container(
         color: Theme.of(context).canvasColor,
-        child: RecipeItemWidget(item: item, onEdit: onEdit),
+        child: Row(
+          children: [
+            ReorderableDragStartListener(
+              index: index,
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                child: Icon(Icons.drag_handle, color: Colors.grey),
+              ),
+            ),
+            Expanded(child: RecipeItemWidget(item: item, onEdit: onEdit)),
+          ],
+        ),
       ),
     );
   }

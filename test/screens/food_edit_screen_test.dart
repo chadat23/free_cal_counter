@@ -5,7 +5,6 @@ import 'package:free_cal_counter1/screens/food_edit_screen.dart';
 import 'package:free_cal_counter1/services/database_service.dart';
 import 'package:free_cal_counter1/services/live_database.dart';
 import 'package:free_cal_counter1/services/reference_database.dart';
-import 'package:free_cal_counter1/models/food_serving.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -38,7 +37,7 @@ void main() {
     await tester.drag(find.byType(ListView), const Offset(0, -500));
     await tester.pumpAndSettle();
 
-    expect(find.text('Servings / Units'), findsOneWidget);
+    expect(find.text('Additional Servings'), findsOneWidget);
   });
 
   testWidgets('validates required fields', (tester) async {
@@ -53,6 +52,12 @@ void main() {
 
   testWidgets('saves new food correctly', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: FoodEditScreen()));
+
+    // New foods default to per-serving mode, switch to 100g mode for this test
+    await tester.tap(find.text('Serving'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('100g').last);
+    await tester.pumpAndSettle();
 
     // Enter details
     await tester.enterText(
@@ -97,54 +102,27 @@ void main() {
   testWidgets('calculates per serving correctly', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: FoodEditScreen()));
 
-    // Switch to "Per Serving" - It uses a DropdownButton<bool>
-    // Initially shows '100g' (value false)
-    await tester.tap(find.text('100g'));
+    // New foods now default to per-serving mode
+    // The primary serving section should be visible with Qty, Unit, and Grams fields
+
+    // Fill in the primary serving: 1 Slice = 30g
+    // First, select a unit - tap on the unit dropdown
+    await tester.tap(find.text('serving'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Custom...').last);
     await tester.pumpAndSettle();
 
-    // Tap 'Serving' in the dropdown menu
-    await tester.tap(find.text('Serving').last);
-    await tester.pumpAndSettle();
-
-    // Scroll down to find add button
-    await tester.drag(find.byType(ListView), const Offset(0, -500));
-    await tester.pumpAndSettle();
-
-    // The default serving is 100g (1 serving = 100g).
-    // Let's add a custom serving to test non-100g math.
-    // Now it should be visible/built
-    await tester.tap(find.byIcon(Icons.add_circle));
-    await tester.pumpAndSettle();
-
-    // Add "Slice" = 30g
+    // Enter custom unit name
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Unit Name (e.g. cup, slice)'),
+      find.widgetWithText(TextFormField, 'Unit name'),
       'Slice',
     );
+
+    // Enter grams for the serving
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Weight for Quantity (g)'),
+      find.widgetWithText(TextFormField, 'Grams'),
       '30',
     );
-    await tester.tap(find.text('Save'));
-    await tester.pumpAndSettle();
-
-    // Scroll back up to see macro dropdown
-    await tester.drag(find.byType(ListView), const Offset(0, 500));
-    await tester.pumpAndSettle();
-
-    // Select "Slice" in macro dropdown
-    final dropdownFinder = find.byType(DropdownButtonFormField<FoodServing>);
-    await tester.ensureVisible(
-      dropdownFinder,
-    ); // ensureVisible also scrolls if possible
-
-    // Tap to open
-    await tester.tap(dropdownFinder);
-    await tester.pumpAndSettle();
-
-    // Select Slice
-    await tester.tap(find.textContaining('Slice').last);
-    await tester.pumpAndSettle();
 
     // Enter 100 calories per Slice (30g)
     // So per gram: 100 / 30 = 3.333
@@ -155,11 +133,10 @@ void main() {
       );
     }
 
-    await tester.ensureVisible(findMacroField('Calories'));
     await tester.enterText(findMacroField('Calories'), '100');
 
-    // Fill metadata
-    await tester.drag(find.byType(ListView), const Offset(0, 500)); // Scroll up
+    // Fill metadata - scroll up to find Food Name
+    await tester.drag(find.byType(ListView), const Offset(0, 500));
     await tester.pumpAndSettle();
 
     await tester.enterText(

@@ -78,19 +78,7 @@ void main() {
       // Verify emoji is displayed separately
       expect(find.text('🍎'), findsOneWidget);
 
-      // Verify initial nutritional info (should be for 1g by default)
-      // Calories: 0.52 * 1 = 0.52
-      expect(find.text('1🔥 • 0P • 0F • 0C • 0Fb'), findsOneWidget);
-
-      // Open the dropdown
-      await tester.tap(find.byType(DropdownButton<model_unit.FoodServing>));
-      await tester.pumpAndSettle();
-
-      // Select '1 medium' unit
-      await tester.tap(find.text('1.0 1 medium').last);
-      await tester.pumpAndSettle();
-
-      // Verify nutritional info updates for '1 medium' (182g)
+      // Default is now the first non-'g' serving ('1 medium', 182g)
       // Calories: 0.52 * 182 = 94.64
       // Protein: 0.003 * 182 = 0.546
       // Fat: 0.002 * 182 = 0.364
@@ -98,10 +86,10 @@ void main() {
       // Fiber: 0.024 * 182 = 4.368
       expect(find.text('95🔥 • 1P • 0F • 25C • 4Fb'), findsOneWidget);
 
-      // Select '1 cup sliced' unit
+      // Select '1 cup sliced' unit - dropdown items include grams in parentheses
       await tester.tap(find.byType(DropdownButton<model_unit.FoodServing>));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('1.0 1 cup sliced').last);
+      await tester.tap(find.textContaining('1 cup sliced').last);
       await tester.pumpAndSettle();
 
       // Verify nutritional info updates for '1 cup sliced' (109g)
@@ -111,6 +99,16 @@ void main() {
       // Carbs: 0.14 * 109 = 15.26
       // Fiber: 0.024 * 109 = 2.616
       expect(find.text('57🔥 • 0P • 0F • 15C • 3Fb'), findsOneWidget);
+
+      // Select 'g' unit to verify 1g calculation
+      await tester.tap(find.byType(DropdownButton<model_unit.FoodServing>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.textContaining(' g').last);
+      await tester.pumpAndSettle();
+
+      // Verify nutritional info for 1g
+      // Calories: 0.52 * 1 = 0.52
+      expect(find.text('1🔥 • 0P • 0F • 0C • 0Fb'), findsOneWidget);
     });
 
     testWidgets(

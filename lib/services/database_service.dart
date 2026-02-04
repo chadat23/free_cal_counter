@@ -1350,6 +1350,11 @@ class DatabaseService {
                 createdTimestamp: DateTime.now().millisecondsSinceEpoch,
               ),
             );
+
+        // Hide the old recipe
+        await (_liveDb.update(_liveDb.recipes)
+              ..where((t) => t.id.equals(recipe.id)))
+            .write(const RecipesCompanion(hidden: Value(true)));
         // We don't need to delete items from old recipe, they stay for history
       } else if (recipe.id > 0) {
         recipeId = recipe.id;

@@ -196,15 +196,6 @@ class RecipeProvider extends ChangeNotifier {
     try {
       final db = DatabaseService.instance;
 
-      int? targetParentId = _parentId;
-      int? originalToHide;
-
-      if (_id > 0 && _isLogged && _ingredientsChanged) {
-        targetParentId = _id;
-        originalToHide = _id;
-        _id = 0;
-      }
-
       final recipe = Recipe(
         id: _id,
         name: _name,
@@ -214,7 +205,7 @@ class RecipeProvider extends ChangeNotifier {
         notes: _notes,
         isTemplate: _isTemplate,
         hidden: false,
-        parentId: targetParentId,
+        parentId: _parentId,
         emoji: _emoji,
         thumbnail: _thumbnail,
         createdTimestamp: DateTime.now().millisecondsSinceEpoch,
@@ -223,10 +214,6 @@ class RecipeProvider extends ChangeNotifier {
       );
 
       await db.saveRecipe(recipe);
-
-      if (originalToHide != null) {
-        await db.hideRecipe(originalToHide);
-      }
 
       reset();
       return true;

@@ -72,6 +72,22 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
     );
   }
 
+  void _moveCursor(int direction) {
+    final selection = _quantityController.selection;
+    if (!selection.isValid) return;
+
+    // If there's a range selection, collapse to the appropriate edge
+    if (!selection.isCollapsed) {
+      final offset = direction < 0 ? selection.start : selection.end;
+      _quantityController.selection = TextSelection.collapsed(offset: offset);
+      return;
+    }
+
+    final newOffset = (selection.baseOffset + direction)
+        .clamp(0, _quantityController.text.length);
+    _quantityController.selection = TextSelection.collapsed(offset: newOffset);
+  }
+
   void _evaluateAndReplaceExpression() {
     final text = _quantityController.text;
     if (text.isEmpty) return;
@@ -190,13 +206,17 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
                 color: const Color(0xFF1C1C1E),
                 child: Row(
                   children: [
-                    _buildOperatorButton('+'),
+                    _buildBarButton('<', () => _moveCursor(-1)),
                     _buildOperatorDivider(),
-                    _buildOperatorButton('-'),
+                    _buildBarButton('>', () => _moveCursor(1)),
                     _buildOperatorDivider(),
-                    _buildOperatorButton('*'),
+                    _buildBarButton('+', () => _insertOperator('+')),
                     _buildOperatorDivider(),
-                    _buildOperatorButton('/'),
+                    _buildBarButton('-', () => _insertOperator('-')),
+                    _buildOperatorDivider(),
+                    _buildBarButton('*', () => _insertOperator('*')),
+                    _buildOperatorDivider(),
+                    _buildBarButton('/', () => _insertOperator('/')),
                   ],
                 ),
               ),
@@ -553,19 +573,19 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
     );
   }
 
-  Widget _buildOperatorButton(String op) {
+  Widget _buildBarButton(String label, VoidCallback onTap) {
     return Expanded(
       child: Material(
         color: const Color(0xFF323236),
         borderRadius: BorderRadius.circular(6),
         child: InkWell(
           borderRadius: BorderRadius.circular(6),
-          onTap: () => _insertOperator(op),
+          onTap: onTap,
           child: SizedBox(
             height: 40,
             child: Center(
               child: Text(
-                op,
+                label,
                 style: const TextStyle(fontSize: 22, color: Colors.white, fontWeight: FontWeight.w500),
               ),
             ),

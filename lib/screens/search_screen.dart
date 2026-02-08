@@ -53,12 +53,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: true,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) {
-          Provider.of<LogProvider>(context, listen: false).clearQueue();
-        }
-      },
+      canPop: !widget.config.showQueueStats,
       child: Scaffold(
         appBar: AppBar(
           toolbarHeight: widget.config.showQueueStats ? 180 : null,

@@ -156,13 +156,12 @@ void main() {
     expect(logProvider.logQueue, isEmpty);
   });
 
-  testWidgets('popping SearchScreen should clear the queue', (tester) async {
+  testWidgets('back gesture on SearchScreen is blocked and preserves queue', (tester) async {
     await tester.pumpWidget(
       createTestWidget(const Scaffold(body: Text('Home'))),
     );
 
     // Navigate to Search
-    // Note: We need a way to trigger the push. Let's use a simple button.
     final context = tester.element(find.text('Home'));
     Navigator.pushNamed(context, '/food_search');
     await tester.pumpAndSettle();
@@ -197,11 +196,13 @@ void main() {
     );
     expect(logProvider.logQueue, isNotEmpty);
 
-    // Pop the SearchScreen (Simulator of back button)
-    Navigator.pop(tester.element(find.byType(SearchScreen)));
+    // Attempt to pop via system back (simulated by maybePop)
+    final navState = Navigator.of(tester.element(find.byType(SearchScreen)));
+    navState.maybePop();
     await tester.pumpAndSettle();
 
-    expect(find.byType(SearchScreen), findsNothing);
-    expect(logProvider.logQueue, isEmpty);
+    // SearchScreen should still be visible and queue should be intact
+    expect(find.byType(SearchScreen), findsOneWidget);
+    expect(logProvider.logQueue, isNotEmpty);
   });
 }

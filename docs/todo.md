@@ -24,3 +24,4 @@ I want all of the numeric inputs to be calculators that can add, subtract, multi
 
 When manually creating new foods, it's a little wonkey, and unclear how it works regarding portions. it needs to be more clear, also, right now I find that the easiest thing to do is to convert (using a calculator app on my phone) the macros from whatever the serving size is on the label to per 100g, and that's a chore.
 
+Please review the relevant code, and once you've reviewed the relevant code, ask me any questions you have. Come up with a plan, ask more questions, plan, and continue that cycle untill you're fully happy with your plan and have no questions.  

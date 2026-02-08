@@ -3,6 +3,7 @@ import 'package:free_cal_counter1/config/app_router.dart';
 import 'package:provider/provider.dart';
 import 'package:free_cal_counter1/providers/navigation_provider.dart';
 import 'package:free_cal_counter1/providers/log_provider.dart';
+import 'package:free_cal_counter1/providers/search_provider.dart';
 
 class SearchRibbon extends StatefulWidget {
   final bool isSearchActive;
@@ -24,6 +25,8 @@ class SearchRibbon extends StatefulWidget {
 
 class _SearchRibbonState extends State<SearchRibbon> {
   late TextEditingController _controller;
+  SearchProvider? _searchProvider;
+  bool _clearing = false;
 
   @override
   void initState() {
@@ -32,7 +35,31 @@ class _SearchRibbonState extends State<SearchRibbon> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.isSearchActive) {
+      final provider = Provider.of<SearchProvider>(context, listen: false);
+      if (_searchProvider != provider) {
+        _searchProvider?.removeListener(_onSearchProviderChanged);
+        _searchProvider = provider;
+        _searchProvider!.addListener(_onSearchProviderChanged);
+      }
+    }
+  }
+
+  void _onSearchProviderChanged() {
+    if (_searchProvider != null &&
+        _searchProvider!.currentQuery.isEmpty &&
+        _controller.text.isNotEmpty) {
+      _clearing = true;
+      _controller.clear();
+      _clearing = false;
+    }
+  }
+
+  @override
   void dispose() {
+    _searchProvider?.removeListener(_onSearchProviderChanged);
     _controller.dispose();
     super.dispose();
   }
@@ -64,7 +91,11 @@ class _SearchRibbonState extends State<SearchRibbon> {
                         },
                       ),
                     ),
-                    onChanged: widget.onChanged,
+                    onChanged: (value) {
+                      if (!_clearing) {
+                        widget.onChanged?.call(value);
+                      }
+                    },
                   )
                 : GestureDetector(
                     key: const Key('food_search_text_field'),

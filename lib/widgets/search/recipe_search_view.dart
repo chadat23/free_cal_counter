@@ -193,6 +193,7 @@ class _RecipeSearchViewState extends State<RecipeSearchView> {
                               context,
                               listen: false,
                             ).dumpRecipeToQueue(recipe);
+                            searchProvider.clearSearch();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
@@ -276,6 +277,7 @@ class _RecipeSearchViewState extends State<RecipeSearchView> {
                               context,
                               listen: false,
                             ).addFoodToQueue(portion);
+                            searchProvider.clearSearch();
                           }
                         },
                         onTap: (selectedUnit) async {
@@ -366,6 +368,7 @@ class _RecipeSearchViewState extends State<RecipeSearchView> {
                                           );
                                         } else {
                                           logProvider.addFoodToQueue(portion);
+                                          searchProvider.clearSearch();
                                         }
                                         Navigator.pop(context);
                                       }
@@ -418,6 +421,7 @@ class _RecipeSearchViewState extends State<RecipeSearchView> {
                               context,
                               listen: false,
                             ).dumpRecipeToQueue(recipe);
+                            searchProvider.clearSearch();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(

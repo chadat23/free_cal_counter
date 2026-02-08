@@ -47,6 +47,10 @@ class SearchProvider extends ChangeNotifier {
     _lastScannedBarcode = null;
   }
 
+  void clearSearch() {
+    textSearch('');
+  }
+
   void setSearchMode(SearchMode mode) {
     _searchMode = mode;
     _searchResults = []; // Clear results when switching modes

@@ -147,6 +147,7 @@ class _TextSearchViewState extends State<TextSearchView> {
                     context,
                     listen: false,
                   ).addFoodToQueue(portion);
+                  searchProvider.clearSearch();
                 }
               },
               onTap: (selectedUnit) {
@@ -205,6 +206,7 @@ class _TextSearchViewState extends State<TextSearchView> {
                                 context,
                                 listen: false,
                               ).addFoodToQueue(portion);
+                              searchProvider.clearSearch();
                             }
                             Navigator.pop(context);
                           }
@@ -389,6 +391,10 @@ class _TextSearchViewState extends State<TextSearchView> {
                     context,
                     listen: false,
                   ).addFoodToQueue(portion);
+                  Provider.of<SearchProvider>(
+                    context,
+                    listen: false,
+                  ).clearSearch();
                 }
                 Navigator.pop(context);
               }

@@ -2,6 +2,8 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:free_cal_counter1/models/food.dart' as model;
+import 'package:free_cal_counter1/models/food.dart' as model;
+import 'package:free_cal_counter1/models/food_serving.dart';
 import 'package:free_cal_counter1/screens/food_edit_screen.dart';
 import 'package:free_cal_counter1/services/database_service.dart';
 import 'package:free_cal_counter1/services/live_database.dart' as live_db;
@@ -371,6 +373,85 @@ void main() {
 
       // Should still only have one instance of the barcode
       expect(find.text('1234567890'), findsOneWidget);
+    });
+  });
+
+  group('Math expression support', () {
+    testWidgets('evaluates expression in Calories field on blur', (tester) async {
+      await tester.pumpWidget(const MaterialApp(home: FoodEditScreen()));
+
+      // Switch to 100g mode for simplicity
+      await tester.tap(find.text('Serving'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('100g').last);
+      await tester.pumpAndSettle();
+
+      // Scroll down to see Calories field
+      await tester.drag(find.byType(ListView), const Offset(0, -300));
+      await tester.pumpAndSettle();
+
+      // Find the Calories field
+      Finder findMacroField(String label) {
+        return find.descendant(
+          of: find.widgetWithText(Row, label),
+          matching: find.byType(TextFormField),
+        );
+      }
+
+      // Enter expression
+      await tester.enterText(findMacroField('Calories'), '100+50');
+      await tester.pumpAndSettle();
+
+      // Tap another field to blur Calories
+      await tester.enterText(findMacroField('Protein'), '10');
+      await tester.pumpAndSettle();
+
+      // Verify the Calories field was evaluated
+      final caloriesField = tester.widget<TextFormField>(findMacroField('Calories'));
+      expect(caloriesField.controller!.text, '150');
+    });
+
+    testWidgets('_parse handles expressions on save', (tester) async {
+      await tester.pumpWidget(const MaterialApp(home: FoodEditScreen()));
+
+      // Switch to 100g mode
+      await tester.tap(find.text('Serving'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('100g').last);
+      await tester.pumpAndSettle();
+
+      // Enter food name
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Food Name'),
+        'Math Test Food',
+      );
+
+      // Scroll to see macro fields
+      await tester.drag(find.byType(ListView), const Offset(0, -300));
+      await tester.pumpAndSettle();
+
+      Finder findMacroField(String label) {
+        return find.descendant(
+          of: find.widgetWithText(Row, label),
+          matching: find.byType(TextFormField),
+        );
+      }
+
+      // Enter expression in Calories (don't blur - test that _parse handles it)
+      await tester.enterText(findMacroField('Calories'), '10*3');
+
+      // Save
+      await tester.ensureVisible(find.byIcon(Icons.check));
+      await tester.tap(find.byIcon(Icons.check));
+      await tester.pumpAndSettle();
+
+      // Verify it popped (save succeeded)
+      expect(find.byType(FoodEditScreen), findsNothing);
+
+      // Verify DB - 10*3 = 30 per 100g = 0.3 per gram
+      final savedFood = await liveDb.select(liveDb.foods).getSingle();
+      expect(savedFood.name, 'Math Test Food');
+      expect(savedFood.caloriesPerGram, closeTo(0.3, 0.001));
     });
   });
 }

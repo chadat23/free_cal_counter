@@ -14,6 +14,7 @@ import 'package:free_cal_counter1/utils/ui_utils.dart';
 import 'package:free_cal_counter1/widgets/food_image_widget.dart';
 import 'package:free_cal_counter1/models/food_container.dart';
 import 'package:free_cal_counter1/widgets/serving_info_sheet.dart';
+import 'package:free_cal_counter1/widgets/math_input_bar.dart';
 
 class QuantityEditScreen extends StatefulWidget {
   final QuantityEditConfig config;
@@ -57,35 +58,6 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
     if (!_quantityFocusNode.hasFocus) {
       _evaluateAndReplaceExpression();
     }
-  }
-
-  void _insertOperator(String op) {
-    final text = _quantityController.text;
-    final selection = _quantityController.selection;
-    final cursorPos = selection.isValid ? selection.baseOffset : text.length;
-
-    final newText = text.substring(0, cursorPos) + op + text.substring(cursorPos);
-
-    _quantityController.value = TextEditingValue(
-      text: newText,
-      selection: TextSelection.collapsed(offset: cursorPos + op.length),
-    );
-  }
-
-  void _moveCursor(int direction) {
-    final selection = _quantityController.selection;
-    if (!selection.isValid) return;
-
-    // If there's a range selection, collapse to the appropriate edge
-    if (!selection.isCollapsed) {
-      final offset = direction < 0 ? selection.start : selection.end;
-      _quantityController.selection = TextSelection.collapsed(offset: offset);
-      return;
-    }
-
-    final newOffset = (selection.baseOffset + direction)
-        .clamp(0, _quantityController.text.length);
-    _quantityController.selection = TextSelection.collapsed(offset: newOffset);
   }
 
   void _evaluateAndReplaceExpression() {
@@ -200,26 +172,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
               left: 0,
               right: 0,
               bottom: keyboardHeight,
-              child: Container(
-                height: 48,
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                color: const Color(0xFF1C1C1E),
-                child: Row(
-                  children: [
-                    _buildBarButton('<', () => _moveCursor(-1)),
-                    _buildOperatorDivider(),
-                    _buildBarButton('>', () => _moveCursor(1)),
-                    _buildOperatorDivider(),
-                    _buildBarButton('+', () => _insertOperator('+')),
-                    _buildOperatorDivider(),
-                    _buildBarButton('-', () => _insertOperator('-')),
-                    _buildOperatorDivider(),
-                    _buildBarButton('*', () => _insertOperator('*')),
-                    _buildOperatorDivider(),
-                    _buildBarButton('/', () => _insertOperator('/')),
-                  ],
-                ),
-              ),
+              child: MathInputBar(controller: _quantityController),
             ),
         ],
       ),
@@ -571,32 +524,6 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
         ),
       ],
     );
-  }
-
-  Widget _buildBarButton(String label, VoidCallback onTap) {
-    return Expanded(
-      child: Material(
-        color: const Color(0xFF323236),
-        borderRadius: BorderRadius.circular(6),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(6),
-          onTap: onTap,
-          child: SizedBox(
-            height: 40,
-            child: Center(
-              child: Text(
-                label,
-                style: const TextStyle(fontSize: 22, color: Colors.white, fontWeight: FontWeight.w500),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOperatorDivider() {
-    return const SizedBox(width: 8);
   }
 
   void _handleSave() {

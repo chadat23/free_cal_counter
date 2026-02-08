@@ -4,8 +4,61 @@ import 'package:free_cal_counter1/models/weight.dart';
 import 'package:free_cal_counter1/services/goal_logic_service.dart';
 import 'package:intl/intl.dart';
 import 'dart:ui' as ui;
+import 'dart:math';
 
-class WeightTrendChart extends StatelessWidget {
+/// Returns the index into [realData] of the nearest real data point
+/// to [tapPosition] within [threshold] pixels, or null if none.
+int? findNearestRealPoint({
+  required Offset tapPosition,
+  required Size chartSize,
+  required List<Weight> realData,
+  required List<double> trends,
+  required DateTime startDate,
+  required DateTime endDate,
+  double threshold = 24.0,
+}) {
+  if (realData.isEmpty) return null;
+
+  final weights = realData.map((e) => e.weight).toList();
+  final allValues = [...weights, ...trends];
+  final minWeight = allValues.reduce((a, b) => a < b ? a : b) - 0.5;
+  final maxWeight = allValues.reduce((a, b) => a > b ? a : b) + 0.5;
+  final weightRange = maxWeight - minWeight;
+
+  const double leftPadding = 40.0;
+  const double rightPadding = 40.0;
+  final drawAreaWidth = chartSize.width - leftPadding - rightPadding;
+  final totalDuration = endDate.difference(startDate).inSeconds;
+
+  double getX(DateTime date) {
+    if (totalDuration == 0) return leftPadding;
+    final elapsed = date.difference(startDate).inSeconds;
+    return leftPadding + (elapsed / totalDuration) * drawAreaWidth;
+  }
+
+  double getYWeight(double weight) {
+    final normalized = (weight - minWeight) / weightRange;
+    return chartSize.height - (normalized * chartSize.height);
+  }
+
+  int? nearestIndex;
+  double nearestDist = double.infinity;
+
+  for (var i = 0; i < realData.length; i++) {
+    final dx = getX(realData[i].date) - tapPosition.dx;
+    final dy = getYWeight(realData[i].weight) - tapPosition.dy;
+    final dist = sqrt(dx * dx + dy * dy);
+    if (dist < nearestDist) {
+      nearestDist = dist;
+      nearestIndex = i;
+    }
+  }
+
+  if (nearestDist <= threshold) return nearestIndex;
+  return null;
+}
+
+class WeightTrendChart extends StatefulWidget {
   final List<Weight> weightHistory;
   final List<double> maintenanceHistory;
   final String timeframeLabel;
@@ -22,8 +75,24 @@ class WeightTrendChart extends StatelessWidget {
   });
 
   @override
+  State<WeightTrendChart> createState() => _WeightTrendChartState();
+}
+
+class _WeightTrendChartState extends State<WeightTrendChart> {
+  int? _selectedRealIndex;
+
+  @override
+  void didUpdateWidget(WeightTrendChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.startDate != widget.startDate ||
+        oldWidget.endDate != widget.endDate) {
+      _selectedRealIndex = null;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (weightHistory.isEmpty) {
+    if (widget.weightHistory.isEmpty) {
       return Container(
         height: 200,
         padding: const EdgeInsets.all(16),
@@ -41,12 +110,12 @@ class WeightTrendChart extends StatelessWidget {
     }
 
     // 1. Calculate min weight for placeholders
-    final realWeights = weightHistory.map((e) => e.weight).toList();
+    final realWeights = widget.weightHistory.map((e) => e.weight).toList();
     final minRealWeight = realWeights.reduce((a, b) => a < b ? a : b);
 
     // 2. Map existing weights by date (date only)
     final weightMap = <DateTime, double>{};
-    for (final w in weightHistory) {
+    for (final w in widget.weightHistory) {
       final dateOnly = DateTime(w.date.year, w.date.month, w.date.day);
       weightMap[dateOnly] = w.weight;
     }
@@ -56,8 +125,16 @@ class WeightTrendChart extends StatelessWidget {
     final today = DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
 
-    var current = DateTime(startDate.year, startDate.month, startDate.day);
-    final end = DateTime(endDate.year, endDate.month, endDate.day);
+    var current = DateTime(
+      widget.startDate.year,
+      widget.startDate.month,
+      widget.startDate.day,
+    );
+    final end = DateTime(
+      widget.endDate.year,
+      widget.endDate.month,
+      widget.endDate.day,
+    );
 
     while (!current.isAfter(end)) {
       final realWeight = weightMap[current];
@@ -74,8 +151,8 @@ class WeightTrendChart extends StatelessWidget {
       current = current.add(const Duration(days: 1));
     }
 
-    // Sort sorted strictly for trend calculation (using only real data)
-    final sortedReal = List<Weight>.from(weightHistory)
+    // Sort strictly for trend calculation (using only real data)
+    final sortedReal = List<Weight>.from(widget.weightHistory)
       ..sort((a, b) => a.date.compareTo(b.date));
     final trends = GoalLogicService.calculateTrendHistory(sortedReal);
 
@@ -90,7 +167,7 @@ class WeightTrendChart extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Weight Trend ($timeframeLabel)',
+            'Weight Trend (${widget.timeframeLabel})',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 18,
@@ -99,16 +176,42 @@ class WeightTrendChart extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: CustomPaint(
-              size: Size.infinite,
-              painter: _WeightLinePainter(
-                points: points,
-                realData: sortedReal,
-                trends: trends,
-                maintenanceHistory: maintenanceHistory,
-                startDate: startDate,
-                endDate: endDate,
-              ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final chartSize = Size(
+                  constraints.maxWidth,
+                  constraints.maxHeight,
+                );
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTapUp: (details) {
+                    final tapped = findNearestRealPoint(
+                      tapPosition: details.localPosition,
+                      chartSize: chartSize,
+                      realData: sortedReal,
+                      trends: trends,
+                      startDate: widget.startDate,
+                      endDate: widget.endDate,
+                    );
+                    setState(() {
+                      _selectedRealIndex =
+                          (tapped == _selectedRealIndex) ? null : tapped;
+                    });
+                  },
+                  child: CustomPaint(
+                    size: Size.infinite,
+                    painter: _WeightLinePainter(
+                      points: points,
+                      realData: sortedReal,
+                      trends: trends,
+                      maintenanceHistory: widget.maintenanceHistory,
+                      startDate: widget.startDate,
+                      endDate: widget.endDate,
+                      selectedRealIndex: _selectedRealIndex,
+                    ),
+                  ),
+                );
+              },
             ),
           ),
           const SizedBox(height: 8),
@@ -116,11 +219,11 @@ class WeightTrendChart extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                DateFormat('MMM d').format(startDate),
+                DateFormat('MMM d').format(widget.startDate),
                 style: const TextStyle(color: Colors.white54, fontSize: 10),
               ),
               Text(
-                DateFormat('MMM d').format(endDate),
+                DateFormat('MMM d').format(widget.endDate),
                 style: const TextStyle(color: Colors.white54, fontSize: 10),
               ),
             ],
@@ -152,6 +255,7 @@ class _WeightLinePainter extends CustomPainter {
   final List<double> maintenanceHistory;
   final DateTime startDate;
   final DateTime endDate;
+  final int? selectedRealIndex;
 
   _WeightLinePainter({
     required this.points,
@@ -160,6 +264,7 @@ class _WeightLinePainter extends CustomPainter {
     required this.maintenanceHistory,
     required this.startDate,
     required this.endDate,
+    this.selectedRealIndex,
   });
 
   @override
@@ -340,6 +445,64 @@ class _WeightLinePainter extends CustomPainter {
           dotPaint,
         );
       }
+    }
+
+    // 5. Paint selected weight label
+    if (selectedRealIndex != null && selectedRealIndex! < realData.length) {
+      final selected = realData[selectedRealIndex!];
+      final x = getX(selected.date);
+      final y = getYWeight(selected.weight);
+
+      // Highlight selected dot
+      dotPaint.color = Colors.white;
+      canvas.drawCircle(Offset(x, y), 5, dotPaint);
+
+      final labelText =
+          '${DateFormat('MMM d').format(selected.date)}: ${selected.weight.toStringAsFixed(1)}';
+
+      final tp = TextPainter(
+        text: TextSpan(
+          text: labelText,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        textDirection: ui.TextDirection.ltr,
+      );
+      tp.layout();
+
+      const verticalOffset = 16.0;
+      const padding = 4.0;
+
+      // Position above dot; flip below if near top
+      double labelY = y - verticalOffset - tp.height;
+      if (labelY < 0) {
+        labelY = y + verticalOffset;
+      }
+
+      // Center horizontally, clamped to chart bounds
+      double labelX = (x - tp.width / 2).clamp(
+        leftPadding,
+        leftPadding + drawAreaWidth - tp.width,
+      );
+
+      // Background pill
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(
+            labelX - padding,
+            labelY - padding,
+            tp.width + padding * 2,
+            tp.height + padding * 2,
+          ),
+          const Radius.circular(4),
+        ),
+        Paint()..color = Colors.black.withValues(alpha: 0.7),
+      );
+
+      tp.paint(canvas, Offset(labelX, labelY));
     }
   }
 

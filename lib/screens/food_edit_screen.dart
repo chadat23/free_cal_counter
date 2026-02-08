@@ -10,6 +10,8 @@ import 'package:free_cal_counter1/widgets/serving_info_sheet.dart';
 import 'package:free_cal_counter1/config/app_colors.dart';
 import 'package:free_cal_counter1/screens/barcode_scanner_screen.dart';
 import 'package:image_picker/image_picker.dart' as picker;
+import 'package:free_cal_counter1/utils/math_evaluator.dart';
+import 'package:free_cal_counter1/widgets/math_input_bar.dart';
 
 enum FoodEditContext {
   search, // From Search Screen (Edit/Copy) -> "Save", "Save & Use"
@@ -63,6 +65,10 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
   bool _isCustomUnit = false;
   final _customUnitController = TextEditingController();
 
+  // FocusNodes for numeric fields (math input support)
+  final List<FocusNode> _numericFocusNodes = [];
+  TextEditingController? _activeController;
+
   List<FoodServing> _servings = [];
   bool _isPerServingMode = false;
   FoodServing? _selectedServingForMacroInput;
@@ -79,9 +85,77 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
   @override
   void initState() {
     super.initState();
+    _initNumericFocusNodes();
     _initData();
     _loadAvailableUnits();
     _loadBarcodes();
+  }
+
+  void _initNumericFocusNodes() {
+    // 7 numeric fields: calories, protein, fat, carbs, fiber, serving qty, serving grams
+    for (int i = 0; i < 7; i++) {
+      _numericFocusNodes.add(FocusNode());
+    }
+  }
+
+  FocusNode _focusNodeFor(TextEditingController controller) {
+    final index = _numericControllerIndex(controller);
+    return _numericFocusNodes[index];
+  }
+
+  int _numericControllerIndex(TextEditingController controller) {
+    if (identical(controller, _caloriesController)) return 0;
+    if (identical(controller, _proteinController)) return 1;
+    if (identical(controller, _fatController)) return 2;
+    if (identical(controller, _carbsController)) return 3;
+    if (identical(controller, _fiberController)) return 4;
+    if (identical(controller, _primaryServingQuantityController)) return 5;
+    if (identical(controller, _primaryServingGramsController)) return 6;
+    return 0;
+  }
+
+  void _onNumericFocusChange(TextEditingController controller, bool hasFocus) {
+    if (hasFocus) {
+      setState(() {
+        _activeController = controller;
+      });
+    } else {
+      _evaluateField(controller);
+      // Trigger grams recalculation if this was the grams field
+      if (identical(controller, _primaryServingGramsController)) {
+        _onGramsFieldEvaluated();
+      }
+      setState(() {
+        if (identical(_activeController, controller)) {
+          _activeController = null;
+        }
+      });
+    }
+  }
+
+  void _evaluateField(TextEditingController controller) {
+    final text = controller.text.trim();
+    if (text.isEmpty) return;
+    if (double.tryParse(text) != null) return;
+
+    final result = MathEvaluator.evaluate(text);
+    if (result != null && !result.isInfinite && !result.isNaN) {
+      controller.text = _format(result);
+    }
+  }
+
+  void _onGramsFieldEvaluated() {
+    if (widget.originalFood != null) {
+      final grams = _parse(_primaryServingGramsController.text);
+      if (grams > 0) {
+        final food = widget.originalFood!;
+        _caloriesController.text = _format(food.calories * grams);
+        _proteinController.text = _format(food.protein * grams);
+        _fatController.text = _format(food.fat * grams);
+        _carbsController.text = _format(food.carbs * grams);
+        _fiberController.text = _format(food.fiber * grams);
+      }
+    }
   }
 
   Future<void> _loadAvailableUnits() async {
@@ -198,6 +272,9 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
 
   @override
   void dispose() {
+    for (final node in _numericFocusNodes) {
+      node.dispose();
+    }
     _nameController.dispose();
     _emojiController.dispose();
     _notesController.dispose();
@@ -212,7 +289,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
     super.dispose();
   }
 
-  double _parse(String text) => double.tryParse(text) ?? 0.0;
+  double _parse(String text) => double.tryParse(text) ?? MathEvaluator.evaluate(text) ?? 0.0;
 
   Future<void> _save(bool useImmediately) async {
     if (!_formKey.currentState!.validate()) return;
@@ -346,9 +423,14 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final showOperatorBar = _activeController != null && keyboardHeight > 0;
+
     return ScreenBackground(
+      resizeToAvoidBottomInset: false,
       child: Scaffold(
         backgroundColor: Colors.transparent,
+        resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: Text(
             widget.originalFood == null ? 'Create Food' : 'Edit Food',
@@ -361,35 +443,51 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
             ),
           ],
         ),
-        body: Form(
-          key: _formKey,
-          child: ListView(
-            padding: const EdgeInsets.all(16.0),
-            children: [
-              _buildMetadataSection(),
-              const SizedBox(height: 24),
-              _buildPrimaryServingSection(),
-              const SizedBox(height: 24),
-              _buildMacroSection(),
-              const SizedBox(height: 24),
-              _buildServingsSection(),
-              const SizedBox(height: 32),
-              if (widget.contextType == FoodEditContext.search)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 24.0),
-                  child: ElevatedButton.icon(
-                    onPressed: () => _save(true),
-                    icon: const Icon(Icons.input),
-                    label: const Text('Save & Use Immediately'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                  ),
+        body: Stack(
+          children: [
+            Form(
+              key: _formKey,
+              child: ListView(
+                padding: EdgeInsets.only(
+                  left: 16.0,
+                  right: 16.0,
+                  top: 16.0,
+                  bottom: 16.0 + (showOperatorBar ? 48 + keyboardHeight : keyboardHeight),
                 ),
-            ],
-          ),
+                children: [
+                  _buildMetadataSection(),
+                  const SizedBox(height: 24),
+                  _buildPrimaryServingSection(),
+                  const SizedBox(height: 24),
+                  _buildMacroSection(),
+                  const SizedBox(height: 24),
+                  _buildServingsSection(),
+                  const SizedBox(height: 32),
+                  if (widget.contextType == FoodEditContext.search)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 24.0),
+                      child: ElevatedButton.icon(
+                        onPressed: () => _save(true),
+                        icon: const Icon(Icons.input),
+                        label: const Text('Save & Use Immediately'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            if (showOperatorBar)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: keyboardHeight,
+                child: MathInputBar(controller: _activeController!),
+              ),
+          ],
         ),
       ),
     );
@@ -692,17 +790,21 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
                 // Quantity field
                 SizedBox(
                   width: 60,
-                  child: TextFormField(
-                    controller: _primaryServingQuantityController,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    textAlign: TextAlign.center,
-                    decoration: const InputDecoration(
-                      labelText: 'Qty',
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 8,
+                  child: Focus(
+                    onFocusChange: (hasFocus) => _onNumericFocusChange(_primaryServingQuantityController, hasFocus),
+                    child: TextFormField(
+                      controller: _primaryServingQuantityController,
+                      focusNode: _focusNodeFor(_primaryServingQuantityController),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      textAlign: TextAlign.center,
+                      decoration: const InputDecoration(
+                        labelText: 'Qty',
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 8,
+                        ),
                       ),
                     ),
                   ),
@@ -739,34 +841,38 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
                 // Grams field
                 SizedBox(
                   width: 80,
-                  child: TextFormField(
-                    controller: _primaryServingGramsController,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    textAlign: TextAlign.end,
-                    decoration: const InputDecoration(
-                      labelText: 'Grams',
-                      suffixText: 'g',
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 8,
+                  child: Focus(
+                    onFocusChange: (hasFocus) => _onNumericFocusChange(_primaryServingGramsController, hasFocus),
+                    child: TextFormField(
+                      controller: _primaryServingGramsController,
+                      focusNode: _focusNodeFor(_primaryServingGramsController),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      textAlign: TextAlign.end,
+                      decoration: const InputDecoration(
+                        labelText: 'Grams',
+                        suffixText: 'g',
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 8,
+                        ),
                       ),
-                    ),
-                    onChanged: (val) {
-                      // Auto-calculate macros if we have a food with existing data
-                      if (widget.originalFood != null) {
-                        final grams = _parse(val);
-                        if (grams > 0) {
-                          final food = widget.originalFood!;
-                          _caloriesController.text = _format(food.calories * grams);
-                          _proteinController.text = _format(food.protein * grams);
-                          _fatController.text = _format(food.fat * grams);
-                          _carbsController.text = _format(food.carbs * grams);
-                          _fiberController.text = _format(food.fiber * grams);
+                      onChanged: (val) {
+                        // Auto-calculate macros if we have a food with existing data
+                        if (widget.originalFood != null) {
+                          final grams = _parse(val);
+                          if (grams > 0) {
+                            final food = widget.originalFood!;
+                            _caloriesController.text = _format(food.calories * grams);
+                            _proteinController.text = _format(food.protein * grams);
+                            _fatController.text = _format(food.fat * grams);
+                            _carbsController.text = _format(food.carbs * grams);
+                            _fiberController.text = _format(food.fiber * grams);
+                          }
                         }
-                      }
-                    },
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -911,24 +1017,29 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
     String label,
     String suffix,
   ) {
+    final focusNode = _focusNodeFor(controller);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
           SizedBox(width: 80, child: Text(label)),
           Expanded(
-            child: TextFormField(
-              controller: controller,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              textAlign: TextAlign.end,
-              decoration: InputDecoration(
-                suffixText: suffix,
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 8,
-                  horizontal: 8,
+            child: Focus(
+              onFocusChange: (hasFocus) => _onNumericFocusChange(controller, hasFocus),
+              child: TextFormField(
+                controller: controller,
+                focusNode: focusNode,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                textAlign: TextAlign.end,
+                decoration: InputDecoration(
+                  suffixText: suffix,
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 8,
+                  ),
                 ),
               ),
             ),

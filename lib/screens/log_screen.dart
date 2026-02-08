@@ -12,6 +12,7 @@ import 'package:free_cal_counter1/widgets/meal_widget.dart';
 import 'package:free_cal_counter1/providers/log_provider.dart';
 import 'package:free_cal_counter1/providers/goals_provider.dart';
 import 'package:free_cal_counter1/config/app_router.dart';
+import 'package:free_cal_counter1/main.dart' show routeObserver;
 
 class LogScreen extends StatefulWidget {
   const LogScreen({super.key});
@@ -20,12 +21,29 @@ class LogScreen extends StatefulWidget {
   State<LogScreen> createState() => _LogScreenState();
 }
 
-class _LogScreenState extends State<LogScreen> {
+class _LogScreenState extends State<LogScreen> with RouteAware {
   DateTime _selectedDate = DateTime.now();
 
   @override
   void initState() {
     super.initState();
+    _initData();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
     _initData();
   }
 

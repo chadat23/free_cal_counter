@@ -18,6 +18,9 @@ import 'package:free_cal_counter1/utils/debug_seeder.dart';
 import 'package:provider/provider.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
 
+final RouteObserver<ModalRoute<void>> routeObserver =
+    RouteObserver<ModalRoute<void>>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
@@ -171,6 +174,7 @@ class _MyAppState extends State<MyApp> {
           brightness: Brightness.dark,
         ),
         initialRoute: AppRouter.homeRoute,
+        navigatorObservers: [routeObserver],
         onGenerateRoute: appRouter.generateRoute,
       ),
     );

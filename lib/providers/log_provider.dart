@@ -8,6 +8,18 @@ import 'package:free_cal_counter1/models/daily_macro_stats.dart';
 import 'package:free_cal_counter1/services/database_service.dart';
 
 class LogProvider extends ChangeNotifier {
+  LogProvider() {
+    _loadInitialData();
+  }
+
+  Future<void> _loadInitialData() async {
+    try {
+      await loadLoggedPortionsForDate(DateTime.now());
+    } catch (_) {
+      // Database may not be initialized yet (e.g. in tests)
+    }
+  }
+
   // State for macros
   double _loggedCalories = 0.0;
   double _loggedProtein = 0.0;

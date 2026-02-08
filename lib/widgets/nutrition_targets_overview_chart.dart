@@ -7,8 +7,13 @@ import 'package:provider/provider.dart';
 
 class NutritionTargetsOverviewChart extends StatefulWidget {
   final List<NutritionTarget> nutritionData;
+  final List<DateTime> dates;
 
-  const NutritionTargetsOverviewChart({super.key, required this.nutritionData});
+  const NutritionTargetsOverviewChart({
+    super.key,
+    required this.nutritionData,
+    required this.dates,
+  });
 
   @override
   State<NutritionTargetsOverviewChart> createState() =>
@@ -21,7 +26,8 @@ class _NutritionTargetsOverviewChartState
 
   @override
   Widget build(BuildContext context) {
-    final weekdays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    const dayLetters = {1: 'M', 2: 'T', 3: 'W', 4: 'T', 5: 'F', 6: 'S', 7: 'S'};
+    final weekdays = widget.dates.map((d) => dayLetters[d.weekday]!).toList();
 
     return Consumer<NavigationProvider>(
       builder: (context, navProvider, child) {

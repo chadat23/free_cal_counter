@@ -8,6 +8,12 @@ import 'package:provider/provider.dart';
 
 void main() {
   group('NutritionTargetsOverviewChart', () {
+    // Wed Feb 4 through Tue Feb 10, 2026 → labels: W, T, F, S, S, M, T
+    final List<DateTime> mockDates = List.generate(
+      7,
+      (i) => DateTime(2026, 2, 4).add(Duration(days: i)),
+    );
+
     final List<NutritionTarget> mockNutritionData = [
       NutritionTarget(
         color: Colors.blue,
@@ -68,6 +74,7 @@ void main() {
           home: Scaffold(
             body: NutritionTargetsOverviewChart(
               nutritionData: mockNutritionData,
+              dates: mockDates,
             ),
           ),
         ),
@@ -84,14 +91,15 @@ void main() {
       expect(find.byType(VerticalMiniBarChart), findsNWidgets(35));
     });
 
-    testWidgets('renders weekday labels', (WidgetTester tester) async {
+    testWidgets('renders weekday labels matching passed-in dates', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
 
-      expect(find.text('M'), findsOneWidget);
-      expect(find.text('T'), findsNWidgets(2)); // Tuesday and Thursday
+      // Dates are Wed Feb 4 – Tue Feb 10 → W, T, F, S, S, M, T
       expect(find.text('W'), findsOneWidget);
+      expect(find.text('T'), findsNWidgets(2)); // Thursday and Tuesday
       expect(find.text('F'), findsOneWidget);
       expect(find.text('S'), findsNWidgets(2)); // Saturday and Sunday
+      expect(find.text('M'), findsOneWidget);
     });
 
     testWidgets('renders formatted nutrient values for selected day (defaults to today/day 6)', (

@@ -22,6 +22,7 @@ class OverviewScreen extends StatefulWidget {
 
 class _OverviewScreenState extends State<OverviewScreen> {
   List<NutritionTarget> _nutritionData = [];
+  List<DateTime> _nutritionDates = [];
   List<Weight> _weightHistory = [];
   List<double> _maintenanceHistory = [];
   bool _isLoading = true;
@@ -139,6 +140,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
       // Process stats into NutritionTargets
       if (mounted) {
         setState(() {
+          _nutritionDates = stats.map((s) => s.date).toList();
           _nutritionData = _buildTargets(stats, goals);
           _weightHistory = weightProvider.weights.where((w) {
             final d = DateTime(w.date.year, w.date.month, w.date.day);
@@ -285,6 +287,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
                         padding: const EdgeInsets.all(8.0),
                         child: NutritionTargetsOverviewChart(
                           nutritionData: _nutritionData,
+                          dates: _nutritionDates,
                         ),
                       ),
                       Padding(

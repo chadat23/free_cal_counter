@@ -1,65 +1,80 @@
-import 'package:workmanager/workmanager.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:free_cal_counter1/services/backup_config_service.dart';
+import 'package:free_cal_counter1/services/database_service.dart';
 import 'package:free_cal_counter1/services/google_drive_service.dart';
-import 'package:free_cal_counter1/services/live_database.dart';
 
-const String backupTaskKey = "com.free_cal_counter1.backupTask";
+/// Attempts an automatic cloud backup if all conditions are met:
+/// enabled, signed in, data is dirty, and 24h+ since last backup.
+///
+/// If [force] is true, skips the dirty and cooldown checks (used when
+/// the user first enables auto-backup).
+///
+/// Runs silently — logs via debugPrint but never throws.
+Future<bool> tryAutoBackup({
+  BackupConfigService? configService,
+  GoogleDriveService? driveService,
+  bool force = false,
+}) async {
+  final config = configService ?? BackupConfigService.instance;
+  final drive = driveService ?? GoogleDriveService.instance;
 
-@pragma('vm:entry-point')
-void callbackDispatcher() {
-  Workmanager().executeTask((task, inputData) async {
-    if (task == backupTaskKey) {
-      debugPrint("Starting background backup task...");
+  try {
+    final isEnabled = await config.isAutoBackupEnabled();
+    if (!isEnabled) {
+      debugPrint('tryAutoBackup: Auto backup disabled. Skipping.');
+      return false;
+    }
 
-      try {
-        final config = BackupConfigService.instance;
-        final isEnabled = await config.isAutoBackupEnabled();
+    if (!force) {
+      final isDirty = await config.isDirty();
+      if (!isDirty) {
+        debugPrint('tryAutoBackup: Database not dirty. Skipping.');
+        return false;
+      }
 
-        if (!isEnabled) {
-          debugPrint("Auto backup disabled. Skipping.");
-          return Future.value(true);
+      final lastBackup = await config.getLastBackupTime();
+      if (lastBackup != null) {
+        final elapsed = DateTime.now().difference(lastBackup);
+        if (elapsed < const Duration(hours: 24)) {
+          debugPrint(
+            'tryAutoBackup: Last backup was ${elapsed.inHours}h ago. Skipping.',
+          );
+          return false;
         }
-
-        final isDirty = await config.isDirty();
-        if (!isDirty) {
-          debugPrint("Database not dirty. Skipping backup.");
-          return Future.value(true);
-        }
-
-        final driveService = GoogleDriveService.instance;
-        final account = await driveService.refreshCurrentUser();
-
-        if (account == null) {
-          debugPrint("Not signed in to Google. Cannot backup.");
-          return Future.value(true);
-        }
-
-        final dbFile = await getLiveDbFile();
-        if (!dbFile.existsSync()) {
-          debugPrint("Live database file not found.");
-          return Future.value(true);
-        }
-
-        final retention = await config.getRetentionCount();
-        final success = await driveService.uploadBackup(
-          dbFile,
-          retentionCount: retention,
-        );
-
-        if (success) {
-          await config.clearDirty();
-          await config.updateLastBackupTime();
-          debugPrint("Backup successful!");
-        } else {
-          debugPrint("Backup failed during upload.");
-          return Future.value(false); // Retry
-        }
-      } catch (e) {
-        debugPrint("Background Backup Error: $e");
-        return Future.value(false);
       }
     }
-    return Future.value(true);
-  });
+
+    final account = await drive.refreshCurrentUser();
+    if (account == null) {
+      debugPrint('tryAutoBackup: Not signed in to Google. Skipping.');
+      return false;
+    }
+
+    debugPrint('tryAutoBackup: Starting backup...');
+    final zipFile = await DatabaseService.instance.exportBackupAsZip();
+
+    final retention = await config.getRetentionCount();
+    final success = await drive.uploadBackup(
+      zipFile,
+      retentionCount: retention,
+    );
+
+    // Clean up temp zip
+    try {
+      await zipFile.delete();
+    } catch (_) {}
+
+    if (success) {
+      await config.clearDirty();
+      await config.updateLastBackupTime();
+      debugPrint('tryAutoBackup: Backup successful!');
+      return true;
+    } else {
+      debugPrint('tryAutoBackup: Upload failed.');
+      return false;
+    }
+  } catch (e) {
+    debugPrint('tryAutoBackup: Error: $e');
+    return false;
+  }
 }

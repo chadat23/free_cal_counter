@@ -522,6 +522,12 @@ class MockSearchProvider extends _i1.Mock implements _i15.SearchProvider {
   );
 
   @override
+  void clearSearch() => super.noSuchMethod(
+    Invocation.method(#clearSearch, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
   void setSearchMode(_i17.SearchMode? mode) => super.noSuchMethod(
     Invocation.method(#setSearchMode, [mode]),
     returnValueForMissingStub: null,

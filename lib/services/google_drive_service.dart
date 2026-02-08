@@ -3,9 +3,6 @@ import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sig
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
-import 'package:path/path.dart' as p;
-import 'package:archive/archive.dart';
-import 'package:free_cal_counter1/services/image_storage_service.dart';
 
 class GoogleDriveService {
   // Singleton pattern
@@ -102,10 +99,9 @@ class GoogleDriveService {
     return drive.DriveApi(authClient);
   }
 
-  /// Uploads database file and images to App Data folder in Google Drive.
-  /// Creates a zip file containing the database and images folder.
+  /// Uploads a pre-built backup zip to the App Data folder in Google Drive.
   /// If [retentionCount] is provided, it deletes older backups exceeding that count.
-  Future<bool> uploadBackup(File file, {int retentionCount = 7}) async {
+  Future<bool> uploadBackup(File zipFile, {int retentionCount = 7}) async {
     try {
       debugPrint('GoogleDriveService: Starting backup upload...');
       final api = await _getDriveApi();
@@ -115,46 +111,6 @@ class GoogleDriveService {
         );
         return false;
       }
-
-      // Create zip file containing database and images
-      final archive = Archive();
-
-      // Add database file to archive
-      final dbBytes = await file.readAsBytes();
-      final dbFile = ArchiveFile('free_cal.db', dbBytes.length, dbBytes);
-      archive.addFile(dbFile);
-
-      // Add images folder to archive
-      final imagesDir = await ImageStorageService.instance.getImagesDirectory();
-      if (await imagesDir.exists()) {
-        debugPrint('GoogleDriveService: Adding images to backup zip...');
-        await for (final entity in imagesDir.list(recursive: true)) {
-          if (entity is File) {
-            final relativePath = p.relative(
-              entity.path,
-              from: imagesDir.parent.path,
-            );
-            final imageBytes = await entity.readAsBytes();
-            final imageFile = ArchiveFile(
-              relativePath,
-              imageBytes.length,
-              imageBytes,
-            );
-            archive.addFile(imageFile);
-          }
-        }
-      }
-
-      // Create zip file
-      final zipBytes = ZipEncoder().encode(archive);
-      if (zipBytes == null) {
-        debugPrint('GoogleDriveService: Failed to create zip file');
-        return false;
-      }
-      final zipFile = File(
-        '${file.parent.path}/backup_${DateTime.now().millisecondsSinceEpoch}.zip',
-      );
-      await zipFile.writeAsBytes(zipBytes);
 
       final fileName =
           'free_cal_backup_${DateTime.now().toIso8601String()}.zip';
@@ -167,9 +123,6 @@ class GoogleDriveService {
       debugPrint('GoogleDriveService: Uploading $fileName to Drive...');
       await api.files.create(driveFile, uploadMedia: media);
       debugPrint('GoogleDriveService: Upload complete.');
-
-      // Clean up temporary zip file
-      await zipFile.delete();
 
       if (retentionCount > 0) {
         await _enforceRetentionPolicy(api, retentionCount);

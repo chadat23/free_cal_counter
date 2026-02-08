@@ -1,7 +1,5 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:workmanager/workmanager.dart';
 import 'package:free_cal_counter1/services/background_backup_worker.dart';
 import 'package:free_cal_counter1/config/app_router.dart';
 import 'package:free_cal_counter1/providers/navigation_provider.dart';
@@ -47,13 +45,6 @@ class _MyAppState extends State<MyApp> {
     try {
       debugPrint('MyApp: Starting initialization...');
 
-      if (Platform.isAndroid || Platform.isIOS) {
-        await Workmanager().initialize(
-          callbackDispatcher,
-          isInDebugMode: false,
-        );
-      }
-
       await DatabaseService.instance.init();
 
       if (kDebugMode) {
@@ -72,6 +63,9 @@ class _MyAppState extends State<MyApp> {
         });
       }
       debugPrint('MyApp: Initialization complete.');
+
+      // Fire-and-forget: attempt auto-backup if conditions are met
+      tryAutoBackup();
     } catch (e, stack) {
       debugPrint('MyApp: Initialization error: $e');
       debugPrint(stack.toString());

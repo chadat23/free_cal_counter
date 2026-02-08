@@ -111,4 +111,36 @@ void main() {
       expect(find.text('SIGN OUT'), findsOneWidget);
     });
   });
+
+  group('Backup to Cloud card visibility', () {
+    testWidgets('shows Backup to Cloud card when signed in', (tester) async {
+      // Arrange
+      final mockUser = MockGoogleSignInAccount();
+      when(mockUser.email).thenReturn('test@example.com');
+      when(mockDriveService.currentUser).thenReturn(mockUser);
+      when(
+        mockDriveService.refreshCurrentUser(),
+      ).thenAnswer((_) async => mockUser);
+
+      await tester.pumpWidget(createSubject());
+      await tester.pumpAndSettle();
+
+      // Assert
+      expect(find.text('Backup to Cloud'), findsOneWidget);
+      expect(find.text('Restore from Cloud'), findsOneWidget);
+    });
+
+    testWidgets('hides Backup to Cloud card when not signed in', (
+      tester,
+    ) async {
+      // Arrange — default stubs have refreshCurrentUser returning null
+
+      await tester.pumpWidget(createSubject());
+      await tester.pumpAndSettle();
+
+      // Assert
+      expect(find.text('Backup to Cloud'), findsNothing);
+      expect(find.text('Restore from Cloud'), findsNothing);
+    });
+  });
 }

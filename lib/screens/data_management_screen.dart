@@ -8,7 +8,6 @@ import 'package:free_cal_counter1/services/backup_config_service.dart';
 import 'package:free_cal_counter1/services/google_drive_service.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:free_cal_counter1/services/background_backup_worker.dart';
-import 'package:workmanager/workmanager.dart';
 import 'package:intl/intl.dart';
 import 'package:free_cal_counter1/utils/ui_utils.dart';
 import 'package:provider/provider.dart';
@@ -178,30 +177,19 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
         // 2. Enable Config
         await _backupConfigService.setAutoBackupEnabled(true);
 
-        // 3. Register Worker (Daily)
-        debugPrint('DataManagementScreen: Registering Workmanager task...');
-        await Workmanager().registerPeriodicTask(
-          backupTaskKey,
-          backupTaskKey,
-          frequency: const Duration(days: 1),
-          constraints: Constraints(
-            networkType: NetworkType.connected,
-            requiresBatteryNotLow: true,
-          ),
-          existingWorkPolicy: ExistingPeriodicWorkPolicy.update,
-        );
-        debugPrint('DataManagementScreen: Workmanager task registered.');
+        // 3. Perform first backup immediately
+        debugPrint('DataManagementScreen: Running first backup...');
+        tryAutoBackup(force: true);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Daily cloud backup enabled!')),
+            const SnackBar(content: Text('Cloud backup enabled!')),
           );
         }
       } else {
         // Turning OFF
         debugPrint('DataManagementScreen: Disabling auto-backup...');
         await _backupConfigService.setAutoBackupEnabled(false);
-        await Workmanager().cancelByUniqueName(backupTaskKey);
         debugPrint('DataManagementScreen: Auto-backup disabled.');
 
         if (mounted) {
@@ -266,6 +254,50 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Export failed: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _isRestoring = false);
+    }
+  }
+
+  Future<void> _backupToCloud() async {
+    try {
+      setState(() => _isRestoring = true);
+      final zipFile = await DatabaseService.instance.exportBackupAsZip();
+
+      final retention = await _backupConfigService.getRetentionCount();
+      final success = await _driveService.uploadBackup(
+        zipFile,
+        retentionCount: retention,
+      );
+
+      // Clean up temp zip
+      try {
+        await zipFile.delete();
+      } catch (_) {}
+
+      if (success) {
+        await _backupConfigService.clearDirty();
+        await _backupConfigService.updateLastBackupTime();
+        final lastTime = await _backupConfigService.getLastBackupTime();
+        if (mounted) {
+          setState(() => _lastBackupTime = lastTime);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Cloud backup successful!')),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Cloud backup upload failed.')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Cloud backup failed: $e')),
+        );
       }
     } finally {
       if (mounted) setState(() => _isRestoring = false);
@@ -487,6 +519,21 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                   ),
                 ),
                 if (_googleEmail != null) ...[
+                  const SizedBox(height: 16),
+                  Card(
+                    color: Colors.grey[900],
+                    child: ListTile(
+                      leading: const Icon(
+                        Icons.cloud_upload,
+                        color: Colors.orange,
+                      ),
+                      title: const Text('Backup to Cloud'),
+                      subtitle: const Text(
+                        'Upload a backup to Google Drive now.',
+                      ),
+                      onTap: _backupToCloud,
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   Card(
                     color: Colors.grey[900],

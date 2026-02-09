@@ -131,22 +131,26 @@ class GoalsProvider extends ChangeNotifier {
     await _loadFromPrefs();
   }
 
-  /// Checks if today is Monday and if we need to update the weekly targets.
+  /// Checks if we need to update the weekly targets.
+  /// Triggers on the first app open on or after the next Monday.
   Future<void> checkWeeklyUpdate() async {
     final now = _clock();
     final today = DateTime(now.year, now.month, now.day);
 
-    if (now.weekday == DateTime.monday) {
-      final lastUpdate = DateTime(
-        _settings.lastTargetUpdate.year,
-        _settings.lastTargetUpdate.month,
-        _settings.lastTargetUpdate.day,
-      );
+    // Find the most recent Monday (today if Monday, else look back)
+    final daysSinceMonday = (today.weekday - DateTime.monday) % 7;
+    final lastMonday = today.subtract(Duration(days: daysSinceMonday));
 
-      if (today.isAfter(lastUpdate)) {
-        await recalculateTargets(isInitialSetup: false);
-        _showUpdateNotification = true;
-      }
+    final lastUpdate = DateTime(
+      _settings.lastTargetUpdate.year,
+      _settings.lastTargetUpdate.month,
+      _settings.lastTargetUpdate.day,
+    );
+
+    // Trigger if the last update was before the most recent Monday
+    if (lastMonday.isAfter(lastUpdate)) {
+      await recalculateTargets(isInitialSetup: false);
+      _showUpdateNotification = true;
     }
   }
 
@@ -178,7 +182,8 @@ class GoalsProvider extends ChangeNotifier {
       // Smart mode: use Kalman TDEE
       final now = _clock();
       final today = DateTime(now.year, now.month, now.day);
-      final analysisStart = today.subtract(const Duration(days: 90));
+      final yesterday = today.subtract(const Duration(days: 1));
+      final analysisStart = yesterday.subtract(const Duration(days: 90));
 
       // 1. Fetch weights
       final weights = await _databaseService.getWeightsForRange(
@@ -207,7 +212,7 @@ class GoalsProvider extends ChangeNotifier {
           analysisStart,
           now,
         );
-        final dailyStats = DailyMacroStats.fromDTOS(dtos, analysisStart, today);
+        final dailyStats = DailyMacroStats.fromDTOS(dtos, analysisStart, yesterday);
 
         // 4. Build parallel arrays for the 90-day range
         final Map<int, DailyMacroStats> statsMap = {
@@ -226,7 +231,7 @@ class GoalsProvider extends ChangeNotifier {
         final List<bool> intakeIsValid = [];
 
         var current = analysisStart;
-        while (!current.isAfter(today)) {
+        while (!current.isAfter(yesterday)) {
           final key = DateTime(current.year, current.month, current.day)
               .millisecondsSinceEpoch;
           dailyWeights.add(weightMap[key] ?? 0.0);

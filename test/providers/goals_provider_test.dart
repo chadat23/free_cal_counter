@@ -361,7 +361,9 @@ void main() {
       expect(provider.showUpdateNotification, isFalse);
     });
 
-    test('non-Monday -> no recalc', () async {
+    test('Tuesday after missed Monday with old lastUpdate -> triggers recalc',
+        () async {
+      // Tuesday Jan 16, lastUpdate is Jan 8 (before Monday Jan 15)
       final now = DateTime(2024, 1, 16, 10); // Tuesday
       when(mockDatabaseService.getWeightsForRange(any, any))
           .thenAnswer((_) async => []);
@@ -375,7 +377,7 @@ void main() {
         mode: GoalMode.maintain,
         calculationMode: MacroCalculationMode.proteinCarbs,
         fixedDelta: 0,
-        lastTargetUpdate: DateTime(2024, 1, 8), // old
+        lastTargetUpdate: DateTime(2024, 1, 8), // before last Monday (Jan 15)
         useMetric: false,
         fiberTarget: 37.0,
         enableSmartTargets: true,
@@ -384,7 +386,35 @@ void main() {
       final provider =
           await createProvider(now: now, initialSettings: settings);
 
-      // Tuesday, no weekly check
+      // Tuesday, but lastUpdate is before last Monday -> triggers recalc
+      expect(provider.showUpdateNotification, isTrue);
+    });
+
+    test('Wednesday after already-updated Tuesday -> no recalc', () async {
+      // Wednesday Jan 17, lastUpdate is Tuesday Jan 16 (after Monday Jan 15)
+      final now = DateTime(2024, 1, 17, 10); // Wednesday
+      when(mockDatabaseService.getWeightsForRange(any, any))
+          .thenAnswer((_) async => []);
+
+      final settings = GoalSettings(
+        anchorWeight: 100.0,
+        maintenanceCaloriesStart: 2000,
+        proteinTarget: 150,
+        fatTarget: 70,
+        carbTarget: 200,
+        mode: GoalMode.maintain,
+        calculationMode: MacroCalculationMode.proteinCarbs,
+        fixedDelta: 0,
+        lastTargetUpdate: DateTime(2024, 1, 16), // Tuesday, after last Monday
+        useMetric: false,
+        fiberTarget: 37.0,
+        enableSmartTargets: true,
+      );
+
+      final provider =
+          await createProvider(now: now, initialSettings: settings);
+
+      // lastUpdate (Tue Jan 16) is after lastMonday (Mon Jan 15) -> no recalc
       expect(provider.showUpdateNotification, isFalse);
     });
   });
@@ -435,6 +465,70 @@ void main() {
 
       // Should complete without error; fasted day is valid intake
       expect(provider.currentGoals.calories, isNotNull);
+    });
+
+    test('partial-day intake (today) excluded from Kalman analysis', () async {
+      final now = DateTime(2024, 1, 15, 14); // Monday 2pm
+      final today = DateTime(now.year, now.month, now.day);
+      final yesterday = today.subtract(const Duration(days: 1));
+      final weights = buildRecentWeights(now, 14);
+
+      when(mockDatabaseService.getWeightsForRange(any, any))
+          .thenAnswer((_) async => weights);
+
+      // Build stable 2000 cal intake for past 90 days through yesterday
+      final analysisStart = yesterday.subtract(const Duration(days: 90));
+      final dtos = <LoggedMacroDTO>[];
+      var d = analysisStart;
+      while (!d.isAfter(yesterday)) {
+        dtos.add(LoggedMacroDTO(
+          logTimestamp: d,
+          grams: 100.0,
+          caloriesPerGram: 20.0, // 2000 cal total
+          proteinPerGram: 1.5,
+          fatPerGram: 0.7,
+          carbsPerGram: 2.0,
+          fiberPerGram: 0.38,
+        ));
+        d = d.add(const Duration(days: 1));
+      }
+      // Add today's partial intake: only 300 cal logged so far
+      dtos.add(LoggedMacroDTO(
+        logTimestamp: today,
+        grams: 100.0,
+        caloriesPerGram: 3.0, // 300 cal
+        proteinPerGram: 0.5,
+        fatPerGram: 0.2,
+        carbsPerGram: 0.5,
+        fiberPerGram: 0.1,
+      ));
+
+      when(mockDatabaseService.getLoggedMacrosForDateRange(any, any))
+          .thenAnswer((_) async => dtos);
+
+      final settings = GoalSettings(
+        anchorWeight: 100.0,
+        maintenanceCaloriesStart: 2000,
+        proteinTarget: 150,
+        fatTarget: 70,
+        carbTarget: 200,
+        mode: GoalMode.maintain,
+        calculationMode: MacroCalculationMode.proteinCarbs,
+        fixedDelta: 0,
+        lastTargetUpdate: DateTime(2024, 1, 1),
+        useMetric: false,
+        fiberTarget: 37.0,
+        enableSmartTargets: true,
+      );
+
+      final provider =
+          await createProvider(now: now, initialSettings: settings);
+
+      // Today's 300 cal partial log should NOT distort TDEE.
+      // With stable weight + 2000 cal intake through yesterday, TDEE ~ 2000.
+      expect(provider.currentGoals.calories, closeTo(2000.0, 150.0));
+      // Specifically: TDEE should NOT be inflated by treating 300 cal as a full day
+      expect(provider.settings.maintenanceCaloriesStart, greaterThan(1500.0));
     });
 
     test('day with 0 cal + logCount == 0 -> excluded from Kalman', () async {

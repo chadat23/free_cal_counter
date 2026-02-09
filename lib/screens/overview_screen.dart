@@ -74,15 +74,16 @@ class _OverviewScreenState extends State<OverviewScreen> {
       final stats = await logProvider.getDailyMacroStats(start, today);
       final goals = goalsProvider.currentGoals;
 
+      final yesterday = today.subtract(const Duration(days: 1));
       final rangeStart = today.subtract(Duration(days: _weightRangeDays));
       final window = GoalLogicService.kTdeeWindowDays;
       final analysisStart = rangeStart.subtract(Duration(days: window));
 
       final analysisStats = await logProvider.getDailyMacroStats(
         analysisStart,
-        today,
+        yesterday,
       );
-      // Ensure weights are loaded for the full analysis window
+      // Ensure weights are loaded for the full analysis window (today's weight still counts)
       await weightProvider.loadWeights(analysisStart, today);
       final analysisWeights = weightProvider.weights;
 
@@ -103,7 +104,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
       };
 
       var current = analysisStart;
-      while (!current.isAfter(today)) {
+      while (!current.isAfter(yesterday)) {
         final dateOnly = DateTime(current.year, current.month, current.day);
         dailyWeights.add(weightMap[dateOnly] ?? 0.0);
 

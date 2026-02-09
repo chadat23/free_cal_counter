@@ -18,7 +18,6 @@ class GoalSettings {
   final DateTime lastTargetUpdate;
   final bool useMetric;
   final bool isSet;
-  final int tdeeWindowDays;
   final bool enableSmartTargets;
 
   GoalSettings({
@@ -34,7 +33,6 @@ class GoalSettings {
     required this.lastTargetUpdate,
     this.useMetric = false,
     this.isSet = true,
-    this.tdeeWindowDays = 14,
     this.enableSmartTargets = true,
   });
 
@@ -61,7 +59,6 @@ class GoalSettings {
       ),
       useMetric: json['useMetric'] as bool? ?? false,
       isSet: json['isSet'] as bool? ?? true,
-      tdeeWindowDays: json['tdeeWindowDays'] as int? ?? 30,
       enableSmartTargets: json['enableSmartTargets'] as bool? ?? true,
     );
   }
@@ -80,7 +77,6 @@ class GoalSettings {
       'lastTargetUpdate': lastTargetUpdate.millisecondsSinceEpoch,
       'useMetric': useMetric,
       'isSet': isSet,
-      'tdeeWindowDays': tdeeWindowDays,
       'enableSmartTargets': enableSmartTargets,
     };
   }
@@ -100,7 +96,6 @@ class GoalSettings {
       lastTargetUpdate: DateTime(2000), // Far in the past to trigger update
       useMetric: false,
       isSet: false,
-      tdeeWindowDays: 30,
       enableSmartTargets: true,
     );
   }
@@ -119,7 +114,6 @@ class GoalSettings {
     DateTime? lastTargetUpdate,
     bool? useMetric,
     bool? isSet,
-    int? tdeeWindowDays,
     bool? enableSmartTargets,
   }) {
     return GoalSettings(
@@ -136,7 +130,6 @@ class GoalSettings {
       lastTargetUpdate: lastTargetUpdate ?? this.lastTargetUpdate,
       useMetric: useMetric ?? this.useMetric,
       isSet: isSet ?? this.isSet,
-      tdeeWindowDays: tdeeWindowDays ?? this.tdeeWindowDays,
       enableSmartTargets: enableSmartTargets ?? this.enableSmartTargets,
     );
   }

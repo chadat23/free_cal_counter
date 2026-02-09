@@ -44,6 +44,37 @@ void main() {
       expect(settings.mode, GoalMode.maintain);
       expect(settings.anchorWeight, 0.0);
     });
+
+    test('old JSON with tdeeWindowDays still deserializes without error', () {
+      // Simulate JSON from an older version that had tdeeWindowDays
+      final oldJson = {
+        'anchorWeight': 80.0,
+        'maintenanceCaloriesStart': 2500.0,
+        'proteinTarget': 160.0,
+        'fatTarget': 70.0,
+        'carbTarget': 250.0,
+        'fiberTarget': 38.0,
+        'mode': 'GoalMode.lose',
+        'calculationMode': 'MacroCalculationMode.proteinCarbs',
+        'fixedDelta': 500.0,
+        'lastTargetUpdate': DateTime(2023, 10, 1).millisecondsSinceEpoch,
+        'useMetric': true,
+        'isSet': true,
+        'tdeeWindowDays': 30, // old field
+        'enableSmartTargets': true,
+      };
+
+      // Should not throw
+      final decoded = GoalSettings.fromJson(oldJson);
+      expect(decoded.anchorWeight, 80.0);
+      expect(decoded.enableSmartTargets, true);
+    });
+
+    test('toJson should not contain tdeeWindowDays', () {
+      final settings = GoalSettings.defaultSettings();
+      final json = settings.toJson();
+      expect(json.containsKey('tdeeWindowDays'), isFalse);
+    });
   });
 
   group('MacroGoals', () {

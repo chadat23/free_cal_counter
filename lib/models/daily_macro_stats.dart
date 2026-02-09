@@ -25,6 +25,7 @@ class DailyMacroStats {
   final double fat;
   final double carbs;
   final double fiber;
+  final int logCount;
 
   DailyMacroStats({
     required this.date,
@@ -33,6 +34,7 @@ class DailyMacroStats {
     this.fat = 0,
     this.carbs = 0,
     this.fiber = 0,
+    this.logCount = 0,
   });
 
   static List<DailyMacroStats> fromDTOS(
@@ -74,6 +76,7 @@ class DailyMacroStats {
           fat: current.fat + (dto.fatPerGram * dto.grams),
           carbs: current.carbs + (dto.carbsPerGram * dto.grams),
           fiber: current.fiber + (dto.fiberPerGram * dto.grams),
+          logCount: current.logCount + 1,
         );
       }
     }

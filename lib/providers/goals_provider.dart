@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:free_cal_counter1/models/goal_settings.dart';
 import 'package:free_cal_counter1/models/macro_goals.dart';
 import 'package:free_cal_counter1/services/database_service.dart';
+import 'package:free_cal_counter1/models/daily_macro_stats.dart';
 import 'package:free_cal_counter1/services/goal_logic_service.dart';
 
 class GoalsProvider extends ChangeNotifier {
@@ -18,13 +19,14 @@ class GoalsProvider extends ChangeNotifier {
   bool _hasSeenWelcome = false;
 
   final DatabaseService _databaseService;
+  final DateTime Function() _clock;
 
-  GoalsProvider({DatabaseService? databaseService})
-    : _databaseService = databaseService ?? DatabaseService.instance {
+  GoalsProvider({DatabaseService? databaseService, DateTime Function()? clock})
+    : _databaseService = databaseService ?? DatabaseService.instance,
+      _clock = clock ?? DateTime.now {
     _loadFromPrefs();
   }
 
-  // Getters
   // Getters
   GoalSettings get settings => _settings;
   MacroGoals get currentGoals => _currentGoals ?? MacroGoals.hardcoded();
@@ -131,7 +133,7 @@ class GoalsProvider extends ChangeNotifier {
 
   /// Checks if today is Monday and if we need to update the weekly targets.
   Future<void> checkWeeklyUpdate() async {
-    final now = DateTime.now();
+    final now = _clock();
     final today = DateTime(now.year, now.month, now.day);
 
     if (now.weekday == DateTime.monday) {
@@ -156,12 +158,10 @@ class GoalsProvider extends ChangeNotifier {
     final useManualLogic = isInitialSetup || !_settings.enableSmartTargets;
 
     if (useManualLogic) {
-      // First week logic
+      // Manual mode: maintenance ± delta
       if (_settings.mode == GoalMode.maintain) {
-        // Just maintenance for first week
         targetCalories = _settings.maintenanceCaloriesStart;
       } else {
-        // Lose/Gain: maintenance ± delta for first week
         double delta = _settings.fixedDelta;
         if (_settings.mode == GoalMode.lose) {
           delta = -delta.abs();
@@ -171,60 +171,112 @@ class GoalsProvider extends ChangeNotifier {
         targetCalories = _settings.maintenanceCaloriesStart + delta;
       }
 
-      // Set lastTargetUpdate to next Monday for initial setup
       _settings = _settings.copyWith(
-        lastTargetUpdate: _getNextMonday(DateTime.now()),
+        lastTargetUpdate: _getNextMonday(_clock()),
       );
     } else {
-      // Normal weekly update logic
-      // 1. Fetch weight history for trend calculation
-      final now = DateTime.now();
-      // We need at least some history. 30 days is the correction window.
-      final history = await _databaseService.getWeightsForRange(
-        now.subtract(
-          const Duration(days: 90),
-        ), // Get up to 90 days for stable EMA
+      // Smart mode: use Kalman TDEE
+      final now = _clock();
+      final today = DateTime(now.year, now.month, now.day);
+      final analysisStart = today.subtract(const Duration(days: 90));
+
+      // 1. Fetch weights
+      final weights = await _databaseService.getWeightsForRange(
+        analysisStart,
         now,
       );
 
-      if (history.isNotEmpty) {
-        final trendWeight = GoalLogicService.calculateTrendWeight(history);
-
-        double delta = 0.0;
+      // 2. Cold boot check
+      if (!GoalLogicService.hasEnoughWeightData(weights, now: now)) {
+        // Fall back to manual mode
         if (_settings.mode == GoalMode.maintain) {
-          // Dynamic drift correction
-          delta = GoalLogicService.calculateMaintenanceDelta(
-            anchorWeight: _settings.anchorWeight,
-            currentTrendWeight: trendWeight,
-            isMetric: _settings.useMetric,
-          );
-          targetCalories += delta;
+          targetCalories = _settings.maintenanceCaloriesStart;
         } else {
-          // For Lose/Gain: dynamically adjust maintenance calories based on trend weight
-          // Calculate weight ratio and apply to baseline maintenance calories
-          final weightRatio = _settings.anchorWeight > 0
-              ? trendWeight / _settings.anchorWeight
-              : 1.0;
-          final adjustedMaintenanceCalories =
-              _settings.maintenanceCaloriesStart * weightRatio;
-
-          // Apply fixed delta to the adjusted maintenance calories
-          delta = _settings.fixedDelta;
+          double delta = _settings.fixedDelta;
           if (_settings.mode == GoalMode.lose) {
             delta = -delta.abs();
           } else {
             delta = delta.abs();
           }
-
-          targetCalories = adjustedMaintenanceCalories + delta;
+          targetCalories = _settings.maintenanceCaloriesStart + delta;
         }
-      }
+        _settings = _settings.copyWith(lastTargetUpdate: _clock());
+      } else {
+        // 3. Fetch intake data
+        final dtos = await _databaseService.getLoggedMacrosForDateRange(
+          analysisStart,
+          now,
+        );
+        final dailyStats = DailyMacroStats.fromDTOS(dtos, analysisStart, today);
 
-      // Set lastTargetUpdate to today for weekly updates
-      _settings = _settings.copyWith(lastTargetUpdate: DateTime.now());
+        // 4. Build parallel arrays for the 90-day range
+        final Map<int, DailyMacroStats> statsMap = {
+          for (var s in dailyStats)
+            DateTime(s.date.year, s.date.month, s.date.day)
+                .millisecondsSinceEpoch: s,
+        };
+        final Map<int, double> weightMap = {
+          for (var w in weights)
+            DateTime(w.date.year, w.date.month, w.date.day)
+                .millisecondsSinceEpoch: w.weight,
+        };
+
+        final List<double> dailyWeights = [];
+        final List<double> dailyIntakes = [];
+        final List<bool> intakeIsValid = [];
+
+        var current = analysisStart;
+        while (!current.isAfter(today)) {
+          final key = DateTime(current.year, current.month, current.day)
+              .millisecondsSinceEpoch;
+          dailyWeights.add(weightMap[key] ?? 0.0);
+          final stat = statsMap[key];
+          dailyIntakes.add(stat?.calories ?? 0.0);
+          intakeIsValid.add(stat != null && stat.logCount > 0);
+          current = current.add(const Duration(days: 1));
+        }
+
+        // 5. Run Kalman filter
+        final initialWeight = _settings.anchorWeight > 0
+            ? _settings.anchorWeight
+            : (weights.isNotEmpty ? weights.first.weight : 70.0);
+
+        final estimates = GoalLogicService.calculateKalmanTDEE(
+          weights: dailyWeights,
+          intakes: dailyIntakes,
+          initialTDEE: _settings.maintenanceCaloriesStart,
+          initialWeight: initialWeight,
+          isMetric: _settings.useMetric,
+          intakeIsValid: intakeIsValid,
+        );
+
+        if (estimates.isNotEmpty) {
+          final kalmanTDEE = estimates.last.clamp(800.0, 6000.0);
+
+          // Update maintenance baseline with Kalman result
+          _settings = _settings.copyWith(
+            maintenanceCaloriesStart: kalmanTDEE,
+          );
+
+          // Apply mode
+          if (_settings.mode == GoalMode.maintain) {
+            targetCalories = kalmanTDEE;
+          } else {
+            double delta = _settings.fixedDelta;
+            if (_settings.mode == GoalMode.lose) {
+              delta = -delta.abs();
+            } else {
+              delta = delta.abs();
+            }
+            targetCalories = kalmanTDEE + delta;
+          }
+        }
+
+        _settings = _settings.copyWith(lastTargetUpdate: _clock());
+      }
     }
 
-    // 2. Derive macros
+    // Derive macros
     final Map<String, double> macros;
     if (_settings.calculationMode == MacroCalculationMode.proteinFat) {
       macros = GoalLogicService.calculateMacrosFromProteinFat(
@@ -252,11 +304,11 @@ class GoalsProvider extends ChangeNotifier {
       'Calculated goals: calories=${_currentGoals!.calories}, protein=${_currentGoals!.protein}, fat=${_currentGoals!.fat}, carbs=${_currentGoals!.carbs}, fiber=${_currentGoals!.fiber}',
     );
 
-    // 3. Persist results
+    // Persist results
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_settingsKey, jsonEncode(_settings.toJson()));
     await prefs.setString(_targetsKey, jsonEncode(_currentGoals!.toJson()));
-    await prefs.reload(); // Ensure writes complete before reload
+    await prefs.reload();
 
     notifyListeners();
   }

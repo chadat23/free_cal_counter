@@ -75,7 +75,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
       final goals = goalsProvider.currentGoals;
 
       final rangeStart = today.subtract(Duration(days: _weightRangeDays));
-      final window = goalsProvider.settings.tdeeWindowDays;
+      final window = GoalLogicService.kTdeeWindowDays;
       final analysisStart = rangeStart.subtract(Duration(days: window));
 
       final analysisStats = await logProvider.getDailyMacroStats(
@@ -94,41 +94,39 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
       final List<double> dailyWeights = [];
       final List<double> dailyIntakes = [];
+      final List<bool> intakeIsValid = [];
+
+      // Build a stats map for O(1) lookup
+      final statsMap = {
+        for (var s in analysisStats)
+          DateTime(s.date.year, s.date.month, s.date.day): s,
+      };
 
       var current = analysisStart;
       while (!current.isAfter(today)) {
         final dateOnly = DateTime(current.year, current.month, current.day);
         dailyWeights.add(weightMap[dateOnly] ?? 0.0);
 
-        final stat = analysisStats.firstWhere(
-          (s) =>
-              s.date.year == current.year &&
-              s.date.month == current.month &&
-              s.date.day == current.day,
-          orElse: () => DailyMacroStats(
-            date: dateOnly,
-            calories: 0,
-            protein: 0,
-            fat: 0,
-            carbs: 0,
-            fiber: 0,
-          ),
-        );
-        dailyIntakes.add(stat.calories);
+        final stat = statsMap[dateOnly];
+        dailyIntakes.add(stat?.calories ?? 0.0);
+        intakeIsValid.add(stat != null && stat.logCount > 0);
 
         current = current.add(const Duration(days: 1));
       }
+
+      final initialWeight = goalsProvider.settings.anchorWeight > 0
+          ? goalsProvider.settings.anchorWeight
+          : (analysisWeights.isNotEmpty
+                ? analysisWeights.first.weight
+                : 0.0);
 
       final maintenanceTrend = GoalLogicService.calculateKalmanTDEE(
         weights: dailyWeights,
         intakes: dailyIntakes,
         initialTDEE: goalsProvider.settings.maintenanceCaloriesStart,
-        initialWeight: goalsProvider.settings.anchorWeight > 0
-            ? goalsProvider.settings.anchorWeight
-            : (analysisWeights.isNotEmpty
-                  ? analysisWeights.first.weight
-                  : 70.0),
+        initialWeight: initialWeight,
         isMetric: goalsProvider.settings.useMetric,
+        intakeIsValid: intakeIsValid,
       );
 
       // Extract the portion corresponding to the displayed range

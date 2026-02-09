@@ -2,6 +2,11 @@ import 'dart:math';
 import 'package:free_cal_counter1/models/weight.dart';
 
 class GoalLogicService {
+  static const int kTdeeWindowDays = 14;
+  static const int kMinWeightDays = 10;
+  static const double kCalPerLb = 3500.0;
+  static const double kCalPerKg = 7716.0;
+
   /// Calculates the smoothed "Trend Weight" from history.
   /// Uses a simple Exponential Moving Average (EMA).
   static double calculateTrendWeight(List<Weight> history) {
@@ -41,21 +46,6 @@ class GoalLogicService {
     }
 
     return trends;
-  }
-
-  /// Calculates the calorie delta for Maintenance mode based on drift.
-  /// Formula: (Anchor Weight - Current Trend Weight) / 30 * 3500
-  /// This assumes a 30-day correction window and ~3500 calories per pound of mass.
-  static double calculateMaintenanceDelta({
-    required double anchorWeight,
-    required double currentTrendWeight,
-    bool isMetric = false, // If true, assume kg and use 7716 cal/kg
-  }) {
-    final weightGap = anchorWeight - currentTrendWeight;
-    final dailyMassChangeRequired = weightGap / 30.0;
-
-    final multiplier = isMetric ? 7716.0 : 3500.0;
-    return dailyMassChangeRequired * multiplier;
   }
 
   /// Calculates the macro targets based on a calorie budget and fixed P/F targets.
@@ -121,10 +111,11 @@ class GoalLogicService {
     required double initialTDEE,
     required double initialWeight,
     bool isMetric = false,
+    List<bool>? intakeIsValid, // null = all valid
   }) {
     if (weights.isEmpty || intakes.isEmpty) return [];
 
-    final double C = isMetric ? 7716.0 : 3500.0;
+    final double C = isMetric ? kCalPerKg : kCalPerLb;
     final double invC = 1.0 / C;
 
     // State initialization
@@ -145,13 +136,16 @@ class GoalLogicService {
     final List<double> estimates = [];
 
     for (int i = 0; i < weights.length; i++) {
-      final double intake = intakes[i];
       final double observedWeight = weights[i];
+
+      // Use current TDEE estimate as intake when data is missing (neutral)
+      final double effectiveIntake =
+          (intakeIsValid == null || intakeIsValid[i]) ? intakes[i] : xTdee;
 
       // 1. Predict
       // x = Fx + Bu
       // F = [1, -invC; 0, 1], B = [invC; 0]
-      xWeight = xWeight + invC * (intake - xTdee);
+      xWeight = xWeight + invC * (effectiveIntake - xTdee);
       // xTdee remains same
 
       // P = FPF' + Q
@@ -176,15 +170,35 @@ class GoalLogicService {
         xTdee = xTdee + kT * z;
 
         // P = (I - KH)P
-        pWW = (1.0 - kW) * pWW;
-        pWT = (1.0 - kW) * pWT;
-        pTW = pTW - kT * pWW;
-        pTT = pTT - kT * pWT;
+        final oldPWW = pWW;
+        final oldPWT = pWT;
+        pWW = (1.0 - kW) * oldPWW;
+        pWT = (1.0 - kW) * oldPWT;
+        pTW = pTW - kT * oldPWW;
+        pTT = pTT - kT * oldPWT;
       }
 
       estimates.add(xTdee);
     }
 
     return estimates;
+  }
+
+  /// Returns true if there are at least [minDays] weight entries
+  /// within the last [windowDays] days.
+  static bool hasEnoughWeightData(
+    List<Weight> weights, {
+    int windowDays = kTdeeWindowDays,
+    int minDays = kMinWeightDays,
+    DateTime? now,
+  }) {
+    final today = now ?? DateTime.now();
+    final cutoff = DateTime(today.year, today.month, today.day)
+        .subtract(Duration(days: windowDays));
+    final recentCount = weights.where((w) {
+      final d = DateTime(w.date.year, w.date.month, w.date.day);
+      return !d.isBefore(cutoff);
+    }).length;
+    return recentCount >= minDays;
   }
 }

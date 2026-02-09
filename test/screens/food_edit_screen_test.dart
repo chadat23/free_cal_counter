@@ -280,8 +280,7 @@ void main() {
       expect(barcodes, contains('1234567890123'));
     });
 
-    // Skip this test - the edit food screen has a different layout that needs investigation
-    testWidgets('loads existing barcodes when editing food', skip: true, (tester) async {
+    testWidgets('loads existing barcodes when editing food', (tester) async {
       // First create a food with barcodes
       final foodId = await liveDb.into(liveDb.foods).insert(
             live_db.FoodsCompanion.insert(
@@ -309,6 +308,7 @@ void main() {
         fat: 0.0,
         carbs: 0.0,
         fiber: 0.0,
+        servings: [const FoodServing(foodId: 0, unit: 'g', grams: 1.0, quantity: 1.0)],
       );
 
       await tester.pumpWidget(
@@ -322,10 +322,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Scroll to find the barcode section using drag instead of scrollUntilVisible
-      // since the layout may be different for edit mode
-      await tester.drag(find.byType(ListView), const Offset(0, -1000));
-      await tester.pumpAndSettle();
+      await scrollToBarcodes(tester);
 
       // Both barcodes should be visible
       expect(find.text('1111111111'), findsOneWidget);

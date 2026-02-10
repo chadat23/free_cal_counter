@@ -243,7 +243,6 @@ class _TextSearchViewState extends State<TextSearchView> {
                           context,
                           newFood,
                           config,
-                          isUpdate: false,
                         );
                       }
                     } else {
@@ -289,7 +288,6 @@ class _TextSearchViewState extends State<TextSearchView> {
                           context,
                           newFood,
                           config,
-                          isUpdate: false,
                         );
                       }
                     } else {
@@ -334,29 +332,26 @@ class _TextSearchViewState extends State<TextSearchView> {
     );
   }
 
-  void _openQuantityEdit(
+  Future<void> _openQuantityEdit(
     BuildContext context,
     model_food.Food food,
-    SearchConfig config, {
-    bool isUpdate = false,
-    int? existingIndex,
-    model_portion.FoodPortion? existingPortion,
-  }) {
-    final unitServing = existingPortion != null
-        ? food.servings.firstWhere(
-            (s) => s.unit == existingPortion.unit,
-            orElse: () => food.servings.first,
-          )
-        : food.servings.first; // Default to first serving for new items
+    SearchConfig config,
+  ) async {
+    var initialUnit = food.servings.first.unit;
+    var initialQuantity = food.servings.first.quantity;
 
-    final initialUnit = existingPortion?.unit ?? unitServing.unit;
+    if (food.id != 0) {
+      final lastInfo = await DatabaseService.instance.getLastLoggedInfo(food.id);
+      if (lastInfo != null) {
+        final serving = food.servings.where((s) => s.unit == lastInfo.unit).firstOrNull;
+        if (serving != null) {
+          initialUnit = serving.unit;
+          initialQuantity = lastInfo.quantity;
+        }
+      }
+    }
 
-    // For new items, use serving quantity (which includes last logged info if available)
-    final initialQuantity = existingPortion != null
-        ? unitServing.quantityFromGrams(existingPortion.grams)
-        : unitServing.quantity;
-
-    final originalGrams = existingPortion?.grams ?? 0.0;
+    if (!context.mounted) return;
 
     Navigator.push(
       context,
@@ -365,10 +360,8 @@ class _TextSearchViewState extends State<TextSearchView> {
           config: QuantityEditConfig(
             context: config.context,
             food: food,
-            isUpdate: isUpdate,
             initialUnit: initialUnit,
             initialQuantity: initialQuantity,
-            originalGrams: originalGrams,
             onSave: (grams, unit, updatedFood) {
               final portion = model_portion.FoodPortion(
                 food: updatedFood ?? food,
@@ -376,26 +369,17 @@ class _TextSearchViewState extends State<TextSearchView> {
                 unit: unit,
               );
               if (config.onSaveOverride != null) {
-                // First pop closes QuantityEditScreen
                 Navigator.pop(context);
-                // Second pop closes SearchScreen via onSaveOverride
                 config.onSaveOverride!(portion);
               } else {
-                if (isUpdate && existingIndex != null) {
-                  Provider.of<LogProvider>(
-                    context,
-                    listen: false,
-                  ).updateFoodInQueue(existingIndex, portion);
-                } else {
-                  Provider.of<LogProvider>(
-                    context,
-                    listen: false,
-                  ).addFoodToQueue(portion);
-                  Provider.of<SearchProvider>(
-                    context,
-                    listen: false,
-                  ).clearSearch();
-                }
+                Provider.of<LogProvider>(
+                  context,
+                  listen: false,
+                ).addFoodToQueue(portion);
+                Provider.of<SearchProvider>(
+                  context,
+                  listen: false,
+                ).clearSearch();
                 Navigator.pop(context);
               }
             },
@@ -405,10 +389,10 @@ class _TextSearchViewState extends State<TextSearchView> {
     );
   }
 
-  void _handleBarcodeSearchResult(
+  Future<void> _handleBarcodeSearchResult(
     BuildContext context,
     SearchProvider searchProvider,
-  ) {
+  ) async {
     if (!mounted) return;
 
     final barcode = searchProvider.lastScannedBarcode;
@@ -427,7 +411,7 @@ class _TextSearchViewState extends State<TextSearchView> {
     } else if (results.length == 1) {
       // Auto-navigate to quantity edit for single result
       final food = results.first;
-      _openQuantityEdit(context, food, config, isUpdate: false);
+      await _openQuantityEdit(context, food, config);
       // Clear barcode search state after navigation
       searchProvider.clearBarcodeSearchState();
     }
@@ -501,7 +485,6 @@ class _TextSearchViewState extends State<TextSearchView> {
               context,
               newFood,
               config,
-              isUpdate: false,
             );
           }
         }

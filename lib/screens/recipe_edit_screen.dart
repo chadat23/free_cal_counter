@@ -24,6 +24,7 @@ import 'package:free_cal_counter1/models/food_portion.dart';
 import 'package:free_cal_counter1/services/emoji_service.dart';
 import 'package:free_cal_counter1/models/category.dart' as model_cat;
 import 'package:image_picker/image_picker.dart' as image_picker;
+import 'package:free_cal_counter1/screens/square_camera_screen.dart';
 import 'package:free_cal_counter1/widgets/food_image_widget.dart';
 import 'package:free_cal_counter1/services/image_storage_service.dart';
 
@@ -460,23 +461,26 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
       return;
     }
 
-    final imagePicker = image_picker.ImagePicker();
-    final image_picker.XFile? pickedFile;
+    if (!mounted) return;
+
+    final String? pickedPath;
     if (choice == 'camera') {
-      pickedFile = await imagePicker.pickImage(
-        source: image_picker.ImageSource.camera,
+      pickedPath = await Navigator.push<String>(
+        context,
+        MaterialPageRoute(builder: (_) => const SquareCameraScreen()),
       );
     } else {
-      pickedFile = await imagePicker.pickImage(
+      final pickedFile = await image_picker.ImagePicker().pickImage(
         source: image_picker.ImageSource.gallery,
       );
+      pickedPath = pickedFile?.path;
     }
 
-    if (pickedFile == null) return;
+    if (pickedPath == null) return;
 
     try {
       final guid = await ImageStorageService.instance.saveImage(
-        File(pickedFile.path),
+        File(pickedPath),
       );
       provider.setThumbnail('${ImageStorageService.localPrefix}$guid');
     } catch (e) {

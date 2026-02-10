@@ -49,13 +49,14 @@ class ImageStorageService {
       throw Exception('Failed to decode image');
     }
 
-    // Resize to fit within 200x200, preserving aspect ratio
-    final resized = copyResize(
-      image,
-      width: _maxImageSize,
-      height: _maxImageSize,
-      maintainAspect: true,
-    );
+    // Center-crop to square
+    final cropSize = image.width < image.height ? image.width : image.height;
+    final x = (image.width - cropSize) ~/ 2;
+    final y = (image.height - cropSize) ~/ 2;
+    final cropped = copyCrop(image, x: x, y: y, width: cropSize, height: cropSize);
+
+    // Resize (input is already square, so only width needed)
+    final resized = copyResize(cropped, width: _maxImageSize);
 
     // Encode as JPEG at 85% quality
     final encoded = encodeJpg(resized, quality: _jpegQuality);

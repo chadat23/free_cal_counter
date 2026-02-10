@@ -129,6 +129,46 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  camera:
+    dependency: "direct main"
+    description:
+      name: camera
+      sha256: a005c6b9783d895a3a9808d65d06773d13587e22a186b6fe8ef3801b0d12f8cf
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.11.3+1"
+  camera_android_camerax:
+    dependency: transitive
+    description:
+      name: camera_android_camerax
+      sha256: "8516fe308bc341a5067fb1a48edff0ddfa57c0d3cdcc9dbe7ceca3ba119e2577"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.30"
+  camera_avfoundation:
+    dependency: transitive
+    description:
+      name: camera_avfoundation
+      sha256: "11b4aee2f5e5e038982e152b4a342c749b414aa27857899d20f4323e94cb5f0b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.9.23+2"
+  camera_platform_interface:
+    dependency: transitive
+    description:
+      name: camera_platform_interface
+      sha256: "98cfc9357e04bad617671b4c1f78a597f25f08003089dd94050709ae54effc63"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.12.0"
+  camera_web:
+    dependency: transitive
+    description:
+      name: camera_web
+      sha256: "57f49a635c8bf249d07fb95eb693d7e4dda6796dedb3777f9127fb54847beba7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.5+3"
   characters:
     dependency: transitive
     description:
@@ -504,38 +544,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.3.0"
-  image_editor:
-    dependency: "direct main"
-    description:
-      name: image_editor
-      sha256: "38070067264fd9fea4328ca630d2ff7bd65ebe6aa4ed375d983b732d2ae7146b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.6.0"
-  image_editor_common:
-    dependency: transitive
-    description:
-      name: image_editor_common
-      sha256: "93d2f5c8b636f862775dd62a9ec20d09c8272598daa02f935955a4640e1844ee"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.0"
-  image_editor_ohos:
-    dependency: transitive
-    description:
-      name: image_editor_ohos
-      sha256: "06756859586d5acefec6e3b4f356f9b1ce05ef09213bcb9a0ce1680ecea2d054"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.9"
-  image_editor_platform_interface:
-    dependency: transitive
-    description:
-      name: image_editor_platform_interface
-      sha256: "474517efc770464f7d99942472d8cfb369a3c378e95466ec17f74d2b80bd40de"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.0"
   image_picker:
     dependency: "direct main"
     description:

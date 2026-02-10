@@ -4,6 +4,7 @@ import 'package:free_cal_counter1/models/food_container.dart';
 import 'package:free_cal_counter1/services/image_storage_service.dart';
 import 'package:free_cal_counter1/widgets/food_image_widget.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:free_cal_counter1/screens/square_camera_screen.dart';
 
 class ContainerEditDialog extends StatefulWidget {
   final FoodContainer? container;
@@ -78,19 +79,24 @@ class _ContainerEditDialogState extends State<ContainerEditDialog> {
       return;
     }
 
-    final picker = ImagePicker();
-    final XFile? pickedFile;
+    if (!mounted) return;
+
+    final String? pickedPath;
     if (choice == 'camera') {
-      pickedFile = await picker.pickImage(source: ImageSource.camera);
+      pickedPath = await Navigator.push<String>(
+        context,
+        MaterialPageRoute(builder: (_) => const SquareCameraScreen()),
+      );
     } else {
-      pickedFile = await picker.pickImage(source: ImageSource.gallery);
+      final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+      pickedPath = pickedFile?.path;
     }
 
-    if (pickedFile == null) return;
+    if (pickedPath == null) return;
 
     try {
       final guid = await ImageStorageService.instance.saveImage(
-        File(pickedFile.path),
+        File(pickedPath),
       );
       setState(() {
         _thumbnail = '${ImageStorageService.localPrefix}$guid';

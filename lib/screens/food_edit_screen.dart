@@ -10,6 +10,7 @@ import 'package:free_cal_counter1/widgets/serving_info_sheet.dart';
 import 'package:free_cal_counter1/config/app_colors.dart';
 import 'package:free_cal_counter1/screens/barcode_scanner_screen.dart';
 import 'package:image_picker/image_picker.dart' as picker;
+import 'package:free_cal_counter1/screens/square_camera_screen.dart';
 import 'package:free_cal_counter1/utils/math_evaluator.dart';
 import 'package:free_cal_counter1/widgets/math_input_bar.dart';
 
@@ -1219,23 +1220,26 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
       return;
     }
 
-    final imagePicker = picker.ImagePicker();
-    final picker.XFile? pickedFile;
+    if (!mounted) return;
+
+    final String? pickedPath;
     if (choice == 'camera') {
-      pickedFile = await imagePicker.pickImage(
-        source: picker.ImageSource.camera,
+      pickedPath = await Navigator.push<String>(
+        context,
+        MaterialPageRoute(builder: (_) => const SquareCameraScreen()),
       );
     } else {
-      pickedFile = await imagePicker.pickImage(
+      final pickedFile = await picker.ImagePicker().pickImage(
         source: picker.ImageSource.gallery,
       );
+      pickedPath = pickedFile?.path;
     }
 
-    if (pickedFile == null) return;
+    if (pickedPath == null) return;
 
     try {
       final guid = await ImageStorageService.instance.saveImage(
-        File(pickedFile.path),
+        File(pickedPath),
       );
 
       if (_thumbnail != null) {

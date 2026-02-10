@@ -75,6 +75,49 @@ void main() {
     );
   }
 
+  testWidgets('Auto-focuses and selects quantity when isUpdate is true', (
+    tester,
+  ) async {
+    final config = QuantityEditConfig(
+      context: QuantityEditContext.day,
+      food: mockFood,
+      initialUnit: 'piece',
+      initialQuantity: 1.5,
+      isUpdate: true,
+      onSave: (grams, unit, updatedFood) {},
+    );
+
+    await tester.pumpWidget(createTestWidget(config));
+    await tester.pumpAndSettle();
+
+    final textField = tester.widget<TextField>(find.byType(TextField));
+    expect(textField.focusNode!.hasFocus, true);
+    expect(textField.controller!.selection.baseOffset, 0);
+    expect(
+      textField.controller!.selection.extentOffset,
+      textField.controller!.text.length,
+    );
+  });
+
+  testWidgets('Does not auto-focus quantity when isUpdate is false', (
+    tester,
+  ) async {
+    final config = QuantityEditConfig(
+      context: QuantityEditContext.day,
+      food: mockFood,
+      initialUnit: 'piece',
+      initialQuantity: 1.5,
+      isUpdate: false,
+      onSave: (grams, unit, updatedFood) {},
+    );
+
+    await tester.pumpWidget(createTestWidget(config));
+    await tester.pumpAndSettle();
+
+    final textField = tester.widget<TextField>(find.byType(TextField));
+    expect(textField.focusNode!.hasFocus, false);
+  });
+
   testWidgets('Pre-populates amount and unit from config', (tester) async {
     final config = QuantityEditConfig(
       context: QuantityEditContext.day,

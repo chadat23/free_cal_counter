@@ -234,7 +234,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
             _buildChartSection(
               isRecipe ? "Ingredient's Macros" : "Portion's Macros",
               itemValues,
-              null,
+              isRecipe ? null : _getGoals(goalsProvider),
             ),
           ],
         );

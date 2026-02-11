@@ -1,8 +1,8 @@
-# FreeCal Counter: Architectural Action Plan
+# Meal of Record: Architectural Action Plan
 
 ## 1. Overview & Core Principles
 
-This document outlines the data architecture and implementation plan for the FreeCal Counter application.
+This document outlines the data architecture and implementation plan for the Meal of Record application.
 
 *   **Stability & Immutability:** A logged entry must never change. This is handled by creating "snapshots" of food data at the time of logging.
 *   **Performance:** Local-first approach using `drift` for SQLite database management.

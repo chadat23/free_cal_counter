@@ -1,9 +1,9 @@
 import 'package:fuzzywuzzy/fuzzywuzzy.dart' as fuzzy;
-import 'package:free_cal_counter1/models/food.dart' as model;
-import 'package:free_cal_counter1/models/recipe.dart' as model;
-import 'package:free_cal_counter1/services/database_service.dart';
-import 'package:free_cal_counter1/services/open_food_facts_service.dart';
-import 'package:free_cal_counter1/services/food_sorting_service.dart';
+import 'package:meal_of_record/models/food.dart' as model;
+import 'package:meal_of_record/models/recipe.dart' as model;
+import 'package:meal_of_record/services/database_service.dart';
+import 'package:meal_of_record/services/open_food_facts_service.dart';
+import 'package:meal_of_record/services/food_sorting_service.dart';
 
 class SearchService {
   final DatabaseService databaseService;

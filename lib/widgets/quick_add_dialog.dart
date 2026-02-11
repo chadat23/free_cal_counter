@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/models/food_portion.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
+import 'package:meal_of_record/models/food_portion.dart';
+import 'package:meal_of_record/services/database_service.dart';
 
 /// A simplified Quick Add dialog that only asks for calories.
 /// Uses a system "Quick Add" food where 1 gram = 1 calorie.

@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/providers/log_provider.dart';
-import 'package:free_cal_counter1/providers/navigation_provider.dart';
-import 'package:free_cal_counter1/providers/search_provider.dart';
-import 'package:free_cal_counter1/screens/overview_screen.dart';
-import 'package:free_cal_counter1/models/daily_macro_stats.dart';
-import 'package:free_cal_counter1/widgets/nutrition_targets_overview_chart.dart';
-import 'package:free_cal_counter1/widgets/search_ribbon.dart';
+import 'package:meal_of_record/providers/log_provider.dart';
+import 'package:meal_of_record/providers/navigation_provider.dart';
+import 'package:meal_of_record/providers/search_provider.dart';
+import 'package:meal_of_record/screens/overview_screen.dart';
+import 'package:meal_of_record/models/daily_macro_stats.dart';
+import 'package:meal_of_record/widgets/nutrition_targets_overview_chart.dart';
+import 'package:meal_of_record/widgets/search_ribbon.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 
-import 'package:free_cal_counter1/providers/weight_provider.dart';
-import 'package:free_cal_counter1/providers/goals_provider.dart';
-import 'package:free_cal_counter1/models/macro_goals.dart';
-import 'package:free_cal_counter1/models/goal_settings.dart';
-import 'package:free_cal_counter1/models/search_mode.dart';
+import 'package:meal_of_record/providers/weight_provider.dart';
+import 'package:meal_of_record/providers/goals_provider.dart';
+import 'package:meal_of_record/models/macro_goals.dart';
+import 'package:meal_of_record/models/goal_settings.dart';
+import 'package:meal_of_record/models/search_mode.dart';
 import 'overview_screen_test.mocks.dart';
 
 @GenerateMocks([

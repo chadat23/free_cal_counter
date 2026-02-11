@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/models/nutrition_target.dart';
-import 'package:free_cal_counter1/widgets/log_header.dart';
-import 'package:free_cal_counter1/providers/navigation_provider.dart';
+import 'package:meal_of_record/models/nutrition_target.dart';
+import 'package:meal_of_record/widgets/log_header.dart';
+import 'package:meal_of_record/providers/navigation_provider.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 
-import 'package:free_cal_counter1/providers/log_provider.dart';
+import 'package:meal_of_record/providers/log_provider.dart';
 import 'log_header_test.mocks.dart';
 
 @GenerateMocks([NavigationProvider, LogProvider])

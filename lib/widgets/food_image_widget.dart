@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:free_cal_counter1/models/food.dart';
-import 'package:free_cal_counter1/services/image_storage_service.dart';
-import 'package:free_cal_counter1/services/emoji_service.dart';
+import 'package:meal_of_record/models/food.dart';
+import 'package:meal_of_record/services/image_storage_service.dart';
+import 'package:meal_of_record/services/emoji_service.dart';
 
 /// Widget for displaying food images with fallbacks.
 ///

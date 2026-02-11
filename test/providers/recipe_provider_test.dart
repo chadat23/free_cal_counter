@@ -1,15 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/models/recipe.dart' as model;
-import 'package:free_cal_counter1/models/recipe_item.dart' as model;
-import 'package:free_cal_counter1/models/food.dart' as model;
-import 'package:free_cal_counter1/models/food_portion.dart' as model;
-import 'package:free_cal_counter1/models/food_serving.dart' as model;
-import 'package:free_cal_counter1/models/category.dart' as model;
-import 'package:free_cal_counter1/providers/recipe_provider.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
+import 'package:meal_of_record/models/recipe.dart' as model;
+import 'package:meal_of_record/models/recipe_item.dart' as model;
+import 'package:meal_of_record/models/food.dart' as model;
+import 'package:meal_of_record/models/food_portion.dart' as model;
+import 'package:meal_of_record/models/food_serving.dart' as model;
+import 'package:meal_of_record/models/category.dart' as model;
+import 'package:meal_of_record/providers/recipe_provider.dart';
+import 'package:meal_of_record/services/database_service.dart';
 import 'package:drift/native.dart';
-import 'package:free_cal_counter1/services/live_database.dart';
-import 'package:free_cal_counter1/services/reference_database.dart' as ref;
+import 'package:meal_of_record/services/live_database.dart';
+import 'package:meal_of_record/services/reference_database.dart' as ref;
 
 import 'package:shared_preferences/shared_preferences.dart';
 

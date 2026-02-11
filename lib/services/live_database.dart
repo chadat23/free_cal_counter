@@ -4,7 +4,7 @@ import 'package:path/path.dart' as p;
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
-import 'package:free_cal_counter1/data/database/tables.dart';
+import 'package:meal_of_record/data/database/tables.dart';
 
 part 'live_database.g.dart';
 

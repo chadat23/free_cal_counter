@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:free_cal_counter1/services/backup_config_service.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
-import 'package:free_cal_counter1/services/google_drive_service.dart';
+import 'package:meal_of_record/services/backup_config_service.dart';
+import 'package:meal_of_record/services/database_service.dart';
+import 'package:meal_of_record/services/google_drive_service.dart';
 
 /// Attempts an automatic cloud backup if all conditions are met:
 /// enabled, signed in, data is dirty, and 24h+ since last backup.

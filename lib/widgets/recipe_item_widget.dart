@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/models/recipe_item.dart';
-import 'package:free_cal_counter1/widgets/food_image_widget.dart';
+import 'package:meal_of_record/models/recipe_item.dart';
+import 'package:meal_of_record/widgets/food_image_widget.dart';
 
 class RecipeItemWidget extends StatelessWidget {
   final RecipeItem item;

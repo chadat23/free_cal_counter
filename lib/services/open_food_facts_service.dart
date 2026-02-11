@@ -1,8 +1,8 @@
-import 'package:free_cal_counter1/services/emoji_service.dart';
+import 'package:meal_of_record/services/emoji_service.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
-import 'package:free_cal_counter1/models/food.dart' as model;
-import 'package:free_cal_counter1/models/food_serving.dart' as model_unit;
-import 'package:free_cal_counter1/services/off_api_client_wrapper.dart';
+import 'package:meal_of_record/models/food.dart' as model;
+import 'package:meal_of_record/models/food_serving.dart' as model_unit;
+import 'package:meal_of_record/services/off_api_client_wrapper.dart';
 
 class OffApiService {
   final OffApiClientWrapper _apiWrapper;

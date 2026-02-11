@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/config/app_colors.dart';
-import 'package:free_cal_counter1/models/food.dart';
-import 'package:free_cal_counter1/models/food_portion.dart';
-import 'package:free_cal_counter1/models/food_serving.dart' as model_unit;
-import 'package:free_cal_counter1/providers/log_provider.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
-import 'package:free_cal_counter1/widgets/food_image_widget.dart';
+import 'package:meal_of_record/config/app_colors.dart';
+import 'package:meal_of_record/models/food.dart';
+import 'package:meal_of_record/models/food_portion.dart';
+import 'package:meal_of_record/models/food_serving.dart' as model_unit;
+import 'package:meal_of_record/providers/log_provider.dart';
+import 'package:meal_of_record/services/database_service.dart';
+import 'package:meal_of_record/widgets/food_image_widget.dart';
 import 'package:provider/provider.dart';
 
 class SearchResultTile extends StatefulWidget {

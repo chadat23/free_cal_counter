@@ -1,14 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
-import 'package:free_cal_counter1/services/search_service.dart';
-import 'package:free_cal_counter1/models/food.dart' as model;
-import 'package:free_cal_counter1/services/live_database.dart'
+import 'package:meal_of_record/services/database_service.dart';
+import 'package:meal_of_record/services/search_service.dart';
+import 'package:meal_of_record/models/food.dart' as model;
+import 'package:meal_of_record/services/live_database.dart'
     hide FoodsCompanion;
-import 'package:free_cal_counter1/services/reference_database.dart'
+import 'package:meal_of_record/services/reference_database.dart'
     hide FoodsCompanion;
-import 'package:free_cal_counter1/services/live_database.dart' as live_db;
-import 'package:free_cal_counter1/services/open_food_facts_service.dart';
-import 'package:free_cal_counter1/services/food_sorting_service.dart';
+import 'package:meal_of_record/services/live_database.dart' as live_db;
+import 'package:meal_of_record/services/open_food_facts_service.dart';
+import 'package:meal_of_record/services/food_sorting_service.dart';
 import 'package:drift/native.dart';
 import 'package:drift/drift.dart';
 

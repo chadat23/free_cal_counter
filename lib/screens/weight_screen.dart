@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:free_cal_counter1/providers/weight_provider.dart';
-import 'package:free_cal_counter1/providers/goals_provider.dart';
-import 'package:free_cal_counter1/providers/navigation_provider.dart';
-import 'package:free_cal_counter1/widgets/screen_background.dart';
-import 'package:free_cal_counter1/config/app_colors.dart';
-import 'package:free_cal_counter1/utils/ui_utils.dart';
+import 'package:meal_of_record/providers/weight_provider.dart';
+import 'package:meal_of_record/providers/goals_provider.dart';
+import 'package:meal_of_record/providers/navigation_provider.dart';
+import 'package:meal_of_record/widgets/screen_background.dart';
+import 'package:meal_of_record/config/app_colors.dart';
+import 'package:meal_of_record/utils/ui_utils.dart';
 
 class WeightScreen extends StatefulWidget {
   const WeightScreen({super.key});

@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/config/app_router.dart';
-import 'package:free_cal_counter1/providers/navigation_provider.dart';
-import 'package:free_cal_counter1/screens/search_screen.dart';
-import 'package:free_cal_counter1/widgets/search_ribbon.dart';
-import 'package:free_cal_counter1/providers/log_provider.dart';
-import 'package:free_cal_counter1/providers/search_provider.dart';
-import 'package:free_cal_counter1/providers/goals_provider.dart';
-import 'package:free_cal_counter1/models/macro_goals.dart';
+import 'package:meal_of_record/config/app_router.dart';
+import 'package:meal_of_record/providers/navigation_provider.dart';
+import 'package:meal_of_record/screens/search_screen.dart';
+import 'package:meal_of_record/widgets/search_ribbon.dart';
+import 'package:meal_of_record/providers/log_provider.dart';
+import 'package:meal_of_record/providers/search_provider.dart';
+import 'package:meal_of_record/providers/goals_provider.dart';
+import 'package:meal_of_record/models/macro_goals.dart';
 import 'package:provider/provider.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-import 'package:free_cal_counter1/models/search_mode.dart';
-import 'package:free_cal_counter1/models/search_config.dart';
-import 'package:free_cal_counter1/models/quantity_edit_config.dart';
+import 'package:meal_of_record/models/search_mode.dart';
+import 'package:meal_of_record/models/search_config.dart';
+import 'package:meal_of_record/models/quantity_edit_config.dart';
 import 'search_ribbon_test.mocks.dart';
 
 @GenerateMocks([LogProvider, NavigationProvider, SearchProvider, GoalsProvider])

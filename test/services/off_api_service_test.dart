@@ -2,9 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
-import 'package:free_cal_counter1/services/open_food_facts_service.dart';
-import 'package:free_cal_counter1/models/food.dart' as model;
-import 'package:free_cal_counter1/services/off_api_client_wrapper.dart';
+import 'package:meal_of_record/services/open_food_facts_service.dart';
+import 'package:meal_of_record/models/food.dart' as model;
+import 'package:meal_of_record/services/off_api_client_wrapper.dart';
 import 'package:matcher/matcher.dart' as matcher;
 
 import 'off_api_service_test.mocks.dart';

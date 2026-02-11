@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/providers/navigation_provider.dart';
+import 'package:meal_of_record/providers/navigation_provider.dart';
 
 void main() {
   group('NavigationProvider', () {

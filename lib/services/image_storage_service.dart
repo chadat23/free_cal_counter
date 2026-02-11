@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:image/image.dart';
-import 'package:free_cal_counter1/services/live_database.dart';
+import 'package:meal_of_record/services/live_database.dart';
 
 class ImageStorageService {
   static final ImageStorageService instance = ImageStorageService._();

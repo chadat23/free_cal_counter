@@ -1,6 +1,6 @@
 {
-    "name": "free_cal_counter1",
-    "short_name": "free_cal_counter1",
+    "name": "meal_of_record",
+    "short_name": "meal_of_record",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

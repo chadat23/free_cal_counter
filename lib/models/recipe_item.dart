@@ -1,5 +1,5 @@
-import 'package:free_cal_counter1/models/food.dart';
-import 'package:free_cal_counter1/models/recipe.dart';
+import 'package:meal_of_record/models/food.dart';
+import 'package:meal_of_record/models/recipe.dart';
 
 class RecipeItem {
   final int id;

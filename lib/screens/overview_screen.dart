@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/widgets/nutrition_targets_overview_chart.dart';
-import 'package:free_cal_counter1/widgets/screen_background.dart';
-import 'package:free_cal_counter1/widgets/search_ribbon.dart';
-import 'package:free_cal_counter1/models/nutrition_target.dart';
+import 'package:meal_of_record/widgets/nutrition_targets_overview_chart.dart';
+import 'package:meal_of_record/widgets/screen_background.dart';
+import 'package:meal_of_record/widgets/search_ribbon.dart';
+import 'package:meal_of_record/models/nutrition_target.dart';
 import 'package:provider/provider.dart';
-import 'package:free_cal_counter1/providers/log_provider.dart';
-import 'package:free_cal_counter1/providers/goals_provider.dart';
-import 'package:free_cal_counter1/models/daily_macro_stats.dart';
-import 'package:free_cal_counter1/models/macro_goals.dart';
-import 'package:free_cal_counter1/providers/weight_provider.dart';
-import 'package:free_cal_counter1/widgets/weight_trend_chart.dart';
-import 'package:free_cal_counter1/models/weight.dart';
-import 'package:free_cal_counter1/services/goal_logic_service.dart';
+import 'package:meal_of_record/providers/log_provider.dart';
+import 'package:meal_of_record/providers/goals_provider.dart';
+import 'package:meal_of_record/models/daily_macro_stats.dart';
+import 'package:meal_of_record/models/macro_goals.dart';
+import 'package:meal_of_record/providers/weight_provider.dart';
+import 'package:meal_of_record/widgets/weight_trend_chart.dart';
+import 'package:meal_of_record/models/weight.dart';
+import 'package:meal_of_record/services/goal_logic_service.dart';
 
 class OverviewScreen extends StatefulWidget {
   const OverviewScreen({super.key});

@@ -1,6 +1,6 @@
-# Gemini Instructions for FreeCal Counter Flutter App
+# Gemini Instructions for Meal of Record Flutter App
 
-This file provides directives for Gemini when assisting with development of the FreeCal Counter Flutter application. All code suggestions must respect the existing project structure and patterns. **Do NOT suggest architectural changes or reorganize existing code** unless explicitly requested.
+This file provides directives for Gemini when assisting with development of the Meal of Record Flutter application. All code suggestions must respect the existing project structure and patterns. **Do NOT suggest architectural changes or reorganize existing code** unless explicitly requested.
 
 ## Project Structure & Architecture
 

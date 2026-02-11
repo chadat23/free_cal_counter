@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/widgets/math_input_bar.dart';
+import 'package:meal_of_record/widgets/math_input_bar.dart';
 
 void main() {
   late TextEditingController controller;

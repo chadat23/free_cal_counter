@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
-import 'package:free_cal_counter1/screens/recipe_edit_screen.dart';
-import 'package:free_cal_counter1/providers/recipe_provider.dart';
+import 'package:meal_of_record/screens/recipe_edit_screen.dart';
+import 'package:meal_of_record/providers/recipe_provider.dart';
 import 'package:mockito/annotations.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
+import 'package:meal_of_record/services/database_service.dart';
 
-import 'package:free_cal_counter1/services/live_database.dart' as live_db;
-import 'package:free_cal_counter1/services/reference_database.dart' as ref_db;
+import 'package:meal_of_record/services/live_database.dart' as live_db;
+import 'package:meal_of_record/services/reference_database.dart' as ref_db;
 import 'package:drift/native.dart';
 
 @GenerateMocks([DatabaseService])

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/models/weight.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
+import 'package:meal_of_record/models/weight.dart';
+import 'package:meal_of_record/services/database_service.dart';
 
 class WeightProvider extends ChangeNotifier {
   final DatabaseService _databaseService;

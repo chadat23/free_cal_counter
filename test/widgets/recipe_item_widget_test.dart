@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/models/food.dart';
-import 'package:free_cal_counter1/models/recipe_item.dart';
-import 'package:free_cal_counter1/widgets/recipe_item_widget.dart';
-import 'package:free_cal_counter1/widgets/food_image_widget.dart';
+import 'package:meal_of_record/models/food.dart';
+import 'package:meal_of_record/models/recipe_item.dart';
+import 'package:meal_of_record/widgets/recipe_item_widget.dart';
+import 'package:meal_of_record/widgets/food_image_widget.dart';
 
 void main() {
   final mockFoodWithEmoji = Food(

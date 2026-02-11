@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/models/food_container.dart';
-import 'package:free_cal_counter1/services/image_storage_service.dart';
-import 'package:free_cal_counter1/widgets/food_image_widget.dart';
+import 'package:meal_of_record/models/food_container.dart';
+import 'package:meal_of_record/services/image_storage_service.dart';
+import 'package:meal_of_record/widgets/food_image_widget.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:free_cal_counter1/screens/square_camera_screen.dart';
+import 'package:meal_of_record/screens/square_camera_screen.dart';
 
 class ContainerEditDialog extends StatefulWidget {
   final FoodContainer? container;

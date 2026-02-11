@@ -3,11 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:free_cal_counter1/providers/goals_provider.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
-import 'package:free_cal_counter1/models/goal_settings.dart';
-import 'package:free_cal_counter1/models/weight.dart';
-import 'package:free_cal_counter1/models/daily_macro_stats.dart';
+import 'package:meal_of_record/providers/goals_provider.dart';
+import 'package:meal_of_record/services/database_service.dart';
+import 'package:meal_of_record/models/goal_settings.dart';
+import 'package:meal_of_record/models/weight.dart';
+import 'package:meal_of_record/models/daily_macro_stats.dart';
 
 import 'goals_provider_test.mocks.dart';
 

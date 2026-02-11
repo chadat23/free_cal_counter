@@ -1,18 +1,18 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/models/food.dart';
-import 'package:free_cal_counter1/models/food_serving.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
-import 'package:free_cal_counter1/services/image_storage_service.dart';
-import 'package:free_cal_counter1/widgets/screen_background.dart';
-import 'package:free_cal_counter1/widgets/food_image_widget.dart';
-import 'package:free_cal_counter1/widgets/serving_info_sheet.dart';
-import 'package:free_cal_counter1/config/app_colors.dart';
-import 'package:free_cal_counter1/screens/barcode_scanner_screen.dart';
+import 'package:meal_of_record/models/food.dart';
+import 'package:meal_of_record/models/food_serving.dart';
+import 'package:meal_of_record/services/database_service.dart';
+import 'package:meal_of_record/services/image_storage_service.dart';
+import 'package:meal_of_record/widgets/screen_background.dart';
+import 'package:meal_of_record/widgets/food_image_widget.dart';
+import 'package:meal_of_record/widgets/serving_info_sheet.dart';
+import 'package:meal_of_record/config/app_colors.dart';
+import 'package:meal_of_record/screens/barcode_scanner_screen.dart';
 import 'package:image_picker/image_picker.dart' as picker;
-import 'package:free_cal_counter1/screens/square_camera_screen.dart';
-import 'package:free_cal_counter1/utils/math_evaluator.dart';
-import 'package:free_cal_counter1/widgets/math_input_bar.dart';
+import 'package:meal_of_record/screens/square_camera_screen.dart';
+import 'package:meal_of_record/utils/math_evaluator.dart';
+import 'package:meal_of_record/widgets/math_input_bar.dart';
 
 enum FoodEditContext {
   search, // From Search Screen (Edit/Copy) -> "Save", "Save & Use"

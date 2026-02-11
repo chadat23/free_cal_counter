@@ -5,10 +5,10 @@
 // 'flutter create' template.
 
 // The application's name. By default this is also the title of the Flutter window.
-PRODUCT_NAME = free_cal_counter1
+PRODUCT_NAME = meal_of_record
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.freeCalCounter1
+PRODUCT_BUNDLE_IDENTIFIER = com.clipclapclop.meal_of_record
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2025 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2025 com.clipclapclop. All rights reserved.

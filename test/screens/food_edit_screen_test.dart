@@ -1,13 +1,13 @@
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/models/food.dart' as model;
-import 'package:free_cal_counter1/models/food.dart' as model;
-import 'package:free_cal_counter1/models/food_serving.dart';
-import 'package:free_cal_counter1/screens/food_edit_screen.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
-import 'package:free_cal_counter1/services/live_database.dart' as live_db;
-import 'package:free_cal_counter1/services/reference_database.dart' as ref_db;
+import 'package:meal_of_record/models/food.dart' as model;
+import 'package:meal_of_record/models/food.dart' as model;
+import 'package:meal_of_record/models/food_serving.dart';
+import 'package:meal_of_record/screens/food_edit_screen.dart';
+import 'package:meal_of_record/services/database_service.dart';
+import 'package:meal_of_record/services/live_database.dart' as live_db;
+import 'package:meal_of_record/services/reference_database.dart' as ref_db;
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {

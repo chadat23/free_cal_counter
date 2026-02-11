@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:free_cal_counter1/utils/permission_utils.dart';
+import 'package:meal_of_record/utils/permission_utils.dart';
 
 /// A full-screen barcode scanner that returns the scanned barcode string.
 /// Returns null if the user cancels or an error occurs.

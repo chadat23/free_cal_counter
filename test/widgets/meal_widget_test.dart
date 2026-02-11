@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
-import 'package:free_cal_counter1/models/food.dart';
-import 'package:free_cal_counter1/models/food_portion.dart';
-import 'package:free_cal_counter1/models/logged_portion.dart';
-import 'package:free_cal_counter1/models/meal.dart';
-import 'package:free_cal_counter1/models/food_serving.dart';
-import 'package:free_cal_counter1/widgets/meal_widget.dart';
-import 'package:free_cal_counter1/widgets/portion_widget.dart';
-import 'package:free_cal_counter1/widgets/slidable_portion_widget.dart';
+import 'package:meal_of_record/models/food.dart';
+import 'package:meal_of_record/models/food_portion.dart';
+import 'package:meal_of_record/models/logged_portion.dart';
+import 'package:meal_of_record/models/meal.dart';
+import 'package:meal_of_record/models/food_serving.dart';
+import 'package:meal_of_record/widgets/meal_widget.dart';
+import 'package:meal_of_record/widgets/portion_widget.dart';
+import 'package:meal_of_record/widgets/slidable_portion_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:free_cal_counter1/providers/log_provider.dart';
+import 'package:meal_of_record/providers/log_provider.dart';
 import 'meal_widget_test.mocks.dart';
 
 @GenerateMocks([LogProvider])

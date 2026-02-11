@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:free_cal_counter1/models/goal_settings.dart';
-import 'package:free_cal_counter1/models/macro_goals.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
-import 'package:free_cal_counter1/models/daily_macro_stats.dart';
-import 'package:free_cal_counter1/services/goal_logic_service.dart';
+import 'package:meal_of_record/models/goal_settings.dart';
+import 'package:meal_of_record/models/macro_goals.dart';
+import 'package:meal_of_record/services/database_service.dart';
+import 'package:meal_of_record/models/daily_macro_stats.dart';
+import 'package:meal_of_record/services/goal_logic_service.dart';
 
 class GoalsProvider extends ChangeNotifier {
   static const String _settingsKey = 'goal_settings';

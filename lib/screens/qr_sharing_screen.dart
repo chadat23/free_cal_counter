@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/models/recipe.dart';
-import 'package:free_cal_counter1/providers/recipe_provider.dart';
-import 'package:free_cal_counter1/widgets/screen_background.dart';
+import 'package:meal_of_record/models/recipe.dart';
+import 'package:meal_of_record/providers/recipe_provider.dart';
+import 'package:meal_of_record/widgets/screen_background.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';

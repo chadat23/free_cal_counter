@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/models/food.dart';
-import 'package:free_cal_counter1/models/food_portion.dart';
-import 'package:free_cal_counter1/models/food_serving.dart';
-import 'package:free_cal_counter1/providers/search_provider.dart';
-import 'package:free_cal_counter1/providers/log_provider.dart';
-import 'package:free_cal_counter1/providers/navigation_provider.dart';
-import 'package:free_cal_counter1/providers/goals_provider.dart';
-import 'package:free_cal_counter1/screens/log_queue_screen.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
-import 'package:free_cal_counter1/services/search_service.dart';
-import 'package:free_cal_counter1/services/open_food_facts_service.dart';
+import 'package:meal_of_record/models/food.dart';
+import 'package:meal_of_record/models/food_portion.dart';
+import 'package:meal_of_record/models/food_serving.dart';
+import 'package:meal_of_record/providers/search_provider.dart';
+import 'package:meal_of_record/providers/log_provider.dart';
+import 'package:meal_of_record/providers/navigation_provider.dart';
+import 'package:meal_of_record/providers/goals_provider.dart';
+import 'package:meal_of_record/screens/log_queue_screen.dart';
+import 'package:meal_of_record/services/database_service.dart';
+import 'package:meal_of_record/services/search_service.dart';
+import 'package:meal_of_record/services/open_food_facts_service.dart';
 import 'package:mockito/annotations.dart';
 import 'package:provider/provider.dart';
 

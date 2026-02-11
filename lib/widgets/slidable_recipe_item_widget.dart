@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:free_cal_counter1/models/recipe_item.dart';
-import 'package:free_cal_counter1/widgets/recipe_item_widget.dart';
+import 'package:meal_of_record/models/recipe_item.dart';
+import 'package:meal_of_record/widgets/recipe_item_widget.dart';
 
 class SlidableRecipeItemWidget extends StatelessWidget {
   final RecipeItem item;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/widgets/vertical_mini_bar_chart.dart';
+import 'package:meal_of_record/widgets/vertical_mini_bar_chart.dart';
 
 void main() {
   group('MiniBarChart', () {

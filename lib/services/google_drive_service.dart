@@ -113,7 +113,7 @@ class GoogleDriveService {
       }
 
       final fileName =
-          'free_cal_backup_${DateTime.now().toIso8601String()}.zip';
+          'meal_of_record_${DateTime.now().toIso8601String()}.zip';
 
       final media = drive.Media(zipFile.openRead(), await zipFile.length());
       final driveFile = drive.File();

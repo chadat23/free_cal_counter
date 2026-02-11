@@ -1,10 +1,10 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/models/food.dart' as model;
-import 'package:free_cal_counter1/models/food_portion.dart' as model_portion;
-import 'package:free_cal_counter1/services/database_service.dart';
-import 'package:free_cal_counter1/services/live_database.dart';
-import 'package:free_cal_counter1/services/reference_database.dart' as ref;
+import 'package:meal_of_record/models/food.dart' as model;
+import 'package:meal_of_record/models/food_portion.dart' as model_portion;
+import 'package:meal_of_record/services/database_service.dart';
+import 'package:meal_of_record/services/live_database.dart';
+import 'package:meal_of_record/services/reference_database.dart' as ref;
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

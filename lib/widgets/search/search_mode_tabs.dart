@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:free_cal_counter1/models/search_mode.dart';
-import 'package:free_cal_counter1/providers/search_provider.dart';
-import 'package:free_cal_counter1/screens/barcode_scanner_screen.dart';
+import 'package:meal_of_record/models/search_mode.dart';
+import 'package:meal_of_record/providers/search_provider.dart';
+import 'package:meal_of_record/screens/barcode_scanner_screen.dart';
 
 class SearchModeTabs extends StatelessWidget {
   const SearchModeTabs({super.key});

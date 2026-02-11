@@ -1,4 +1,4 @@
-import 'package:free_cal_counter1/models/food.dart';
+import 'package:meal_of_record/models/food.dart';
 
 class FoodPortion {
   final Food food;

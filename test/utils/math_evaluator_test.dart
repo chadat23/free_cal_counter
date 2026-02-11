@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/utils/math_evaluator.dart';
+import 'package:meal_of_record/utils/math_evaluator.dart';
 
 void main() {
   group('MathEvaluator', () {

@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/models/meal.dart';
-import 'package:free_cal_counter1/models/food.dart';
-import 'package:free_cal_counter1/widgets/slidable_portion_widget.dart';
-import 'package:free_cal_counter1/models/quantity_edit_config.dart';
-import 'package:free_cal_counter1/screens/quantity_edit_screen.dart';
-import 'package:free_cal_counter1/models/logged_portion.dart';
-import 'package:free_cal_counter1/models/food_portion.dart';
+import 'package:meal_of_record/models/meal.dart';
+import 'package:meal_of_record/models/food.dart';
+import 'package:meal_of_record/widgets/slidable_portion_widget.dart';
+import 'package:meal_of_record/models/quantity_edit_config.dart';
+import 'package:meal_of_record/screens/quantity_edit_screen.dart';
+import 'package:meal_of_record/models/logged_portion.dart';
+import 'package:meal_of_record/models/food_portion.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:free_cal_counter1/providers/log_provider.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
+import 'package:meal_of_record/providers/log_provider.dart';
+import 'package:meal_of_record/services/database_service.dart';
 
 class MealWidget extends StatelessWidget {
   final Meal meal;

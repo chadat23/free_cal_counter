@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:free_cal_counter1/models/food_portion.dart';
-import 'package:free_cal_counter1/widgets/portion_widget.dart';
+import 'package:meal_of_record/models/food_portion.dart';
+import 'package:meal_of_record/widgets/portion_widget.dart';
 
 class SlidablePortionWidget extends StatelessWidget {
   final FoodPortion serving;

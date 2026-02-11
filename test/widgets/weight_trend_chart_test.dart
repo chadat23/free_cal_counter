@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/models/weight.dart';
-import 'package:free_cal_counter1/widgets/weight_trend_chart.dart';
+import 'package:meal_of_record/models/weight.dart';
+import 'package:meal_of_record/widgets/weight_trend_chart.dart';
 
 void main() {
   testWidgets('WeightTrendChart displays empty state message', (tester) async {

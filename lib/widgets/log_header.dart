@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:free_cal_counter1/models/nutrition_target.dart';
-import 'package:free_cal_counter1/widgets/horizontal_mini_bar_chart.dart';
-import 'package:free_cal_counter1/config/app_colors.dart';
-import 'package:free_cal_counter1/providers/navigation_provider.dart';
-import 'package:free_cal_counter1/providers/log_provider.dart';
+import 'package:meal_of_record/models/nutrition_target.dart';
+import 'package:meal_of_record/widgets/horizontal_mini_bar_chart.dart';
+import 'package:meal_of_record/config/app_colors.dart';
+import 'package:meal_of_record/providers/navigation_provider.dart';
+import 'package:meal_of_record/providers/log_provider.dart';
 import 'package:provider/provider.dart';
 
 class LogHeader extends StatefulWidget {

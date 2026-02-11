@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/models/food_container.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
-import 'package:free_cal_counter1/widgets/container_edit_dialog.dart';
-import 'package:free_cal_counter1/widgets/food_image_widget.dart';
-import 'package:free_cal_counter1/widgets/screen_background.dart';
+import 'package:meal_of_record/models/food_container.dart';
+import 'package:meal_of_record/services/database_service.dart';
+import 'package:meal_of_record/widgets/container_edit_dialog.dart';
+import 'package:meal_of_record/widgets/food_image_widget.dart';
+import 'package:meal_of_record/widgets/screen_background.dart';
 
 class ContainerSettingsScreen extends StatefulWidget {
   const ContainerSettingsScreen({super.key});

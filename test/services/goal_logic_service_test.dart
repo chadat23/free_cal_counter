@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/models/weight.dart';
-import 'package:free_cal_counter1/services/goal_logic_service.dart';
+import 'package:meal_of_record/models/weight.dart';
+import 'package:meal_of_record/services/goal_logic_service.dart';
 
 void main() {
   group('GoalLogicService', () {

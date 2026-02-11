@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/models/food.dart';
-import 'package:free_cal_counter1/models/food_portion.dart';
-import 'package:free_cal_counter1/models/food_serving.dart';
-import 'package:free_cal_counter1/widgets/portion_widget.dart';
+import 'package:meal_of_record/models/food.dart';
+import 'package:meal_of_record/models/food_portion.dart';
+import 'package:meal_of_record/models/food_serving.dart';
+import 'package:meal_of_record/widgets/portion_widget.dart';
 
 void main() {
   testWidgets('Serving widget displays correctly', (WidgetTester tester) async {

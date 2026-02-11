@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:free_cal_counter1/providers/weight_provider.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
-import 'package:free_cal_counter1/models/weight.dart';
+import 'package:meal_of_record/providers/weight_provider.dart';
+import 'package:meal_of_record/services/database_service.dart';
+import 'package:meal_of_record/models/weight.dart';
 
 import 'weight_provider_test.mocks.dart';
 

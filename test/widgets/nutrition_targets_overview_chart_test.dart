@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/widgets/vertical_mini_bar_chart.dart';
-import 'package:free_cal_counter1/widgets/nutrition_targets_overview_chart.dart';
-import 'package:free_cal_counter1/models/nutrition_target.dart';
-import 'package:free_cal_counter1/providers/navigation_provider.dart';
+import 'package:meal_of_record/widgets/vertical_mini_bar_chart.dart';
+import 'package:meal_of_record/widgets/nutrition_targets_overview_chart.dart';
+import 'package:meal_of_record/models/nutrition_target.dart';
+import 'package:meal_of_record/providers/navigation_provider.dart';
 import 'package:provider/provider.dart';
 
 void main() {

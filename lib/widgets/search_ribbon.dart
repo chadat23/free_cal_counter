@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/config/app_router.dart';
+import 'package:meal_of_record/config/app_router.dart';
 import 'package:provider/provider.dart';
-import 'package:free_cal_counter1/providers/navigation_provider.dart';
-import 'package:free_cal_counter1/providers/log_provider.dart';
-import 'package:free_cal_counter1/providers/search_provider.dart';
+import 'package:meal_of_record/providers/navigation_provider.dart';
+import 'package:meal_of_record/providers/log_provider.dart';
+import 'package:meal_of_record/providers/search_provider.dart';
 
 class SearchRibbon extends StatefulWidget {
   final bool isSearchActive;

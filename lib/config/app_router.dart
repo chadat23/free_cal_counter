@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/screens/goal_settings_screen.dart';
-import 'package:free_cal_counter1/screens/qr_sharing_screen.dart';
-import 'package:free_cal_counter1/screens/data_management_screen.dart';
-import 'package:free_cal_counter1/screens/search_screen.dart';
-import 'package:free_cal_counter1/models/recipe.dart';
-import 'package:free_cal_counter1/screens/navigation_container_screen.dart';
-import 'package:free_cal_counter1/screens/log_queue_screen.dart';
-import 'package:free_cal_counter1/screens/recipe_edit_screen.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
-import 'package:free_cal_counter1/services/open_food_facts_service.dart';
-import 'package:free_cal_counter1/services/search_service.dart';
+import 'package:meal_of_record/screens/goal_settings_screen.dart';
+import 'package:meal_of_record/screens/qr_sharing_screen.dart';
+import 'package:meal_of_record/screens/data_management_screen.dart';
+import 'package:meal_of_record/screens/search_screen.dart';
+import 'package:meal_of_record/models/recipe.dart';
+import 'package:meal_of_record/screens/navigation_container_screen.dart';
+import 'package:meal_of_record/screens/log_queue_screen.dart';
+import 'package:meal_of_record/screens/recipe_edit_screen.dart';
+import 'package:meal_of_record/services/database_service.dart';
+import 'package:meal_of_record/services/open_food_facts_service.dart';
+import 'package:meal_of_record/services/search_service.dart';
 import 'package:provider/provider.dart';
-import 'package:free_cal_counter1/providers/search_provider.dart';
-import 'package:free_cal_counter1/models/search_config.dart';
-import 'package:free_cal_counter1/models/quantity_edit_config.dart';
-import 'package:free_cal_counter1/screens/container_settings_screen.dart';
+import 'package:meal_of_record/providers/search_provider.dart';
+import 'package:meal_of_record/models/search_config.dart';
+import 'package:meal_of_record/models/quantity_edit_config.dart';
+import 'package:meal_of_record/screens/container_settings_screen.dart';
 
 class AppRouter {
   static const String homeRoute = '/';

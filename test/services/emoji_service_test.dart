@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/services/emoji_service.dart';
+import 'package:meal_of_record/services/emoji_service.dart';
 
 void main() {
   group('emojiForFoodName', () {

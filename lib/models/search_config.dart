@@ -1,5 +1,5 @@
-import 'package:free_cal_counter1/models/food_portion.dart';
-import 'package:free_cal_counter1/models/quantity_edit_config.dart';
+import 'package:meal_of_record/models/food_portion.dart';
+import 'package:meal_of_record/models/quantity_edit_config.dart';
 
 typedef SearchSaveCallback = void Function(FoodPortion portion);
 

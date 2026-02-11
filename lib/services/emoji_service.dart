@@ -1,4 +1,4 @@
-import 'package:free_cal_counter1/config/emoji_map.dart';
+import 'package:meal_of_record/config/emoji_map.dart';
 
 String emojiForFoodName(String foodName) {
   if (foodName.isEmpty) {

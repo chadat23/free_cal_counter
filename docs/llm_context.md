@@ -1,6 +1,6 @@
 # App usage summary
 
-FreeCalCounter is to help people track calories, macros, and weight over time. 
+Meal of Record is to help people track calories, macros, and weight over time. 
 
 At a high level, eventually, it should be able to do things like track calories, fat, carbs, and protein per meal, day, and week, enable visualizing, easy data entry and editing from sources such as the FDA as well as OpenFoodFacts (OFF). There should be a local Live Database (where user data and edits live) and a read-only Reference Database (parsed and pruned from FDA data). Generally, we want to prioritize local data since it's faster, but allow seamless integration with OFF and the Reference DB. Determining how to manage data versioning and history is critical: we want users to be able to fix input mistakes without rewriting history in a way that falsifies past logs.
 
@@ -418,7 +418,7 @@ To preserve historical accuracy while allowing food improvements, we implement a
     - database.db
     - app_images/ (only referenced images)
   - Backups are named using an ISO‑8601 timestamp:
-    - freecalcounter_backup_YYYY-MM-DDTHH-mm-ssZ.zip
+    - mealofrecord_backup_YYYY-MM-DDTHH-mm-ssZ.zip
   - Metadata (timestamp, app version) is stored in Drive file properties.
 - 3.5.4 Retention & Cleanup
   - Retention count is user configurable (default: 7).

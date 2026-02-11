@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/models/food_container.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
-import 'package:free_cal_counter1/services/live_database.dart' hide Food;
-import 'package:free_cal_counter1/services/reference_database.dart' hide Food;
+import 'package:meal_of_record/models/food_container.dart';
+import 'package:meal_of_record/services/database_service.dart';
+import 'package:meal_of_record/services/live_database.dart' hide Food;
+import 'package:meal_of_record/services/reference_database.dart' hide Food;
 import 'package:drift/native.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

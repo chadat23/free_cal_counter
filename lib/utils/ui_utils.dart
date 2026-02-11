@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/widgets/auto_dismiss_dialog.dart';
+import 'package:meal_of_record/widgets/auto_dismiss_dialog.dart';
 
 class UiUtils {
   static Future<void> showAutoDismissDialog(

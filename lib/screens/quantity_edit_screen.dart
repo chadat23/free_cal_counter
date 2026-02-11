@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:free_cal_counter1/models/quantity_edit_config.dart';
-import 'package:free_cal_counter1/providers/log_provider.dart';
-import 'package:free_cal_counter1/providers/recipe_provider.dart';
-import 'package:free_cal_counter1/providers/goals_provider.dart';
-import 'package:free_cal_counter1/utils/math_evaluator.dart';
-import 'package:free_cal_counter1/utils/quantity_edit_utils.dart';
-import 'package:free_cal_counter1/widgets/horizontal_mini_bar_chart.dart';
-import 'package:free_cal_counter1/screens/food_edit_screen.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
-import 'package:free_cal_counter1/models/food.dart';
-import 'package:free_cal_counter1/utils/ui_utils.dart';
-import 'package:free_cal_counter1/widgets/food_image_widget.dart';
-import 'package:free_cal_counter1/models/food_container.dart';
-import 'package:free_cal_counter1/widgets/serving_info_sheet.dart';
-import 'package:free_cal_counter1/widgets/math_input_bar.dart';
+import 'package:meal_of_record/models/quantity_edit_config.dart';
+import 'package:meal_of_record/providers/log_provider.dart';
+import 'package:meal_of_record/providers/recipe_provider.dart';
+import 'package:meal_of_record/providers/goals_provider.dart';
+import 'package:meal_of_record/utils/math_evaluator.dart';
+import 'package:meal_of_record/utils/quantity_edit_utils.dart';
+import 'package:meal_of_record/widgets/horizontal_mini_bar_chart.dart';
+import 'package:meal_of_record/screens/food_edit_screen.dart';
+import 'package:meal_of_record/services/database_service.dart';
+import 'package:meal_of_record/models/food.dart';
+import 'package:meal_of_record/utils/ui_utils.dart';
+import 'package:meal_of_record/widgets/food_image_widget.dart';
+import 'package:meal_of_record/models/food_container.dart';
+import 'package:meal_of_record/widgets/serving_info_sheet.dart';
+import 'package:meal_of_record/widgets/math_input_bar.dart';
 
 class QuantityEditScreen extends StatefulWidget {
   final QuantityEditConfig config;

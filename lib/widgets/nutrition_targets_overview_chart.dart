@@ -1,8 +1,8 @@
-import 'package:free_cal_counter1/config/app_colors.dart';
+import 'package:meal_of_record/config/app_colors.dart';
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/widgets/vertical_mini_bar_chart.dart';
-import 'package:free_cal_counter1/models/nutrition_target.dart';
-import 'package:free_cal_counter1/providers/navigation_provider.dart';
+import 'package:meal_of_record/widgets/vertical_mini_bar_chart.dart';
+import 'package:meal_of_record/models/nutrition_target.dart';
+import 'package:meal_of_record/providers/navigation_provider.dart';
 import 'package:provider/provider.dart';
 
 class NutritionTargetsOverviewChart extends StatefulWidget {

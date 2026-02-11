@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-import 'package:free_cal_counter1/providers/log_provider.dart';
-import 'package:free_cal_counter1/providers/navigation_provider.dart';
-import 'package:free_cal_counter1/widgets/discard_dialog.dart';
-import 'package:free_cal_counter1/widgets/search_ribbon.dart';
-import 'package:free_cal_counter1/widgets/log_queue_top_ribbon.dart';
-import 'package:free_cal_counter1/widgets/slidable_portion_widget.dart';
-import 'package:free_cal_counter1/models/food_portion.dart';
-import 'package:free_cal_counter1/models/quantity_edit_config.dart';
-import 'package:free_cal_counter1/screens/quantity_edit_screen.dart';
+import 'package:meal_of_record/providers/log_provider.dart';
+import 'package:meal_of_record/providers/navigation_provider.dart';
+import 'package:meal_of_record/widgets/discard_dialog.dart';
+import 'package:meal_of_record/widgets/search_ribbon.dart';
+import 'package:meal_of_record/widgets/log_queue_top_ribbon.dart';
+import 'package:meal_of_record/widgets/slidable_portion_widget.dart';
+import 'package:meal_of_record/models/food_portion.dart';
+import 'package:meal_of_record/models/quantity_edit_config.dart';
+import 'package:meal_of_record/screens/quantity_edit_screen.dart';
 import 'package:provider/provider.dart';
 
 class LogQueueScreen extends StatelessWidget {

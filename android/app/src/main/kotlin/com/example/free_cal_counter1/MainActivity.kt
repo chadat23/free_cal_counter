@@ -1,4 +1,4 @@
-package com.example.free_cal_counter1
+package com.clipclapclop.meal_of_record
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/models/food.dart';
-import 'package:free_cal_counter1/models/food_serving.dart';
-import 'package:free_cal_counter1/models/recipe.dart';
-import 'package:free_cal_counter1/models/recipe_item.dart';
-import 'package:free_cal_counter1/providers/log_provider.dart';
-import 'package:free_cal_counter1/providers/recipe_provider.dart';
-import 'package:free_cal_counter1/providers/search_provider.dart';
-import 'package:free_cal_counter1/providers/navigation_provider.dart';
-import 'package:free_cal_counter1/screens/recipe_edit_screen.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
+import 'package:meal_of_record/models/food.dart';
+import 'package:meal_of_record/models/food_serving.dart';
+import 'package:meal_of_record/models/recipe.dart';
+import 'package:meal_of_record/models/recipe_item.dart';
+import 'package:meal_of_record/providers/log_provider.dart';
+import 'package:meal_of_record/providers/recipe_provider.dart';
+import 'package:meal_of_record/providers/search_provider.dart';
+import 'package:meal_of_record/providers/navigation_provider.dart';
+import 'package:meal_of_record/screens/recipe_edit_screen.dart';
+import 'package:meal_of_record/services/database_service.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 
 import 'package:drift/native.dart';
-import 'package:free_cal_counter1/services/live_database.dart' as live_db;
-import 'package:free_cal_counter1/services/reference_database.dart' as ref_db;
+import 'package:meal_of_record/services/live_database.dart' as live_db;
+import 'package:meal_of_record/services/reference_database.dart' as ref_db;
 
 import 'dump_functionality_test.mocks.dart';
 

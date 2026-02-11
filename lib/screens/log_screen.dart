@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:free_cal_counter1/models/nutrition_target.dart';
-import 'package:free_cal_counter1/widgets/log_header.dart';
-import 'package:free_cal_counter1/widgets/screen_background.dart';
-import 'package:free_cal_counter1/widgets/search_ribbon.dart';
-import 'package:free_cal_counter1/widgets/confirm_delete_dialog.dart';
-import 'package:free_cal_counter1/models/food_portion.dart';
-import 'package:free_cal_counter1/models/logged_portion.dart';
-import 'package:free_cal_counter1/models/meal.dart';
-import 'package:free_cal_counter1/widgets/meal_widget.dart';
-import 'package:free_cal_counter1/providers/log_provider.dart';
-import 'package:free_cal_counter1/providers/goals_provider.dart';
-import 'package:free_cal_counter1/config/app_router.dart';
-import 'package:free_cal_counter1/main.dart' show routeObserver;
+import 'package:meal_of_record/models/nutrition_target.dart';
+import 'package:meal_of_record/widgets/log_header.dart';
+import 'package:meal_of_record/widgets/screen_background.dart';
+import 'package:meal_of_record/widgets/search_ribbon.dart';
+import 'package:meal_of_record/widgets/confirm_delete_dialog.dart';
+import 'package:meal_of_record/models/food_portion.dart';
+import 'package:meal_of_record/models/logged_portion.dart';
+import 'package:meal_of_record/models/meal.dart';
+import 'package:meal_of_record/widgets/meal_widget.dart';
+import 'package:meal_of_record/providers/log_provider.dart';
+import 'package:meal_of_record/providers/goals_provider.dart';
+import 'package:meal_of_record/config/app_router.dart';
+import 'package:meal_of_record/main.dart' show routeObserver;
 
 class LogScreen extends StatefulWidget {
   const LogScreen({super.key});

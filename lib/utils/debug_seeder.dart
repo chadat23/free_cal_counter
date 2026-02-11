@@ -1,5 +1,5 @@
-import 'package:free_cal_counter1/models/food_portion.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
+import 'package:meal_of_record/models/food_portion.dart';
+import 'package:meal_of_record/services/database_service.dart';
 
 class DebugSeeder {
   static Future<void> seed() async {

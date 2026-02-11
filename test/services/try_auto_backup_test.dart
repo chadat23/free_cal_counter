@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/services/backup_config_service.dart';
-import 'package:free_cal_counter1/services/google_drive_service.dart';
-import 'package:free_cal_counter1/services/background_backup_worker.dart';
+import 'package:meal_of_record/services/backup_config_service.dart';
+import 'package:meal_of_record/services/google_drive_service.dart';
+import 'package:meal_of_record/services/background_backup_worker.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';

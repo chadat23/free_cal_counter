@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/models/food.dart';
-import 'package:free_cal_counter1/models/food_serving.dart';
-import 'package:free_cal_counter1/utils/quantity_edit_utils.dart';
+import 'package:meal_of_record/models/food.dart';
+import 'package:meal_of_record/models/food_serving.dart';
+import 'package:meal_of_record/utils/quantity_edit_utils.dart';
 
 void main() {
   final mockFood = Food(

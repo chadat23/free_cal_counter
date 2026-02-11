@@ -1,18 +1,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/services/background_backup_worker.dart';
-import 'package:free_cal_counter1/config/app_router.dart';
-import 'package:free_cal_counter1/providers/navigation_provider.dart';
-import 'package:free_cal_counter1/providers/log_provider.dart';
-import 'package:free_cal_counter1/providers/recipe_provider.dart';
-import 'package:free_cal_counter1/providers/goals_provider.dart';
-import 'package:free_cal_counter1/providers/weight_provider.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
-import 'package:free_cal_counter1/services/emoji_service.dart';
-import 'package:free_cal_counter1/services/open_food_facts_service.dart';
-import 'package:free_cal_counter1/services/search_service.dart';
-import 'package:free_cal_counter1/services/food_sorting_service.dart';
-import 'package:free_cal_counter1/utils/debug_seeder.dart';
+import 'package:meal_of_record/services/background_backup_worker.dart';
+import 'package:meal_of_record/config/app_router.dart';
+import 'package:meal_of_record/providers/navigation_provider.dart';
+import 'package:meal_of_record/providers/log_provider.dart';
+import 'package:meal_of_record/providers/recipe_provider.dart';
+import 'package:meal_of_record/providers/goals_provider.dart';
+import 'package:meal_of_record/providers/weight_provider.dart';
+import 'package:meal_of_record/services/database_service.dart';
+import 'package:meal_of_record/services/emoji_service.dart';
+import 'package:meal_of_record/services/open_food_facts_service.dart';
+import 'package:meal_of_record/services/search_service.dart';
+import 'package:meal_of_record/services/food_sorting_service.dart';
+import 'package:meal_of_record/utils/debug_seeder.dart';
 import 'package:provider/provider.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
 
@@ -53,7 +53,7 @@ class _MyAppState extends State<MyApp> {
 
       // Set user agent for OpenFoodFacts API
       OpenFoodAPIConfiguration.userAgent = UserAgent(
-        name: 'FreeCalCounter',
+        name: 'Meal of Record',
         version: '1.0',
       );
 
@@ -161,7 +161,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => WeightProvider()),
       ],
       child: MaterialApp(
-        title: 'Free Cal Counter',
+        title: 'Meal of Record',
         theme: ThemeData(
           primarySwatch: Colors.blue,
           scaffoldBackgroundColor: Colors.grey[850],

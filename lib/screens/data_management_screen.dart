@@ -1,17 +1,17 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
-import 'package:free_cal_counter1/widgets/screen_background.dart';
+import 'package:meal_of_record/services/database_service.dart';
+import 'package:meal_of_record/widgets/screen_background.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:free_cal_counter1/services/backup_config_service.dart';
-import 'package:free_cal_counter1/services/google_drive_service.dart';
+import 'package:meal_of_record/services/backup_config_service.dart';
+import 'package:meal_of_record/services/google_drive_service.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
-import 'package:free_cal_counter1/services/background_backup_worker.dart';
+import 'package:meal_of_record/services/background_backup_worker.dart';
 import 'package:intl/intl.dart';
-import 'package:free_cal_counter1/utils/ui_utils.dart';
+import 'package:meal_of_record/utils/ui_utils.dart';
 import 'package:provider/provider.dart';
-import 'package:free_cal_counter1/providers/goals_provider.dart';
+import 'package:meal_of_record/providers/goals_provider.dart';
 
 class DataManagementScreen extends StatefulWidget {
   final GoogleDriveService? googleDriveService;
@@ -237,9 +237,9 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
           XFile(
             zipFile.path,
             name:
-                'free_cal_backup_${DateTime.now().millisecondsSinceEpoch}.zip',
+                'meal_of_record_${DateTime.now().millisecondsSinceEpoch}.zip',
           ),
-        ], text: 'FreeCal Counter Backup (with images)');
+        ], text: 'Meal of Record Backup (with images)');
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

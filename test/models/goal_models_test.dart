@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/models/goal_settings.dart';
-import 'package:free_cal_counter1/models/macro_goals.dart';
+import 'package:meal_of_record/models/goal_settings.dart';
+import 'package:meal_of_record/models/macro_goals.dart';
 
 void main() {
   group('GoalSettings', () {

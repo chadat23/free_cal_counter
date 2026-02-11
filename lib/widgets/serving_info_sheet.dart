@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/models/food.dart';
-import 'package:free_cal_counter1/models/food_serving.dart';
-import 'package:free_cal_counter1/config/app_colors.dart';
+import 'package:meal_of_record/models/food.dart';
+import 'package:meal_of_record/models/food_serving.dart';
+import 'package:meal_of_record/config/app_colors.dart';
 
 /// Shows a bottom sheet with all serving sizes and their calculated macros.
 /// Designed for easy reading, not editing.

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/models/food_portion.dart' as model;
-import 'package:free_cal_counter1/models/logged_portion.dart' as model;
-import 'package:free_cal_counter1/models/recipe.dart' as model;
-import 'package:free_cal_counter1/models/food.dart' as model_food;
-import 'package:free_cal_counter1/services/emoji_service.dart';
-import 'package:free_cal_counter1/models/daily_macro_stats.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
+import 'package:meal_of_record/models/food_portion.dart' as model;
+import 'package:meal_of_record/models/logged_portion.dart' as model;
+import 'package:meal_of_record/models/recipe.dart' as model;
+import 'package:meal_of_record/models/food.dart' as model_food;
+import 'package:meal_of_record/services/emoji_service.dart';
+import 'package:meal_of_record/models/daily_macro_stats.dart';
+import 'package:meal_of_record/services/database_service.dart';
 
 class LogProvider extends ChangeNotifier {
   LogProvider() {

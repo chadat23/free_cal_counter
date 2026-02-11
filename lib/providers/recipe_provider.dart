@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/models/recipe.dart';
-import 'package:free_cal_counter1/models/recipe_item.dart';
-import 'package:free_cal_counter1/models/category.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
-import 'package:free_cal_counter1/services/image_storage_service.dart';
+import 'package:meal_of_record/models/recipe.dart';
+import 'package:meal_of_record/models/recipe_item.dart';
+import 'package:meal_of_record/models/category.dart';
+import 'package:meal_of_record/services/database_service.dart';
+import 'package:meal_of_record/services/image_storage_service.dart';
 
 class RecipeProvider extends ChangeNotifier {
   int _id = 0;

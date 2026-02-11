@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:free_cal_counter1/utils/permission_utils.dart';
+import 'package:meal_of_record/utils/permission_utils.dart';
 
 /// A camera screen with a square viewfinder for taking food photos.
 /// Returns the captured file path via Navigator.pop, or null on cancel.

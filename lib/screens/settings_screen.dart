@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/widgets/screen_background.dart';
-import 'package:free_cal_counter1/config/app_router.dart';
+import 'package:meal_of_record/widgets/screen_background.dart';
+import 'package:meal_of_record/config/app_router.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});

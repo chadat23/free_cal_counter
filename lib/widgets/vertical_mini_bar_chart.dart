@@ -1,9 +1,9 @@
-import 'package:free_cal_counter1/config/app_colors.dart';
+import 'package:meal_of_record/config/app_colors.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
 
 // Export for testing
-export 'package:free_cal_counter1/widgets/vertical_mini_bar_chart.dart'
+export 'package:meal_of_record/widgets/vertical_mini_bar_chart.dart'
     show VerticalMiniBarChartPainter;
 
 class VerticalMiniBarChart extends StatelessWidget {

@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
-import 'package:free_cal_counter1/models/food.dart' as model;
-import 'package:free_cal_counter1/services/database_service.dart';
-import 'package:free_cal_counter1/services/open_food_facts_service.dart';
-import 'package:free_cal_counter1/services/search_service.dart';
-import 'package:free_cal_counter1/models/search_mode.dart';
+import 'package:meal_of_record/models/food.dart' as model;
+import 'package:meal_of_record/services/database_service.dart';
+import 'package:meal_of_record/services/open_food_facts_service.dart';
+import 'package:meal_of_record/services/search_service.dart';
+import 'package:meal_of_record/models/search_mode.dart';
 
 class SearchProvider extends ChangeNotifier {
   final DatabaseService databaseService;

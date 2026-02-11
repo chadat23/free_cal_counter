@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/models/food_portion.dart' as model_portion;
-import 'package:free_cal_counter1/models/quantity_edit_config.dart';
-import 'package:free_cal_counter1/models/search_config.dart';
-import 'package:free_cal_counter1/providers/log_provider.dart';
-import 'package:free_cal_counter1/screens/food_edit_screen.dart';
-import 'package:free_cal_counter1/screens/quantity_edit_screen.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
-import 'package:free_cal_counter1/widgets/quick_add_dialog.dart';
+import 'package:meal_of_record/models/food_portion.dart' as model_portion;
+import 'package:meal_of_record/models/quantity_edit_config.dart';
+import 'package:meal_of_record/models/search_config.dart';
+import 'package:meal_of_record/providers/log_provider.dart';
+import 'package:meal_of_record/screens/food_edit_screen.dart';
+import 'package:meal_of_record/screens/quantity_edit_screen.dart';
+import 'package:meal_of_record/services/database_service.dart';
+import 'package:meal_of_record/widgets/quick_add_dialog.dart';
 import 'package:provider/provider.dart';
 
 class FoodSearchView extends StatelessWidget {

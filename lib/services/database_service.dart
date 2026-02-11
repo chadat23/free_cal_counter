@@ -4,22 +4,22 @@ import 'package:drift/drift.dart';
 import 'package:archive/archive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:free_cal_counter1/models/food.dart' as model;
-import 'package:free_cal_counter1/models/food_serving.dart' as model_serving;
-import 'package:free_cal_counter1/models/food_portion.dart' as model;
-import 'package:free_cal_counter1/models/logged_portion.dart' as model;
-import 'package:free_cal_counter1/models/recipe.dart' as model;
-import 'package:free_cal_counter1/models/recipe_item.dart' as model;
-import 'package:free_cal_counter1/services/backup_config_service.dart';
-import 'package:free_cal_counter1/models/category.dart' as model;
-import 'package:free_cal_counter1/models/weight.dart' as model;
-import 'package:free_cal_counter1/services/live_database.dart';
-import 'package:free_cal_counter1/models/daily_macro_stats.dart' as model_stats;
-import 'package:free_cal_counter1/services/reference_database.dart'
+import 'package:meal_of_record/models/food.dart' as model;
+import 'package:meal_of_record/models/food_serving.dart' as model_serving;
+import 'package:meal_of_record/models/food_portion.dart' as model;
+import 'package:meal_of_record/models/logged_portion.dart' as model;
+import 'package:meal_of_record/models/recipe.dart' as model;
+import 'package:meal_of_record/models/recipe_item.dart' as model;
+import 'package:meal_of_record/services/backup_config_service.dart';
+import 'package:meal_of_record/models/category.dart' as model;
+import 'package:meal_of_record/models/weight.dart' as model;
+import 'package:meal_of_record/services/live_database.dart';
+import 'package:meal_of_record/models/daily_macro_stats.dart' as model_stats;
+import 'package:meal_of_record/services/reference_database.dart'
     hide FoodPortion, FoodsCompanion, FoodPortionsCompanion;
-import 'package:free_cal_counter1/models/food_usage_stats.dart';
-import 'package:free_cal_counter1/models/food_container.dart';
-import 'package:free_cal_counter1/services/image_storage_service.dart';
+import 'package:meal_of_record/models/food_usage_stats.dart';
+import 'package:meal_of_record/models/food_container.dart';
+import 'package:meal_of_record/services/image_storage_service.dart';
 
 /// Holds information about the last logged unit and quantity for a food.
 class LastLoggedInfo {
@@ -82,7 +82,7 @@ class DatabaseService {
 
         for (final file in archive) {
           if (file.isFile) {
-            if (file.name == 'free_cal.db') {
+            if (file.name == 'meal_of_record.db') {
               final dbFile = File(liveFile.path);
               await dbFile.writeAsBytes(file.content as List<int>);
             } else if (file.name.startsWith('app_images/')) {
@@ -135,7 +135,7 @@ class DatabaseService {
 
     // Add database
     final dbBytes = await liveFile.readAsBytes();
-    archive.addFile(ArchiveFile('free_cal.db', dbBytes.length, dbBytes));
+    archive.addFile(ArchiveFile('meal_of_record.db', dbBytes.length, dbBytes));
 
     // Add images
     if (await imagesDir.exists()) {
@@ -171,13 +171,13 @@ class DatabaseService {
     final zipBytes = ZipEncoder().encode(archive);
     if (zipBytes == null) throw Exception('Failed to encode zip');
 
-    // Generate timestamped filename: free_cal_backup_YYYY-MM-DD_HH-mm-ss.zip
+    // Generate timestamped filename: meal_of_record_backup_YYYY-MM-DD_HH-mm-ss.zip
     final now = DateTime.now();
     final timestamp =
         '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}_${now.hour.toString().padLeft(2, '0')}-${now.minute.toString().padLeft(2, '0')}-${now.second.toString().padLeft(2, '0')}';
 
     final tempDir = await Directory.systemTemp.createTemp();
-    final zipFile = File('${tempDir.path}/free_cal_backup_$timestamp.zip');
+    final zipFile = File('${tempDir.path}/meal_of_record_$timestamp.zip');
     await zipFile.writeAsBytes(zipBytes);
 
     return zipFile;

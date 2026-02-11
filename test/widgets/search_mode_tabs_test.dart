@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/models/search_mode.dart';
-import 'package:free_cal_counter1/providers/search_provider.dart';
-import 'package:free_cal_counter1/widgets/search/search_mode_tabs.dart';
+import 'package:meal_of_record/models/search_mode.dart';
+import 'package:meal_of_record/providers/search_provider.dart';
+import 'package:meal_of_record/widgets/search/search_mode_tabs.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';

@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:free_cal_counter1/models/weight.dart';
+import 'package:meal_of_record/models/weight.dart';
 
 class GoalLogicService {
   static const int kTdeeWindowDays = 14;

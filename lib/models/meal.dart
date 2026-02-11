@@ -1,4 +1,4 @@
-import 'package:free_cal_counter1/models/logged_portion.dart';
+import 'package:meal_of_record/models/logged_portion.dart';
 
 class Meal {
   final DateTime timestamp;

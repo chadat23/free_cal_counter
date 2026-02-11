@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/widgets/screen_background.dart';
+import 'package:meal_of_record/widgets/screen_background.dart';
 
 void main() {
   group('ScreenBackground', () {

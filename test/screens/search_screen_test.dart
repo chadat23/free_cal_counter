@@ -1,30 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/widgets/log_queue_top_ribbon.dart';
+import 'package:meal_of_record/widgets/log_queue_top_ribbon.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/models/food.dart';
-import 'package:free_cal_counter1/models/food_portion.dart';
-import 'package:free_cal_counter1/models/food_serving.dart';
-import 'package:free_cal_counter1/providers/log_provider.dart';
-import 'package:free_cal_counter1/providers/navigation_provider.dart';
-import 'package:free_cal_counter1/providers/search_provider.dart';
-import 'package:free_cal_counter1/providers/recipe_provider.dart';
-import 'package:free_cal_counter1/providers/goals_provider.dart';
-import 'package:free_cal_counter1/models/macro_goals.dart';
-import 'package:free_cal_counter1/screens/search_screen.dart';
-import 'package:free_cal_counter1/screens/quantity_edit_screen.dart';
-import 'package:free_cal_counter1/widgets/search_ribbon.dart';
-import 'package:free_cal_counter1/models/search_mode.dart';
+import 'package:meal_of_record/models/food.dart';
+import 'package:meal_of_record/models/food_portion.dart';
+import 'package:meal_of_record/models/food_serving.dart';
+import 'package:meal_of_record/providers/log_provider.dart';
+import 'package:meal_of_record/providers/navigation_provider.dart';
+import 'package:meal_of_record/providers/search_provider.dart';
+import 'package:meal_of_record/providers/recipe_provider.dart';
+import 'package:meal_of_record/providers/goals_provider.dart';
+import 'package:meal_of_record/models/macro_goals.dart';
+import 'package:meal_of_record/screens/search_screen.dart';
+import 'package:meal_of_record/screens/quantity_edit_screen.dart';
+import 'package:meal_of_record/widgets/search_ribbon.dart';
+import 'package:meal_of_record/models/search_mode.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 
 import 'package:drift/native.dart';
-import 'package:free_cal_counter1/services/database_service.dart';
-import 'package:free_cal_counter1/services/live_database.dart' as live_db;
-import 'package:free_cal_counter1/services/reference_database.dart' as ref_db;
+import 'package:meal_of_record/services/database_service.dart';
+import 'package:meal_of_record/services/live_database.dart' as live_db;
+import 'package:meal_of_record/services/reference_database.dart' as ref_db;
 
-import 'package:free_cal_counter1/models/search_config.dart';
-import 'package:free_cal_counter1/models/quantity_edit_config.dart';
+import 'package:meal_of_record/models/search_config.dart';
+import 'package:meal_of_record/models/quantity_edit_config.dart';
 
 import 'search_screen_test.mocks.dart';
 

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:free_cal_counter1/services/backup_config_service.dart';
+import 'package:meal_of_record/services/backup_config_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {

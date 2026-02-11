@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:free_cal_counter1/config/app_router.dart';
-import 'package:free_cal_counter1/widgets/discard_dialog.dart';
-import 'package:free_cal_counter1/widgets/log_queue_top_ribbon.dart';
+import 'package:meal_of_record/config/app_router.dart';
+import 'package:meal_of_record/widgets/discard_dialog.dart';
+import 'package:meal_of_record/widgets/log_queue_top_ribbon.dart';
 import 'package:provider/provider.dart';
-import 'package:free_cal_counter1/providers/search_provider.dart';
-import 'package:free_cal_counter1/providers/log_provider.dart';
-import 'package:free_cal_counter1/providers/navigation_provider.dart';
-import 'package:free_cal_counter1/widgets/search_ribbon.dart';
-import 'package:free_cal_counter1/models/search_mode.dart';
-import 'package:free_cal_counter1/widgets/search/search_mode_tabs.dart';
-import 'package:free_cal_counter1/widgets/search/text_search_view.dart';
-import 'package:free_cal_counter1/widgets/search/recipe_search_view.dart';
-import 'package:free_cal_counter1/widgets/search/food_search_view.dart';
-import 'package:free_cal_counter1/models/search_config.dart';
+import 'package:meal_of_record/providers/search_provider.dart';
+import 'package:meal_of_record/providers/log_provider.dart';
+import 'package:meal_of_record/providers/navigation_provider.dart';
+import 'package:meal_of_record/widgets/search_ribbon.dart';
+import 'package:meal_of_record/models/search_mode.dart';
+import 'package:meal_of_record/widgets/search/search_mode_tabs.dart';
+import 'package:meal_of_record/widgets/search/text_search_view.dart';
+import 'package:meal_of_record/widgets/search/recipe_search_view.dart';
+import 'package:meal_of_record/widgets/search/food_search_view.dart';
+import 'package:meal_of_record/models/search_config.dart';
 
 class SearchScreen extends StatefulWidget {
   final SearchConfig config;

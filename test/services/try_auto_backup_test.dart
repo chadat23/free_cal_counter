@@ -1,20 +1,19 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meal_of_record/services/backup_config_service.dart';
-import 'package:meal_of_record/services/google_drive_service.dart';
+import 'package:meal_of_record/services/nas_backup_service.dart';
 import 'package:meal_of_record/services/background_backup_worker.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-@GenerateMocks([GoogleDriveService, BackupConfigService, GoogleSignInAccount])
+@GenerateMocks([NasBackupService, BackupConfigService])
 import 'try_auto_backup_test.mocks.dart';
 
 void main() {
-  late MockGoogleDriveService mockDrive;
+  late MockNasBackupService mockNas;
   late MockBackupConfigService mockConfig;
 
   setUp(() {
-    mockDrive = MockGoogleDriveService();
+    mockNas = MockNasBackupService();
     mockConfig = MockBackupConfigService();
   });
 
@@ -23,11 +22,11 @@ void main() {
 
     final result = await tryAutoBackup(
       configService: mockConfig,
-      driveService: mockDrive,
+      nasService: mockNas,
     );
 
     expect(result, isFalse);
-    verifyNever(mockDrive.refreshCurrentUser());
+    verifyNever(mockConfig.isNasConfigured());
   });
 
   test('skips when database is not dirty', () async {
@@ -36,11 +35,11 @@ void main() {
 
     final result = await tryAutoBackup(
       configService: mockConfig,
-      driveService: mockDrive,
+      nasService: mockNas,
     );
 
     expect(result, isFalse);
-    verifyNever(mockDrive.refreshCurrentUser());
+    verifyNever(mockConfig.isNasConfigured());
   });
 
   test('skips when last backup was less than 24h ago', () async {
@@ -52,43 +51,43 @@ void main() {
 
     final result = await tryAutoBackup(
       configService: mockConfig,
-      driveService: mockDrive,
+      nasService: mockNas,
     );
 
     expect(result, isFalse);
-    verifyNever(mockDrive.refreshCurrentUser());
+    verifyNever(mockConfig.isNasConfigured());
   });
 
-  test('skips when not signed in to Google', () async {
+  test('skips when NAS is not configured', () async {
     when(mockConfig.isAutoBackupEnabled()).thenAnswer((_) async => true);
     when(mockConfig.isDirty()).thenAnswer((_) async => true);
     when(mockConfig.getLastBackupTime()).thenAnswer((_) async => null);
-    when(mockDrive.refreshCurrentUser()).thenAnswer((_) async => null);
+    when(mockConfig.isNasConfigured()).thenAnswer((_) async => false);
 
     final result = await tryAutoBackup(
       configService: mockConfig,
-      driveService: mockDrive,
+      nasService: mockNas,
     );
 
     expect(result, isFalse);
-    verifyNever(mockDrive.uploadBackup(any, retentionCount: anyNamed('retentionCount')));
+    verifyNever(mockNas.uploadBackup(any, retentionCount: anyNamed('retentionCount')));
   });
 
   test('force=true skips dirty and cooldown checks', () async {
     when(mockConfig.isAutoBackupEnabled()).thenAnswer((_) async => true);
     // Not stubbing isDirty/getLastBackupTime — they shouldn't be called
-    when(mockDrive.refreshCurrentUser()).thenAnswer((_) async => null);
+    when(mockConfig.isNasConfigured()).thenAnswer((_) async => false);
 
     await tryAutoBackup(
       configService: mockConfig,
-      driveService: mockDrive,
+      nasService: mockNas,
       force: true,
     );
 
     verifyNever(mockConfig.isDirty());
     verifyNever(mockConfig.getLastBackupTime());
-    // Still checks sign-in
-    verify(mockDrive.refreshCurrentUser()).called(1);
+    // Still checks configuration
+    verify(mockConfig.isNasConfigured()).called(1);
   });
 
   test('proceeds when last backup was more than 24h ago', () async {
@@ -97,29 +96,29 @@ void main() {
     when(mockConfig.getLastBackupTime()).thenAnswer(
       (_) async => DateTime.now().subtract(const Duration(hours: 25)),
     );
-    // Will fail at sign-in, but we verify it gets past the cooldown check
-    when(mockDrive.refreshCurrentUser()).thenAnswer((_) async => null);
+    // Will fail at NAS not configured, but we verify it gets past the cooldown check
+    when(mockConfig.isNasConfigured()).thenAnswer((_) async => false);
 
     await tryAutoBackup(
       configService: mockConfig,
-      driveService: mockDrive,
+      nasService: mockNas,
     );
 
-    verify(mockDrive.refreshCurrentUser()).called(1);
+    verify(mockConfig.isNasConfigured()).called(1);
   });
 
   test('proceeds when no previous backup exists', () async {
     when(mockConfig.isAutoBackupEnabled()).thenAnswer((_) async => true);
     when(mockConfig.isDirty()).thenAnswer((_) async => true);
     when(mockConfig.getLastBackupTime()).thenAnswer((_) async => null);
-    when(mockDrive.refreshCurrentUser()).thenAnswer((_) async => null);
+    when(mockConfig.isNasConfigured()).thenAnswer((_) async => false);
 
     await tryAutoBackup(
       configService: mockConfig,
-      driveService: mockDrive,
+      nasService: mockNas,
     );
 
-    verify(mockDrive.refreshCurrentUser()).called(1);
+    verify(mockConfig.isNasConfigured()).called(1);
   });
 
   test('returns false and does not throw on exceptions', () async {
@@ -127,9 +126,25 @@ void main() {
 
     final result = await tryAutoBackup(
       configService: mockConfig,
-      driveService: mockDrive,
+      nasService: mockNas,
     );
 
     expect(result, isFalse);
+  });
+
+  test('records failure on exception', () async {
+    when(mockConfig.isAutoBackupEnabled()).thenAnswer((_) async => true);
+    when(mockConfig.isDirty()).thenAnswer((_) async => true);
+    when(mockConfig.getLastBackupTime()).thenAnswer((_) async => null);
+    when(mockConfig.isNasConfigured()).thenThrow(Exception('test error'));
+    when(mockConfig.recordBackupFailure()).thenAnswer((_) async {});
+
+    final result = await tryAutoBackup(
+      configService: mockConfig,
+      nasService: mockNas,
+    );
+
+    expect(result, isFalse);
+    verify(mockConfig.recordBackupFailure()).called(1);
   });
 }

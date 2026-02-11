@@ -3,15 +3,13 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i4;
-import 'dart:io' as _i5;
+import 'dart:async' as _i3;
+import 'dart:io' as _i4;
 
-import 'package:meal_of_record/services/backup_config_service.dart' as _i7;
-import 'package:meal_of_record/services/google_drive_service.dart' as _i3;
-import 'package:google_sign_in/google_sign_in.dart' as _i2;
-import 'package:googleapis/drive/v3.dart' as _i6;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i6;
+import 'package:meal_of_record/services/backup_config_service.dart' as _i5;
+import 'package:meal_of_record/services/nas_backup_service.dart' as _i2;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i8;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -28,237 +26,295 @@ import 'package:mockito/src/dummies.dart' as _i8;
 // ignore_for_file: subtype_of_sealed_class
 // ignore_for_file: invalid_use_of_internal_member
 
-class _FakeGoogleSignInAuthentication_0 extends _i1.SmartFake
-    implements _i2.GoogleSignInAuthentication {
-  _FakeGoogleSignInAuthentication_0(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
-}
-
-/// A class which mocks [GoogleDriveService].
+/// A class which mocks [NasBackupService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockGoogleDriveService extends _i1.Mock
-    implements _i3.GoogleDriveService {
-  MockGoogleDriveService() {
+class MockNasBackupService extends _i1.Mock implements _i2.NasBackupService {
+  MockNasBackupService() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i4.Future<_i2.GoogleSignInAccount?> signIn() =>
+  _i3.Future<String?> testConnection() =>
       (super.noSuchMethod(
-            Invocation.method(#signIn, []),
-            returnValue: _i4.Future<_i2.GoogleSignInAccount?>.value(),
+            Invocation.method(#testConnection, []),
+            returnValue: _i3.Future<String?>.value(),
           )
-          as _i4.Future<_i2.GoogleSignInAccount?>);
+          as _i3.Future<String?>);
 
   @override
-  _i4.Future<void> signOut() =>
-      (super.noSuchMethod(
-            Invocation.method(#signOut, []),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
-          )
-          as _i4.Future<void>);
-
-  @override
-  _i4.Future<bool> isSignedIn() =>
-      (super.noSuchMethod(
-            Invocation.method(#isSignedIn, []),
-            returnValue: _i4.Future<bool>.value(false),
-          )
-          as _i4.Future<bool>);
-
-  @override
-  _i4.Future<_i2.GoogleSignInAccount?> refreshCurrentUser() =>
-      (super.noSuchMethod(
-            Invocation.method(#refreshCurrentUser, []),
-            returnValue: _i4.Future<_i2.GoogleSignInAccount?>.value(),
-          )
-          as _i4.Future<_i2.GoogleSignInAccount?>);
-
-  @override
-  _i4.Future<void> silentSignIn() =>
-      (super.noSuchMethod(
-            Invocation.method(#silentSignIn, []),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
-          )
-          as _i4.Future<void>);
-
-  @override
-  _i4.Future<bool> uploadBackup(_i5.File? zipFile, {int? retentionCount = 7}) =>
+  _i3.Future<bool> uploadBackup(_i4.File? zipFile, {int? retentionCount = 7}) =>
       (super.noSuchMethod(
             Invocation.method(
               #uploadBackup,
               [zipFile],
               {#retentionCount: retentionCount},
             ),
-            returnValue: _i4.Future<bool>.value(false),
+            returnValue: _i3.Future<bool>.value(false),
           )
-          as _i4.Future<bool>);
+          as _i3.Future<bool>);
 
   @override
-  _i4.Future<List<_i6.File>> listBackups() =>
+  _i3.Future<List<_i2.NasBackupFile>> listBackups() =>
       (super.noSuchMethod(
             Invocation.method(#listBackups, []),
-            returnValue: _i4.Future<List<_i6.File>>.value(<_i6.File>[]),
+            returnValue: _i3.Future<List<_i2.NasBackupFile>>.value(
+              <_i2.NasBackupFile>[],
+            ),
           )
-          as _i4.Future<List<_i6.File>>);
+          as _i3.Future<List<_i2.NasBackupFile>>);
 
   @override
-  _i4.Future<_i5.File?> downloadBackup(String? fileId) =>
+  _i3.Future<_i4.File?> downloadBackup(String? href) =>
       (super.noSuchMethod(
-            Invocation.method(#downloadBackup, [fileId]),
-            returnValue: _i4.Future<_i5.File?>.value(),
+            Invocation.method(#downloadBackup, [href]),
+            returnValue: _i3.Future<_i4.File?>.value(),
           )
-          as _i4.Future<_i5.File?>);
+          as _i3.Future<_i4.File?>);
+
+  @override
+  List<_i2.NasBackupFile> parsePropfindResponse(String? xmlBody) =>
+      (super.noSuchMethod(
+            Invocation.method(#parsePropfindResponse, [xmlBody]),
+            returnValue: <_i2.NasBackupFile>[],
+          )
+          as List<_i2.NasBackupFile>);
 }
 
 /// A class which mocks [BackupConfigService].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockBackupConfigService extends _i1.Mock
-    implements _i7.BackupConfigService {
+    implements _i5.BackupConfigService {
   MockBackupConfigService() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i4.Future<void> setAutoBackupEnabled(bool? enabled) =>
+  set secureStorage(_i6.FlutterSecureStorage? storage) => super.noSuchMethod(
+    Invocation.setter(#secureStorage, storage),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i3.Future<void> setAutoBackupEnabled(bool? enabled) =>
       (super.noSuchMethod(
             Invocation.method(#setAutoBackupEnabled, [enabled]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i3.Future<void>);
 
   @override
-  _i4.Future<bool> isAutoBackupEnabled() =>
+  _i3.Future<bool> isAutoBackupEnabled() =>
       (super.noSuchMethod(
             Invocation.method(#isAutoBackupEnabled, []),
-            returnValue: _i4.Future<bool>.value(false),
+            returnValue: _i3.Future<bool>.value(false),
           )
-          as _i4.Future<bool>);
+          as _i3.Future<bool>);
 
   @override
-  _i4.Future<void> setRetentionCount(int? count) =>
+  _i3.Future<void> setRetentionCount(int? count) =>
       (super.noSuchMethod(
             Invocation.method(#setRetentionCount, [count]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i3.Future<void>);
 
   @override
-  _i4.Future<int> getRetentionCount() =>
+  _i3.Future<int> getRetentionCount() =>
       (super.noSuchMethod(
             Invocation.method(#getRetentionCount, []),
-            returnValue: _i4.Future<int>.value(0),
+            returnValue: _i3.Future<int>.value(0),
           )
-          as _i4.Future<int>);
+          as _i3.Future<int>);
 
   @override
-  _i4.Future<void> markDirty() =>
+  _i3.Future<void> markDirty() =>
       (super.noSuchMethod(
             Invocation.method(#markDirty, []),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i3.Future<void>);
 
   @override
-  _i4.Future<void> clearDirty() =>
+  _i3.Future<void> clearDirty() =>
       (super.noSuchMethod(
             Invocation.method(#clearDirty, []),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i3.Future<void>);
 
   @override
-  _i4.Future<bool> isDirty() =>
+  _i3.Future<bool> isDirty() =>
       (super.noSuchMethod(
             Invocation.method(#isDirty, []),
-            returnValue: _i4.Future<bool>.value(false),
+            returnValue: _i3.Future<bool>.value(false),
           )
-          as _i4.Future<bool>);
+          as _i3.Future<bool>);
 
   @override
-  _i4.Future<void> updateLastBackupTime() =>
+  _i3.Future<void> updateLastBackupTime() =>
       (super.noSuchMethod(
             Invocation.method(#updateLastBackupTime, []),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i3.Future<void>);
 
   @override
-  _i4.Future<DateTime?> getLastBackupTime() =>
+  _i3.Future<DateTime?> getLastBackupTime() =>
       (super.noSuchMethod(
             Invocation.method(#getLastBackupTime, []),
-            returnValue: _i4.Future<DateTime?>.value(),
+            returnValue: _i3.Future<DateTime?>.value(),
           )
-          as _i4.Future<DateTime?>);
-}
-
-/// A class which mocks [GoogleSignInAccount].
-///
-/// See the documentation for Mockito's code generation for more information.
-// ignore: must_be_immutable
-class MockGoogleSignInAccount extends _i1.Mock
-    implements _i2.GoogleSignInAccount {
-  MockGoogleSignInAccount() {
-    _i1.throwOnMissingStub(this);
-  }
+          as _i3.Future<DateTime?>);
 
   @override
-  String get email =>
+  _i3.Future<void> setNasHost(String? host) =>
       (super.noSuchMethod(
-            Invocation.getter(#email),
-            returnValue: _i8.dummyValue<String>(
-              this,
-              Invocation.getter(#email),
-            ),
+            Invocation.method(#setNasHost, [host]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
           )
-          as String);
+          as _i3.Future<void>);
 
   @override
-  String get id =>
+  _i3.Future<String?> getNasHost() =>
       (super.noSuchMethod(
-            Invocation.getter(#id),
-            returnValue: _i8.dummyValue<String>(this, Invocation.getter(#id)),
+            Invocation.method(#getNasHost, []),
+            returnValue: _i3.Future<String?>.value(),
           )
-          as String);
+          as _i3.Future<String?>);
 
   @override
-  _i4.Future<_i2.GoogleSignInAuthentication> get authentication =>
+  _i3.Future<void> setNasPort(int? port) =>
       (super.noSuchMethod(
-            Invocation.getter(#authentication),
-            returnValue: _i4.Future<_i2.GoogleSignInAuthentication>.value(
-              _FakeGoogleSignInAuthentication_0(
-                this,
-                Invocation.getter(#authentication),
-              ),
-            ),
+            Invocation.method(#setNasPort, [port]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
           )
-          as _i4.Future<_i2.GoogleSignInAuthentication>);
+          as _i3.Future<void>);
 
   @override
-  _i4.Future<Map<String, String>> get authHeaders =>
+  _i3.Future<int?> getNasPort() =>
       (super.noSuchMethod(
-            Invocation.getter(#authHeaders),
-            returnValue: _i4.Future<Map<String, String>>.value(
-              <String, String>{},
-            ),
+            Invocation.method(#getNasPort, []),
+            returnValue: _i3.Future<int?>.value(),
           )
-          as _i4.Future<Map<String, String>>);
+          as _i3.Future<int?>);
 
   @override
-  _i4.Future<void> clearAuthCache() =>
+  _i3.Future<void> setNasPath(String? path) =>
       (super.noSuchMethod(
-            Invocation.method(#clearAuthCache, []),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            Invocation.method(#setNasPath, [path]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
           )
-          as _i4.Future<void>);
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<String?> getNasPath() =>
+      (super.noSuchMethod(
+            Invocation.method(#getNasPath, []),
+            returnValue: _i3.Future<String?>.value(),
+          )
+          as _i3.Future<String?>);
+
+  @override
+  _i3.Future<void> setNasUseHttps(bool? useHttps) =>
+      (super.noSuchMethod(
+            Invocation.method(#setNasUseHttps, [useHttps]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<bool> getNasUseHttps() =>
+      (super.noSuchMethod(
+            Invocation.method(#getNasUseHttps, []),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
+
+  @override
+  _i3.Future<void> setNasAllowSelfSigned(bool? allow) =>
+      (super.noSuchMethod(
+            Invocation.method(#setNasAllowSelfSigned, [allow]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<bool> getNasAllowSelfSigned() =>
+      (super.noSuchMethod(
+            Invocation.method(#getNasAllowSelfSigned, []),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
+
+  @override
+  _i3.Future<void> recordBackupFailure() =>
+      (super.noSuchMethod(
+            Invocation.method(#recordBackupFailure, []),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> recordBackupSuccess() =>
+      (super.noSuchMethod(
+            Invocation.method(#recordBackupSuccess, []),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<int> getConsecutiveFailures() =>
+      (super.noSuchMethod(
+            Invocation.method(#getConsecutiveFailures, []),
+            returnValue: _i3.Future<int>.value(0),
+          )
+          as _i3.Future<int>);
+
+  @override
+  _i3.Future<void> saveNasCredentials(String? username, String? password) =>
+      (super.noSuchMethod(
+            Invocation.method(#saveNasCredentials, [username, password]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<(String?, String?)> getNasCredentials() =>
+      (super.noSuchMethod(
+            Invocation.method(#getNasCredentials, []),
+            returnValue: _i3.Future<(String?, String?)>.value((null, null)),
+          )
+          as _i3.Future<(String?, String?)>);
+
+  @override
+  _i3.Future<void> clearNasCredentials() =>
+      (super.noSuchMethod(
+            Invocation.method(#clearNasCredentials, []),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<bool> isNasConfigured() =>
+      (super.noSuchMethod(
+            Invocation.method(#isNasConfigured, []),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
 }

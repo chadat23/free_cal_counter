@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:meal_of_record/services/background_backup_worker.dart';
+import 'package:meal_of_record/services/backup_config_service.dart';
 import 'package:meal_of_record/config/app_router.dart';
 import 'package:meal_of_record/providers/navigation_provider.dart';
 import 'package:meal_of_record/providers/log_provider.dart';
@@ -18,6 +19,7 @@ import 'package:openfoodfacts/openfoodfacts.dart';
 
 final RouteObserver<ModalRoute<void>> routeObserver =
     RouteObserver<ModalRoute<void>>();
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,6 +68,9 @@ class _MyAppState extends State<MyApp> {
 
       // Fire-and-forget: attempt auto-backup if conditions are met
       tryAutoBackup();
+
+      // Check for repeated backup failures from previous sessions
+      _checkBackupWarning();
     } catch (e, stack) {
       debugPrint('MyApp: Initialization error: $e');
       debugPrint(stack.toString());
@@ -74,6 +79,51 @@ class _MyAppState extends State<MyApp> {
           _error = e.toString();
         });
       }
+    }
+  }
+
+  Future<void> _checkBackupWarning() async {
+    try {
+      final config = BackupConfigService.instance;
+      final enabled = await config.isAutoBackupEnabled();
+      if (!enabled) return;
+
+      final failures = await config.getConsecutiveFailures();
+      if (failures < 3) return;
+
+      // Wait for the app to finish building before showing dialog
+      await Future.delayed(const Duration(seconds: 2));
+
+      final ctx = navigatorKey.currentContext;
+      if (ctx == null) return;
+
+      showDialog(
+        context: ctx,
+        builder: (context) => AlertDialog(
+          title: const Text('NAS Backup Issue'),
+          content: Text(
+            'Your backups haven\'t succeeded in the last $failures attempts. '
+            'Check your NAS connection or settings.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('DISMISS'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                navigatorKey.currentState?.pushNamed(
+                  AppRouter.dataManagementRoute,
+                );
+              },
+              child: const Text('GO TO SETTINGS'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      debugPrint('Backup warning check error: $e');
     }
   }
 
@@ -162,6 +212,7 @@ class _MyAppState extends State<MyApp> {
       ],
       child: MaterialApp(
         title: 'Meal of Record',
+        navigatorKey: navigatorKey,
         theme: ThemeData(
           primarySwatch: Colors.blue,
           scaffoldBackgroundColor: Colors.grey[850],

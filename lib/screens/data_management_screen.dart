@@ -5,8 +5,7 @@ import 'package:meal_of_record/widgets/screen_background.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:meal_of_record/services/backup_config_service.dart';
-import 'package:meal_of_record/services/google_drive_service.dart';
-import 'package:googleapis/drive/v3.dart' as drive;
+import 'package:meal_of_record/services/nas_backup_service.dart';
 import 'package:meal_of_record/services/background_backup_worker.dart';
 import 'package:intl/intl.dart';
 import 'package:meal_of_record/utils/ui_utils.dart';
@@ -14,12 +13,12 @@ import 'package:provider/provider.dart';
 import 'package:meal_of_record/providers/goals_provider.dart';
 
 class DataManagementScreen extends StatefulWidget {
-  final GoogleDriveService? googleDriveService;
+  final NasBackupService? nasBackupService;
   final BackupConfigService? backupConfigService;
 
   const DataManagementScreen({
     super.key,
-    this.googleDriveService,
+    this.nasBackupService,
     this.backupConfigService,
   });
 
@@ -30,191 +29,104 @@ class DataManagementScreen extends StatefulWidget {
 class _DataManagementScreenState extends State<DataManagementScreen> {
   bool _isRestoring = false;
 
-  // Cloud Backup State
+  // NAS Backup State
   bool _isAutoBackupEnabled = false;
   int _retentionCount = 7;
-  String? _googleEmail;
+  bool _isNasConfigured = false;
+  String? _nasDisplayAddress;
+  String? _nasConnectionNote;
   DateTime? _lastBackupTime;
-  bool _isLoadingCloudSettings = true;
+  bool _isLoadingSettings = true;
 
-  late final GoogleDriveService _driveService;
+  late final NasBackupService _nasService;
   late final BackupConfigService _backupConfigService;
 
   @override
   void initState() {
     super.initState();
-    _driveService = widget.googleDriveService ?? GoogleDriveService.instance;
+    _nasService = widget.nasBackupService ?? NasBackupService.instance;
     _backupConfigService =
         widget.backupConfigService ?? BackupConfigService.instance;
-    _loadCloudSettings();
+    _loadSettings();
   }
 
-  Future<void> _loadCloudSettings() async {
+  Future<void> _loadSettings() async {
     final config = _backupConfigService;
-    final drive = _driveService;
-
-    // Try silent sign-in to get email if possible
-    final account = await drive.refreshCurrentUser();
 
     final enabled = await config.isAutoBackupEnabled();
     final retention = await config.getRetentionCount();
     final lastTime = await config.getLastBackupTime();
+    final configured = await config.isNasConfigured();
+
+    String? displayAddr;
+    String? connNote;
+    if (configured) {
+      final host = await config.getNasHost();
+      final port = await config.getNasPort();
+      final path = await config.getNasPath();
+      final useHttps = await config.getNasUseHttps();
+      final allowSelfSigned = await config.getNasAllowSelfSigned();
+
+      final portStr = port != null ? ':$port' : '';
+      displayAddr = '$host$portStr$path';
+
+      if (!useHttps) {
+        connNote = 'HTTP';
+      } else if (allowSelfSigned) {
+        connNote = 'HTTPS (self-signed certificate)';
+      } else {
+        connNote = 'HTTPS';
+      }
+    }
 
     if (mounted) {
       setState(() {
         _isAutoBackupEnabled = enabled;
         _retentionCount = retention;
         _lastBackupTime = lastTime;
-        _googleEmail = account?.email;
-        _isLoadingCloudSettings = false;
+        _isNasConfigured = configured;
+        _nasDisplayAddress = displayAddr;
+        _nasConnectionNote = connNote;
+        _isLoadingSettings = false;
       });
     }
   }
 
   Future<void> _toggleAutoBackup(bool value) async {
-    setState(() => _isLoadingCloudSettings = true);
+    if (value && !_isNasConfigured) {
+      // Need to configure first
+      final configured = await _showNasConfigDialog();
+      if (configured != true) return;
+    }
+
+    setState(() => _isLoadingSettings = true);
 
     try {
+      await _backupConfigService.setAutoBackupEnabled(value);
+
       if (value) {
-        // Turning ON
-        // 1. Ensure Signed In
-        var account = _driveService.currentUser;
-        if (account == null) {
-          debugPrint(
-            'DataManagementScreen: Not signed in, requesting sign-in...',
-          );
-          try {
-            account = await _driveService.signIn();
-          } catch (e) {
-            debugPrint('DataManagementScreen: Sign-in error: $e');
-            if (mounted) {
-              setState(() {
-                _isAutoBackupEnabled = false;
-                _isLoadingCloudSettings = false;
-              });
-              await showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Sign In Failed'),
-                  content: Text(
-                    'Unable to sign in to Google Drive.\n\nError: $e\n\nWould you like to try again?',
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('CANCEL'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _toggleAutoBackup(true); // Retry
-                      },
-                      child: const Text('RETRY'),
-                    ),
-                  ],
-                ),
-              );
-            }
-            return;
-          }
-
-          if (account == null) {
-            if (mounted) {
-              setState(() {
-                _isAutoBackupEnabled = false;
-                _isLoadingCloudSettings = false;
-              });
-              await showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Sign In Required'),
-                  content: const Text(
-                    'You need a Google account to enable cloud backup. Would you like to sign in now?',
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('CANCEL'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        _toggleAutoBackup(true); // Retry
-                      },
-                      child: const Text('SIGN IN'),
-                    ),
-                  ],
-                ),
-              );
-            }
-            return;
-          }
-
-          // Verify sign-in state is properly established
-          account = await _driveService.refreshCurrentUser();
-
-          if (account == null) {
-            debugPrint('DataManagementScreen: Sign-in verification failed');
-            if (mounted) {
-              setState(() {
-                _isAutoBackupEnabled = false;
-                _isLoadingCloudSettings = false;
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Failed to verify Google account. Please try again.',
-                  ),
-                ),
-              );
-            }
-            return;
-          }
-        }
-        _googleEmail = account.email;
-        debugPrint('DataManagementScreen: Signed in as $_googleEmail');
-
-        // 2. Enable Config
-        await _backupConfigService.setAutoBackupEnabled(true);
-
-        // 3. Perform first backup immediately
-        debugPrint('DataManagementScreen: Running first backup...');
+        // Perform first backup immediately
         tryAutoBackup(force: true);
-
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Cloud backup enabled!')),
+            const SnackBar(content: Text('NAS backup enabled!')),
           );
         }
       } else {
-        // Turning OFF
-        debugPrint('DataManagementScreen: Disabling auto-backup...');
-        await _backupConfigService.setAutoBackupEnabled(false);
-        debugPrint('DataManagementScreen: Auto-backup disabled.');
-
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Cloud backup disabled.')),
+            const SnackBar(content: Text('NAS backup disabled.')),
           );
         }
       }
 
-      if (mounted) {
-        setState(() {
-          _isAutoBackupEnabled = value;
-          _isLoadingCloudSettings = false;
-        });
-      }
-    } catch (e, stack) {
-      debugPrint('DataManagementScreen: Error toggling backup: $e');
-      debugPrint(stack.toString());
+      await _loadSettings();
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to update backup settings: $e')),
         );
-        setState(() {
-          _isLoadingCloudSettings = false;
-        });
+        setState(() => _isLoadingSettings = false);
       }
     }
   }
@@ -225,11 +137,194 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
     await _backupConfigService.setRetentionCount(intVal);
   }
 
+  Future<void> _testConnection() async {
+    setState(() => _isRestoring = true);
+    try {
+      final error = await _nasService.testConnection();
+      if (!mounted) return;
+      if (error == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Connection successful!')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error)),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isRestoring = false);
+    }
+  }
+
+  Future<bool?> _showNasConfigDialog() async {
+    final config = _backupConfigService;
+    final hostController = TextEditingController(
+      text: await config.getNasHost() ?? '',
+    );
+    final portText = await config.getNasPort();
+    final portController = TextEditingController(
+      text: portText?.toString() ?? '',
+    );
+    final pathController = TextEditingController(
+      text: await config.getNasPath() ?? '/backups/meal_of_record',
+    );
+    final (existingUser, existingPass) = await config.getNasCredentials();
+    final usernameController = TextEditingController(
+      text: existingUser ?? '',
+    );
+    final passwordController = TextEditingController(
+      text: existingPass ?? '',
+    );
+    var useHttps = await config.getNasUseHttps();
+    var allowSelfSigned = await config.getNasAllowSelfSigned();
+
+    if (!mounted) return null;
+
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('NAS Settings'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: hostController,
+                  decoration: const InputDecoration(
+                    labelText: 'Server Address',
+                    hintText: '192.168.1.100 or nas.local',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: portController,
+                  decoration: InputDecoration(
+                    labelText: 'Port (optional)',
+                    hintText: useHttps ? '443' : '80',
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: pathController,
+                  decoration: const InputDecoration(
+                    labelText: 'Backup Folder',
+                    hintText: '/backups/meal_of_record',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: usernameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Username',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: passwordController,
+                  decoration: const InputDecoration(
+                    labelText: 'Password',
+                  ),
+                  obscureText: true,
+                ),
+                const SizedBox(height: 12),
+                SwitchListTile(
+                  title: const Text('Use HTTPS'),
+                  value: useHttps,
+                  onChanged: (v) => setDialogState(() => useHttps = v),
+                  contentPadding: EdgeInsets.zero,
+                ),
+                if (useHttps)
+                  SwitchListTile(
+                    title: const Text('Allow self-signed certificate'),
+                    value: allowSelfSigned,
+                    onChanged: (v) =>
+                        setDialogState(() => allowSelfSigned = v),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.wifi_find, size: 18),
+                    label: const Text('Test Connection'),
+                    onPressed: () async {
+                      // Save temporarily to test
+                      await _saveNasConfig(
+                        hostController.text,
+                        portController.text,
+                        pathController.text,
+                        usernameController.text,
+                        passwordController.text,
+                        useHttps,
+                        allowSelfSigned,
+                      );
+                      final error = await _nasService.testConnection();
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(error ?? 'Connection successful!'),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('CANCEL'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await _saveNasConfig(
+                  hostController.text,
+                  portController.text,
+                  pathController.text,
+                  usernameController.text,
+                  passwordController.text,
+                  useHttps,
+                  allowSelfSigned,
+                );
+                if (context.mounted) {
+                  Navigator.pop(context, true);
+                }
+              },
+              child: const Text('SAVE'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _saveNasConfig(
+    String host,
+    String portStr,
+    String path,
+    String username,
+    String password,
+    bool useHttps,
+    bool allowSelfSigned,
+  ) async {
+    final config = _backupConfigService;
+    await config.setNasHost(host.trim());
+    final port = int.tryParse(portStr.trim());
+    await config.setNasPort(port);
+    await config.setNasPath(path.trim());
+    await config.setNasUseHttps(useHttps);
+    await config.setNasAllowSelfSigned(allowSelfSigned);
+    if (username.isNotEmpty && password.isNotEmpty) {
+      await config.saveNasCredentials(username.trim(), password);
+    }
+  }
+
   Future<void> _exportBackup() async {
     try {
-      setState(
-        () => _isRestoring = true,
-      ); // Use same loading state or another one
+      setState(() => _isRestoring = true);
       final zipFile = await DatabaseService.instance.exportBackupAsZip();
 
       if (await zipFile.exists()) {
@@ -260,13 +355,13 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
     }
   }
 
-  Future<void> _backupToCloud() async {
+  Future<void> _backupToNas() async {
     try {
       setState(() => _isRestoring = true);
       final zipFile = await DatabaseService.instance.exportBackupAsZip();
 
       final retention = await _backupConfigService.getRetentionCount();
-      final success = await _driveService.uploadBackup(
+      final success = await _nasService.uploadBackup(
         zipFile,
         retentionCount: retention,
       );
@@ -279,24 +374,26 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       if (success) {
         await _backupConfigService.clearDirty();
         await _backupConfigService.updateLastBackupTime();
+        await _backupConfigService.recordBackupSuccess();
         final lastTime = await _backupConfigService.getLastBackupTime();
         if (mounted) {
           setState(() => _lastBackupTime = lastTime);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Cloud backup successful!')),
+            const SnackBar(content: Text('NAS backup successful!')),
           );
         }
       } else {
+        await _backupConfigService.recordBackupFailure();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Cloud backup upload failed.')),
+            const SnackBar(content: Text('NAS backup upload failed.')),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cloud backup failed: $e')),
+          SnackBar(content: Text('NAS backup failed: $e')),
         );
       }
     } finally {
@@ -356,16 +453,15 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
     }
   }
 
-  Future<void> _restoreFromCloud() async {
+  Future<void> _restoreFromNas() async {
     setState(() => _isRestoring = true);
     try {
-      final driveService = _driveService;
-      final backups = await driveService.listBackups();
+      final backups = await _nasService.listBackups();
 
       if (backups.isEmpty) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No cloud backups found.')),
+            const SnackBar(content: Text('No NAS backups found.')),
           );
         }
         return;
@@ -373,10 +469,10 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
 
       if (!mounted) return;
 
-      final selectedBackup = await showDialog<drive.File>(
+      final selectedBackup = await showDialog<NasBackupFile>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Select Cloud Backup'),
+          title: const Text('Select NAS Backup'),
           content: SizedBox(
             width: double.maxFinite,
             child: ListView.builder(
@@ -384,11 +480,11 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
               itemCount: backups.length,
               itemBuilder: (context, index) {
                 final b = backups[index];
-                final date = b.createdTime != null
-                    ? DateFormat('MM/dd/yyyy HH:mm').format(b.createdTime!)
+                final date = b.modified != null
+                    ? DateFormat('MM/dd/yyyy HH:mm').format(b.modified!)
                     : 'Unknown Date';
                 final size = b.size != null
-                    ? '${(int.parse(b.size!) / 1024).toStringAsFixed(1)} KB'
+                    ? '${(b.size! / 1024).toStringAsFixed(1)} KB'
                     : 'Unknown Size';
 
                 return ListTile(
@@ -408,11 +504,11 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
         ),
       );
 
-      if (selectedBackup != null && selectedBackup.id != null) {
+      if (selectedBackup != null) {
         final confirmed = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Restore Cloud Backup?'),
+            title: const Text('Restore NAS Backup?'),
             content: const Text(
               'This will overwrite all your current logs and recipes. This action cannot be undone.',
             ),
@@ -435,8 +531,8 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
         if (confirmed == true) {
           // Capture provider before async gap
           final goalsProvider = context.read<GoalsProvider>();
-          final tempFile = await driveService.downloadBackup(
-            selectedBackup.id!,
+          final tempFile = await _nasService.downloadBackup(
+            selectedBackup.href,
           );
           if (tempFile != null) {
             await DatabaseService.instance.restoreDatabase(tempFile);
@@ -446,7 +542,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
             if (mounted) {
               await UiUtils.showAutoDismissDialog(
                 context,
-                'Cloud backup restored successfully!',
+                'NAS backup restored successfully!',
               );
             }
           } else {
@@ -482,7 +578,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                _buildCloudBackupCard(),
+                _buildNasBackupCard(),
                 const SizedBox(height: 24),
                 const Text(
                   'Manual Backup',
@@ -518,7 +614,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                     onTap: _importBackup,
                   ),
                 ),
-                if (_googleEmail != null) ...[
+                if (_isNasConfigured) ...[
                   const SizedBox(height: 16),
                   Card(
                     color: Colors.grey[900],
@@ -527,11 +623,11 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                         Icons.cloud_upload,
                         color: Colors.orange,
                       ),
-                      title: const Text('Backup to Cloud'),
+                      title: const Text('Backup to NAS'),
                       subtitle: const Text(
-                        'Upload a backup to Google Drive now.',
+                        'Upload a backup to your NAS now.',
                       ),
-                      onTap: _backupToCloud,
+                      onTap: _backupToNas,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -542,11 +638,11 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                         Icons.cloud_download,
                         color: Colors.orange,
                       ),
-                      title: const Text('Restore from Cloud'),
+                      title: const Text('Restore from NAS'),
                       subtitle: const Text(
-                        'Select a backup to restore from Google Drive.',
+                        'Select a backup to restore from your NAS.',
                       ),
-                      onTap: _restoreFromCloud,
+                      onTap: _restoreFromNas,
                     ),
                   ),
                 ],
@@ -563,8 +659,8 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
     );
   }
 
-  Widget _buildCloudBackupCard() {
-    if (_isLoadingCloudSettings) {
+  Widget _buildNasBackupCard() {
+    if (_isLoadingSettings) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(20),
@@ -583,11 +679,11 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
           children: [
             Row(
               children: [
-                const Icon(Icons.cloud_upload, color: Colors.orange),
+                const Icon(Icons.dns, color: Colors.orange),
                 const SizedBox(width: 12),
                 const Expanded(
                   child: Text(
-                    'Google Drive Backup',
+                    'NAS Backup',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -598,53 +694,56 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                 ),
               ],
             ),
-            if (_googleEmail != null)
+
+            if (!_isNasConfigured)
               Padding(
-                padding: const EdgeInsets.only(left: 36.0, bottom: 12.0),
-                child: InkWell(
-                  onTap: () async {
-                    await showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Google Account'),
-                        content: Text('Signed in as $_googleEmail'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('CLOSE'),
-                          ),
-                          TextButton(
-                            onPressed: () async {
-                              Navigator.pop(context);
-                              await _driveService.signOut();
-                              _loadCloudSettings();
-                            },
-                            style: TextButton.styleFrom(
-                              foregroundColor: Colors.red,
-                            ),
-                            child: const Text('SIGN OUT'),
-                          ),
-                        ],
-                      ),
-                    );
+                padding: const EdgeInsets.only(left: 36.0, top: 8.0),
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.settings, size: 18),
+                  label: const Text('Configure NAS'),
+                  onPressed: () async {
+                    final result = await _showNasConfigDialog();
+                    if (result == true) await _loadSettings();
                   },
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Account: $_googleEmail',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.blue,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.edit, size: 12, color: Colors.blue),
-                    ],
-                  ),
                 ),
               ),
+
+            if (_isNasConfigured) ...[
+              Padding(
+                padding: const EdgeInsets.only(left: 36.0, top: 4.0),
+                child: Text(
+                  _nasDisplayAddress ?? '',
+                  style: const TextStyle(fontSize: 12, color: Colors.white70),
+                ),
+              ),
+              if (_nasConnectionNote != null)
+                Padding(
+                  padding: const EdgeInsets.only(left: 36.0),
+                  child: Text(
+                    _nasConnectionNote!,
+                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.only(left: 36.0, top: 8.0),
+                child: Wrap(
+                  spacing: 8,
+                  children: [
+                    OutlinedButton(
+                      onPressed: () async {
+                        final result = await _showNasConfigDialog();
+                        if (result == true) await _loadSettings();
+                      },
+                      child: const Text('Edit Settings'),
+                    ),
+                    OutlinedButton(
+                      onPressed: _testConnection,
+                      child: const Text('Test Connection'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
 
             if (_isAutoBackupEnabled) ...[
               const Divider(color: Colors.white24),
@@ -661,7 +760,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                       min: 1,
                       max: 30,
                       divisions: 29,
-                      label: '$_retentionCount days',
+                      label: '$_retentionCount backups',
                       activeColor: Colors.orange,
                       onChanged: _updateRetention,
                     ),
@@ -676,14 +775,14 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                 ],
               ),
               const Text(
-                'Backups older than this number of days will be deleted.',
+                'Backups exceeding this count will be deleted (oldest first).',
                 style: TextStyle(fontSize: 10, color: Colors.grey),
               ),
               const SizedBox(height: 16),
               const Text(
-                'Frequency: Daily',
+                'Backs up when app opens (at most once per day)',
                 style: TextStyle(color: Colors.grey),
-              ), // Hardcoded for MVP
+              ),
             ],
 
             if (_lastBackupTime != null) ...[

@@ -68,11 +68,10 @@ dependencies:
   # Permissions
   permission_handler: ^11.3.0
 
-  # Cloud Backup
-  google_sign_in: ^6.2.1
-  googleapis: ^13.1.0
-  extension_google_sign_in_as_googleapis_auth: ^2.0.12
+  # NAS Backup
   shared_preferences: ^2.2.3
+  flutter_secure_storage: ^9.2.4
+  xml: ^6.5.0
 
 dev_dependencies:
   flutter_test:

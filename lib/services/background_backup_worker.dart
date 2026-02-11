@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:meal_of_record/services/backup_config_service.dart';
 import 'package:meal_of_record/services/database_service.dart';
-import 'package:meal_of_record/services/google_drive_service.dart';
+import 'package:meal_of_record/services/nas_backup_service.dart';
 
-/// Attempts an automatic cloud backup if all conditions are met:
-/// enabled, signed in, data is dirty, and 24h+ since last backup.
+/// Attempts an automatic NAS backup if all conditions are met:
+/// enabled, NAS configured, data is dirty, and 24h+ since last backup.
 ///
 /// If [force] is true, skips the dirty and cooldown checks (used when
 /// the user first enables auto-backup).
@@ -12,11 +12,11 @@ import 'package:meal_of_record/services/google_drive_service.dart';
 /// Runs silently — logs via debugPrint but never throws.
 Future<bool> tryAutoBackup({
   BackupConfigService? configService,
-  GoogleDriveService? driveService,
+  NasBackupService? nasService,
   bool force = false,
 }) async {
   final config = configService ?? BackupConfigService.instance;
-  final drive = driveService ?? GoogleDriveService.instance;
+  final nas = nasService ?? NasBackupService.instance;
 
   try {
     final isEnabled = await config.isAutoBackupEnabled();
@@ -44,9 +44,9 @@ Future<bool> tryAutoBackup({
       }
     }
 
-    final account = await drive.refreshCurrentUser();
-    if (account == null) {
-      debugPrint('tryAutoBackup: Not signed in to Google. Skipping.');
+    final isConfigured = await config.isNasConfigured();
+    if (!isConfigured) {
+      debugPrint('tryAutoBackup: NAS not configured. Skipping.');
       return false;
     }
 
@@ -54,7 +54,7 @@ Future<bool> tryAutoBackup({
     final zipFile = await DatabaseService.instance.exportBackupAsZip();
 
     final retention = await config.getRetentionCount();
-    final success = await drive.uploadBackup(
+    final success = await nas.uploadBackup(
       zipFile,
       retentionCount: retention,
     );
@@ -67,14 +67,19 @@ Future<bool> tryAutoBackup({
     if (success) {
       await config.clearDirty();
       await config.updateLastBackupTime();
+      await config.recordBackupSuccess();
       debugPrint('tryAutoBackup: Backup successful!');
       return true;
     } else {
+      await config.recordBackupFailure();
       debugPrint('tryAutoBackup: Upload failed.');
       return false;
     }
   } catch (e) {
     debugPrint('tryAutoBackup: Error: $e');
+    try {
+      await config.recordBackupFailure();
+    } catch (_) {}
     return false;
   }
 }

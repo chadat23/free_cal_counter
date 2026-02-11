@@ -99,7 +99,7 @@ void main() {
     );
   });
 
-  testWidgets('Does not auto-focus quantity when isUpdate is false', (
+  testWidgets('Auto-focuses and selects quantity even when isUpdate is false', (
     tester,
   ) async {
     final config = QuantityEditConfig(
@@ -115,7 +115,12 @@ void main() {
     await tester.pumpAndSettle();
 
     final textField = tester.widget<TextField>(find.byType(TextField));
-    expect(textField.focusNode!.hasFocus, false);
+    expect(textField.focusNode!.hasFocus, true);
+    expect(textField.controller!.selection.baseOffset, 0);
+    expect(
+      textField.controller!.selection.extentOffset,
+      textField.controller!.text.length,
+    );
   });
 
   testWidgets('Pre-populates amount and unit from config', (tester) async {

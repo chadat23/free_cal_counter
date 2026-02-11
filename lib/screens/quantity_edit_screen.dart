@@ -42,15 +42,13 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
     _selectedUnit = widget.config.initialUnit;
     _quantityFocusNode.addListener(_onQuantityFocusChange);
 
-    if (widget.config.isUpdate) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _quantityFocusNode.requestFocus();
-        _quantityController.selection = TextSelection(
-          baseOffset: 0,
-          extentOffset: _quantityController.text.length,
-        );
-      });
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _quantityFocusNode.requestFocus();
+      _quantityController.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: _quantityController.text.length,
+      );
+    });
   }
 
   @override

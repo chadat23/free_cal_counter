@@ -1,6 +1,9 @@
 flutter_launcher_icons:
-  image_path: "assets/app_icon.png" # your 1024×1024 PNG
   android: true
   ios: true
-  remove_alpha_ios: true # iOS App Store rejects icons with transparency
-  min_sdk_android: 21 # optional
+
+  adaptive_icon_background: "assets/icon_background.png"
+  adaptive_icon_foreground: "assets/icon_foreground.png"
+
+  remove_alpha_ios: true
+  min_sdk_android: 21

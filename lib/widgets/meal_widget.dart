@@ -117,42 +117,32 @@ class MealWidget extends StatelessWidget {
 
                         if (!context.mounted) return;
 
-                        Navigator.push(
+                        final unit = foodToEdit.servings.firstWhere(
+                          (s) => s.unit == loggedFood.portion.unit,
+                          orElse: () => foodToEdit.servings.first,
+                        );
+                        final result = await Navigator.push<FoodPortion>(
                           context,
                           MaterialPageRoute(
-                            builder: (context) {
-                              final unit = foodToEdit.servings.firstWhere(
-                                (s) => s.unit == loggedFood.portion.unit,
-                                orElse: () => foodToEdit.servings.first,
-                              );
-                              return QuantityEditScreen(
-                                config: QuantityEditConfig(
-                                  context: QuantityEditContext.day,
-                                  food: foodToEdit,
-                                  isUpdate: true,
-                                  initialUnit: unit.unit,
-                                  initialQuantity: unit.quantityFromGrams(
-                                    loggedFood.portion.grams,
-                                  ),
-                                  originalGrams: loggedFood.portion.grams,
-                                  onSave: (grams, unitName, updatedFood) {
-                                    if (onFoodUpdated != null) {
-                                      onFoodUpdated!(
-                                        loggedFood,
-                                        FoodPortion(
-                                          food: updatedFood ?? foodToEdit,
-                                          grams: grams,
-                                          unit: unitName,
-                                        ),
-                                      );
-                                    }
-                                    Navigator.pop(context);
-                                  },
+                            builder: (_) => QuantityEditScreen(
+                              config: QuantityEditConfig(
+                                context: QuantityEditContext.day,
+                                food: foodToEdit,
+                                isUpdate: true,
+                                initialUnit: unit.unit,
+                                initialQuantity: unit.quantityFromGrams(
+                                  loggedFood.portion.grams,
                                 ),
-                              );
-                            },
+                                originalGrams: loggedFood.portion.grams,
+                              ),
+                            ),
                           ),
                         );
+                        if (result != null && context.mounted) {
+                          if (onFoodUpdated != null) {
+                            onFoodUpdated!(loggedFood, result);
+                          }
+                        }
                       },
                     ),
                     if (index < meal.loggedPortion.length - 1)

@@ -66,42 +66,32 @@ class LogQueueScreen extends StatelessWidget {
                 onDelete: () {
                   logProvider.removeFoodFromQueue(foodServing);
                 },
-                onEdit: () {
+                onEdit: () async {
                   final foodToUse = foodServing.food;
-                  Navigator.push(
+                  final unit = foodToUse.servings.firstWhere(
+                    (s) => s.unit == foodServing.unit,
+                    orElse: () => foodToUse.servings.first,
+                  );
+                  final result = await Navigator.push<FoodPortion>(
                     context,
                     MaterialPageRoute(
-                      builder: (context) {
-                        final unit = foodToUse.servings.firstWhere(
-                          (s) => s.unit == foodServing.unit,
-                          orElse: () => foodToUse.servings.first,
-                        );
-                        return QuantityEditScreen(
-                          config: QuantityEditConfig(
-                            context: QuantityEditContext.day,
-                            food: foodToUse,
-                            isUpdate: true,
-                            initialUnit: unit.unit,
-                            initialQuantity: unit.quantityFromGrams(
-                              foodServing.grams,
-                            ),
-                            originalGrams: foodServing.grams,
-                            onSave: (grams, unitName, updatedFood) {
-                              logProvider.updateFoodInQueue(
-                                index,
-                                FoodPortion(
-                                  food: updatedFood ?? foodToUse,
-                                  grams: grams,
-                                  unit: unitName,
-                                ),
-                              );
-                              Navigator.pop(context);
-                            },
+                      builder: (_) => QuantityEditScreen(
+                        config: QuantityEditConfig(
+                          context: QuantityEditContext.day,
+                          food: foodToUse,
+                          isUpdate: true,
+                          initialUnit: unit.unit,
+                          initialQuantity: unit.quantityFromGrams(
+                            foodServing.grams,
                           ),
-                        );
-                      },
+                          originalGrams: foodServing.grams,
+                        ),
+                      ),
                     ),
                   );
+                  if (result != null && context.mounted) {
+                    logProvider.updateFoodInQueue(index, result);
+                  }
                 },
               );
             },

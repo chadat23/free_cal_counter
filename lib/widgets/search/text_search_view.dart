@@ -101,10 +101,10 @@ class _TextSearchViewState extends State<TextSearchView> {
                     (s) => s.unit == existingPortion.unit,
                     orElse: () => reloadedFood.servings.first,
                   );
-                  Navigator.push(
+                  final result = await Navigator.push<model_portion.FoodPortion>(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => QuantityEditScreen(
+                      builder: (_) => QuantityEditScreen(
                         config: QuantityEditConfig(
                           context: config.context,
                           food: reloadedFood,
@@ -114,24 +114,16 @@ class _TextSearchViewState extends State<TextSearchView> {
                             existingPortion.grams,
                           ),
                           originalGrams: existingPortion.grams,
-                          onSave: (grams, unit, updatedFood) {
-                            Provider.of<LogProvider>(
-                              context,
-                              listen: false,
-                            ).updateFoodInQueue(
-                              existingIndex,
-                              model_portion.FoodPortion(
-                                food: updatedFood ?? reloadedFood,
-                                grams: grams,
-                                unit: unit,
-                              ),
-                            );
-                            Navigator.pop(context);
-                          },
                         ),
                       ),
                     ),
                   );
+                  if (result != null && context.mounted) {
+                    Provider.of<LogProvider>(
+                      context,
+                      listen: false,
+                    ).updateFoodInQueue(existingIndex, result);
+                  }
                   return;
                 }
 
@@ -150,7 +142,7 @@ class _TextSearchViewState extends State<TextSearchView> {
                   searchProvider.clearSearch();
                 }
               },
-              onTap: (selectedUnit) {
+              onTap: (selectedUnit) async {
                 final existingPortion = isUpdate
                     ? logProvider.logQueue[existingIndex]
                     : null;
@@ -173,10 +165,10 @@ class _TextSearchViewState extends State<TextSearchView> {
                     ? existingPortion.grams
                     : 0.0;
 
-                Navigator.push(
+                final result = await Navigator.push<model_portion.FoodPortion>(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => QuantityEditScreen(
+                    builder: (_) => QuantityEditScreen(
                       config: QuantityEditConfig(
                         context: config.context,
                         food: food,
@@ -184,37 +176,28 @@ class _TextSearchViewState extends State<TextSearchView> {
                         initialUnit: initialUnit,
                         initialQuantity: initialQuantity,
                         originalGrams: originalGrams,
-                        onSave: (grams, unit, updatedFood) {
-                          final portion = model_portion.FoodPortion(
-                            food: updatedFood ?? food,
-                            grams: grams,
-                            unit: unit,
-                          );
-                          if (config.onSaveOverride != null) {
-                            // First pop closes QuantityEditScreen
-                            Navigator.pop(context);
-                            // Second pop closes SearchScreen via onSaveOverride
-                            config.onSaveOverride!(portion);
-                          } else {
-                            if (isUpdate) {
-                              Provider.of<LogProvider>(
-                                context,
-                                listen: false,
-                              ).updateFoodInQueue(existingIndex, portion);
-                            } else {
-                              Provider.of<LogProvider>(
-                                context,
-                                listen: false,
-                              ).addFoodToQueue(portion);
-                              searchProvider.clearSearch();
-                            }
-                            Navigator.pop(context);
-                          }
-                        },
                       ),
                     ),
                   ),
                 );
+                if (result != null && context.mounted) {
+                  if (config.onSaveOverride != null) {
+                    config.onSaveOverride!(result);
+                  } else {
+                    if (isUpdate) {
+                      Provider.of<LogProvider>(
+                        context,
+                        listen: false,
+                      ).updateFoodInQueue(existingIndex, result);
+                    } else {
+                      Provider.of<LogProvider>(
+                        context,
+                        listen: false,
+                      ).addFoodToQueue(result);
+                      searchProvider.clearSearch();
+                    }
+                  }
+                }
               },
               onEdit: () async {
                 try {
@@ -353,40 +336,33 @@ class _TextSearchViewState extends State<TextSearchView> {
 
     if (!context.mounted) return;
 
-    Navigator.push(
+    final result = await Navigator.push<model_portion.FoodPortion>(
       context,
       MaterialPageRoute(
-        builder: (context) => QuantityEditScreen(
+        builder: (_) => QuantityEditScreen(
           config: QuantityEditConfig(
             context: config.context,
             food: food,
             initialUnit: initialUnit,
             initialQuantity: initialQuantity,
-            onSave: (grams, unit, updatedFood) {
-              final portion = model_portion.FoodPortion(
-                food: updatedFood ?? food,
-                grams: grams,
-                unit: unit,
-              );
-              if (config.onSaveOverride != null) {
-                Navigator.pop(context);
-                config.onSaveOverride!(portion);
-              } else {
-                Provider.of<LogProvider>(
-                  context,
-                  listen: false,
-                ).addFoodToQueue(portion);
-                Provider.of<SearchProvider>(
-                  context,
-                  listen: false,
-                ).clearSearch();
-                Navigator.pop(context);
-              }
-            },
           ),
         ),
       ),
     );
+    if (result != null && context.mounted) {
+      if (config.onSaveOverride != null) {
+        config.onSaveOverride!(result);
+      } else {
+        Provider.of<LogProvider>(
+          context,
+          listen: false,
+        ).addFoodToQueue(result);
+        Provider.of<SearchProvider>(
+          context,
+          listen: false,
+        ).clearSearch();
+      }
+    }
   }
 
   Future<void> _handleBarcodeSearchResult(
@@ -411,9 +387,9 @@ class _TextSearchViewState extends State<TextSearchView> {
     } else if (results.length == 1) {
       // Auto-navigate to quantity edit for single result
       final food = results.first;
-      await _openQuantityEdit(context, food, config);
-      // Clear barcode search state after navigation
+      // Clear barcode search state before navigation
       searchProvider.clearBarcodeSearchState();
+      await _openQuantityEdit(context, food, config);
     }
     // If multiple results, just show them in the list (already handled)
   }

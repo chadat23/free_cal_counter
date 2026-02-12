@@ -12,6 +12,7 @@ import 'package:meal_of_record/services/database_service.dart';
 import 'package:meal_of_record/models/food.dart';
 import 'package:meal_of_record/utils/ui_utils.dart';
 import 'package:meal_of_record/widgets/food_image_widget.dart';
+import 'package:meal_of_record/models/food_portion.dart';
 import 'package:meal_of_record/models/food_container.dart';
 import 'package:meal_of_record/widgets/serving_info_sheet.dart';
 import 'package:meal_of_record/widgets/math_input_bar.dart';
@@ -537,8 +538,10 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
   void _handleSave() {
     final grams = _calculateCurrentGrams();
     if (grams > 0) {
-      // Call the callback with the updated food reference
-      widget.config.onSave(grams, _selectedUnit, _food);
+      Navigator.pop(
+        context,
+        FoodPortion(food: _food, grams: grams, unit: _selectedUnit),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a valid amount')),

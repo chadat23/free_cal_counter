@@ -90,10 +90,10 @@ class FoodSearchView extends StatelessWidget {
             );
             if (food != null) {
               // Open quantity edit screen
-              Navigator.push(
+              final result = await Navigator.push<model_portion.FoodPortion>(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => QuantityEditScreen(
+                  builder: (_) => QuantityEditScreen(
                     config: QuantityEditConfig(
                       context: config.context,
                       food: food,
@@ -101,27 +101,20 @@ class FoodSearchView extends StatelessWidget {
                       initialUnit: food.servings.first.unit,
                       initialQuantity: 1.0,
                       originalGrams: 0.0,
-                      onSave: (grams, unit, updatedFood) {
-                        final portion = model_portion.FoodPortion(
-                          food: updatedFood ?? food,
-                          grams: grams,
-                          unit: unit,
-                        );
-                        if (config.onSaveOverride != null) {
-                          Navigator.pop(context);
-                          config.onSaveOverride!(portion);
-                        } else {
-                          Provider.of<LogProvider>(
-                            context,
-                            listen: false,
-                          ).addFoodToQueue(portion);
-                          Navigator.pop(context);
-                        }
-                      },
                     ),
                   ),
                 ),
               );
+              if (result != null && context.mounted) {
+                if (config.onSaveOverride != null) {
+                  config.onSaveOverride!(result);
+                } else {
+                  Provider.of<LogProvider>(
+                    context,
+                    listen: false,
+                  ).addFoodToQueue(result);
+                }
+              }
             }
           }
         },

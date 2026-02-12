@@ -721,7 +721,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
             final updatedPortion = await Navigator.push<FoodPortion>(
               context,
               MaterialPageRoute(
-                builder: (context) => QuantityEditScreen(
+                builder: (_) => QuantityEditScreen(
                   config: QuantityEditConfig(
                     context: QuantityEditContext.recipe,
                     food: reloadedFood,
@@ -730,16 +730,6 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
                     initialQuantity: serving.quantityFromGrams(item.grams),
                     originalGrams: item.grams,
                     recipeServings: provider.servingsCreated,
-                    onSave: (grams, unit, updatedFood) {
-                      Navigator.pop(
-                        context,
-                        FoodPortion(
-                          food: updatedFood ?? reloadedFood,
-                          grams: grams,
-                          unit: unit,
-                        ),
-                      );
-                    },
                   ),
                 ),
               ),

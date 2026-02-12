@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meal_of_record/models/food.dart';
+import 'package:meal_of_record/models/food_portion.dart';
 import 'package:meal_of_record/models/food_serving.dart';
 import 'package:meal_of_record/models/quantity_edit_config.dart';
 import 'package:meal_of_record/providers/log_provider.dart';
@@ -84,7 +85,6 @@ void main() {
       initialUnit: 'piece',
       initialQuantity: 1.5,
       isUpdate: true,
-      onSave: (grams, unit, updatedFood) {},
     );
 
     await tester.pumpWidget(createTestWidget(config));
@@ -108,7 +108,6 @@ void main() {
       initialUnit: 'piece',
       initialQuantity: 1.5,
       isUpdate: false,
-      onSave: (grams, unit, updatedFood) {},
     );
 
     await tester.pumpWidget(createTestWidget(config));
@@ -129,7 +128,6 @@ void main() {
       food: mockFood,
       initialUnit: 'piece',
       initialQuantity: 1.5,
-      onSave: (grams, unit, updatedFood) {},
     );
 
     await tester.pumpWidget(createTestWidget(config));
@@ -153,7 +151,6 @@ void main() {
       food: mockFood,
       initialUnit: 'piece',
       initialQuantity: 1.0,
-      onSave: (grams, unit, updatedFood) {},
     );
 
     await tester.pumpWidget(createTestWidget(config));
@@ -192,8 +189,7 @@ void main() {
         food: mockFood,
         initialUnit: 'g',
         initialQuantity: 100.0,
-        onSave: (grams, unit, updatedFood) {},
-      );
+        );
 
       await tester.pumpWidget(createTestWidget(config));
 
@@ -216,21 +212,44 @@ void main() {
   );
 
   testWidgets('Saves correct grams and unit', (tester) async {
-    double savedGrams = 0;
-    String savedUnit = '';
+    FoodPortion? result;
 
     final config = QuantityEditConfig(
       context: QuantityEditContext.day,
       food: mockFood,
       initialUnit: 'piece',
       initialQuantity: 1.0,
-      onSave: (grams, unit, updatedFood) {
-        savedGrams = grams;
-        savedUnit = unit;
-      },
     );
 
-    await tester.pumpWidget(createTestWidget(config));
+    // Push QuantityEditScreen from a test route so we can capture the pop result
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<LogProvider>.value(value: mockLogProvider),
+          ChangeNotifierProvider<RecipeProvider>.value(value: mockRecipeProvider),
+          ChangeNotifierProvider<GoalsProvider>.value(value: mockGoalsProvider),
+        ],
+        child: MaterialApp(
+          home: Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () async {
+                result = await Navigator.push<FoodPortion>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => QuantityEditScreen(config: config),
+                  ),
+                );
+              },
+              child: const Text('Open'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Open the QuantityEditScreen
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
 
     // Change quantity to 2.0
     await tester.enterText(find.byType(TextField), '2.0');
@@ -239,7 +258,8 @@ void main() {
     await tester.tap(find.text('Add'));
     await tester.pumpAndSettle();
 
-    expect(savedGrams, 364.0); // 2 * 182
-    expect(savedUnit, 'piece');
+    expect(result, isNotNull);
+    expect(result!.grams, 364.0); // 2 * 182
+    expect(result!.unit, 'piece');
   });
 }

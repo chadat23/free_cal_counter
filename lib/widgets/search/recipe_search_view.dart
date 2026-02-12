@@ -232,10 +232,10 @@ class _RecipeSearchViewState extends State<RecipeSearchView> {
                                     orElse: () => reloadedFood.servings.first,
                                   );
 
-                              Navigator.push(
+                              final result = await Navigator.push<model_portion.FoodPortion>(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => QuantityEditScreen(
+                                  builder: (_) => QuantityEditScreen(
                                     config: QuantityEditConfig(
                                       context: widget.config.context,
                                       food: reloadedFood,
@@ -246,21 +246,15 @@ class _RecipeSearchViewState extends State<RecipeSearchView> {
                                             existingPortion.grams,
                                           ),
                                       originalGrams: existingPortion.grams,
-                                      onSave: (grams, unit, updatedFood) {
-                                        logProvider.updateFoodInQueue(
-                                          existingIndex,
-                                          model_portion.FoodPortion(
-                                            food: updatedFood ?? reloadedFood,
-                                            grams: grams,
-                                            unit: unit,
-                                          ),
-                                        );
-                                        Navigator.pop(context);
-                                      },
                                     ),
                                   ),
                                 ),
                               );
+                              if (result != null && context.mounted) {
+                                logProvider.updateFoodInQueue(
+                                  existingIndex, result,
+                                );
+                              }
                             }
                             return;
                           }
@@ -335,10 +329,10 @@ class _RecipeSearchViewState extends State<RecipeSearchView> {
                                 ? existingPortion.grams
                                 : 0.0;
 
-                            Navigator.push(
+                            final result = await Navigator.push<model_portion.FoodPortion>(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => QuantityEditScreen(
+                                builder: (_) => QuantityEditScreen(
                                   config: QuantityEditConfig(
                                     context: widget.config.context,
                                     food: food,
@@ -348,35 +342,25 @@ class _RecipeSearchViewState extends State<RecipeSearchView> {
                                     initialUnit: initialUnit,
                                     initialQuantity: initialQuantity,
                                     originalGrams: originalGrams,
-                                    onSave: (grams, unit, updatedFood) {
-                                      final portion = model_portion.FoodPortion(
-                                        food: updatedFood ?? food,
-                                        grams: grams,
-                                        unit: unit,
-                                      );
-                                      if (widget.config.onSaveOverride !=
-                                          null) {
-                                        // First pop closes QuantityEditScreen
-                                        Navigator.pop(context);
-                                        // Second pop closes SearchScreen via onSaveOverride
-                                        widget.config.onSaveOverride!(portion);
-                                      } else {
-                                        if (isUpdate) {
-                                          logProvider.updateFoodInQueue(
-                                            existingIndex,
-                                            portion,
-                                          );
-                                        } else {
-                                          logProvider.addFoodToQueue(portion);
-                                          searchProvider.clearSearch();
-                                        }
-                                        Navigator.pop(context);
-                                      }
-                                    },
                                   ),
                                 ),
                               ),
                             );
+                            if (result != null && context.mounted) {
+                              if (widget.config.onSaveOverride != null) {
+                                widget.config.onSaveOverride!(result);
+                              } else {
+                                if (isUpdate) {
+                                  logProvider.updateFoodInQueue(
+                                    existingIndex,
+                                    result,
+                                  );
+                                } else {
+                                  logProvider.addFoodToQueue(result);
+                                  searchProvider.clearSearch();
+                                }
+                              }
+                            }
                           }
                         },
                         onEdit: () async {

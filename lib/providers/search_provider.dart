@@ -131,20 +131,38 @@ class SearchProvider extends ChangeNotifier {
       // First check local database using the new barcodes table
       List<model.Food> foods = await databaseService.getFoodsByBarcode(barcode);
 
-      // If not found locally, try OpenFoodFacts
-      if (foods.isEmpty) {
-        final offFood = await offApiService.fetchFoodByBarcode(barcode);
-        if (offFood != null) {
-          foods = [offFood];
-        }
-      }
-
       _searchResults = foods;
 
       // Switch to text mode to display results
       _searchMode = SearchMode.text;
     } catch (e) {
       _errorMessage = 'Failed to search by barcode: ${e.toString()}';
+      _searchResults = [];
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> barcodeOffSearch(String barcode) async {
+    _isLoading = true;
+    _isBarcodeSearch = true;
+    _lastScannedBarcode = barcode;
+    _clearErrorMessage();
+    notifyListeners();
+
+    try {
+      final offFood = await offApiService.fetchFoodByBarcode(barcode);
+      if (offFood != null) {
+        _searchResults = [offFood];
+      } else {
+        _searchResults = [];
+      }
+
+      // Switch to text mode to display results
+      _searchMode = SearchMode.text;
+    } catch (e) {
+      _errorMessage = 'Failed to search Open Food Facts: ${e.toString()}';
       _searchResults = [];
     } finally {
       _isLoading = false;

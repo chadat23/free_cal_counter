@@ -7,7 +7,7 @@ import 'package:meal_of_record/screens/barcode_scanner_screen.dart';
 class SearchModeTabs extends StatelessWidget {
   const SearchModeTabs({super.key});
 
-  Future<void> _handleScanTap(BuildContext context) async {
+  static Future<void> handleScanTap(BuildContext context) async {
     final provider = Provider.of<SearchProvider>(context, listen: false);
 
     // Launch the barcode scanner
@@ -56,7 +56,7 @@ class SearchModeTabs extends StatelessWidget {
     // Scan tab is never "selected" since it immediately launches scanner
     return Expanded(
       child: GestureDetector(
-        onTap: () => _handleScanTap(context),
+        onTap: () => handleScanTap(context),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12.0),
           decoration: BoxDecoration(

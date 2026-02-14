@@ -157,7 +157,7 @@ void main() {
     );
 
     testWidgets(
-      'barcode search with no results shows not-found dialog',
+      'barcode search with no results shows enhanced not-found dialog',
       (tester) async {
         when(mockSearchProvider.isBarcodeSearch).thenReturn(true);
         when(mockSearchProvider.searchResults).thenReturn([]);
@@ -168,6 +168,28 @@ void main() {
 
         expect(find.byType(AlertDialog), findsOneWidget);
         expect(find.text('Barcode Not Found'), findsOneWidget);
+        expect(find.text('Scan Again'), findsOneWidget);
+        expect(find.text('Search Open Food Facts'), findsOneWidget);
+        expect(find.text('Create Food'), findsOneWidget);
+        expect(find.text('Cancel'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'clicking Search Open Food Facts in dialog calls barcodeOffSearch',
+      (tester) async {
+        when(mockSearchProvider.isBarcodeSearch).thenReturn(true);
+        when(mockSearchProvider.searchResults).thenReturn([]);
+        when(mockSearchProvider.lastScannedBarcode).thenReturn('999');
+
+        await tester.pumpWidget(buildWidget());
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Search Open Food Facts'));
+        await tester.pumpAndSettle();
+
+        verify(mockSearchProvider.barcodeOffSearch('999')).called(1);
+        verify(mockSearchProvider.clearBarcodeSearchState()).called(1);
       },
     );
 

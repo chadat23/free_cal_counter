@@ -226,35 +226,21 @@ void main() {
 
   // Barcode search and other groups remain unchanged as their logic was not affected.
   group('barcodeSearch', () {
-    test('should query OffApiService if not found in database', () async {
+    test('should NOT query OffApiService if not found in database', () async {
       // Arrange
-      final mockFood = model.Food(
-        id: 0,
-        name: 'OFF Food',
-        emoji: '',
-        calories: 200,
-        protein: 20,
-        fat: 10,
-        carbs: 30,
-        fiber: 0.0,
-        source: 'off',
-      );
       when(
         mockDatabaseService.getFoodsByBarcode(any),
-      ).thenAnswer((_) async => []); // New method returns empty list
-      when(
-        mockOffApiService.fetchFoodByBarcode(any),
-      ).thenAnswer((_) async => mockFood);
+      ).thenAnswer((_) async => []);
 
       // Act
       await searchProvider.barcodeSearch('12345');
 
       // Assert
-      expect(searchProvider.searchResults, [mockFood]);
+      expect(searchProvider.searchResults, isEmpty);
       expect(searchProvider.isBarcodeSearch, isTrue);
       expect(searchProvider.lastScannedBarcode, '12345');
       verify(mockDatabaseService.getFoodsByBarcode('12345')).called(1);
-      verify(mockOffApiService.fetchFoodByBarcode('12345')).called(1);
+      verifyNever(mockOffApiService.fetchFoodByBarcode(any));
     });
 
     test('should return local food if found in database', () async {
@@ -302,6 +288,50 @@ void main() {
       // Assert
       expect(searchProvider.isBarcodeSearch, isFalse);
       expect(searchProvider.lastScannedBarcode, isNull);
+    });
+  });
+
+  group('barcodeOffSearch', () {
+    test('should query OffApiService', () async {
+      // Arrange
+      final mockFood = model.Food(
+        id: 0,
+        name: 'OFF Food',
+        emoji: '',
+        calories: 200,
+        protein: 20,
+        fat: 10,
+        carbs: 30,
+        fiber: 0.0,
+        source: 'off',
+        sourceBarcode: '12345',
+      );
+      when(
+        mockOffApiService.fetchFoodByBarcode('12345'),
+      ).thenAnswer((_) async => mockFood);
+
+      // Act
+      await searchProvider.barcodeOffSearch('12345');
+
+      // Assert
+      expect(searchProvider.searchResults, [mockFood]);
+      expect(searchProvider.isBarcodeSearch, isTrue);
+      expect(searchProvider.lastScannedBarcode, '12345');
+      verify(mockOffApiService.fetchFoodByBarcode('12345')).called(1);
+    });
+
+    test('should set errorMessage on error', () async {
+      // Arrange
+      when(
+        mockOffApiService.fetchFoodByBarcode(any),
+      ).thenThrow(Exception('Network error'));
+
+      // Act
+      await searchProvider.barcodeOffSearch('12345');
+
+      // Assert
+      expect(searchProvider.errorMessage, contains('Network error'));
+      expect(searchProvider.searchResults, isEmpty);
     });
   });
   group('searchMode', () {

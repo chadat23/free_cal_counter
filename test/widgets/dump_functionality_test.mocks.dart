@@ -870,6 +870,15 @@ class MockSearchProvider extends _i1.Mock implements _i18.SearchProvider {
           as _i12.Future<void>);
 
   @override
+  _i12.Future<void> barcodeOffSearch(String? barcode) =>
+      (super.noSuchMethod(
+            Invocation.method(#barcodeOffSearch, [barcode]),
+            returnValue: _i12.Future<void>.value(),
+            returnValueForMissingStub: _i12.Future<void>.value(),
+          )
+          as _i12.Future<void>);
+
+  @override
   void addListener(_i13.VoidCallback? listener) => super.noSuchMethod(
     Invocation.method(#addListener, [listener]),
     returnValueForMissingStub: null,

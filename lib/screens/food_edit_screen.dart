@@ -13,6 +13,7 @@ import 'package:image_picker/image_picker.dart' as picker;
 import 'package:meal_of_record/screens/square_camera_screen.dart';
 import 'package:meal_of_record/utils/math_evaluator.dart';
 import 'package:meal_of_record/widgets/math_input_bar.dart';
+import 'package:meal_of_record/widgets/unit_select_field.dart';
 
 enum FoodEditContext {
   search, // From Search Screen (Edit/Copy) -> "Save", "Save & Use"
@@ -63,8 +64,6 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
       TextEditingController(text: '1');
   final _primaryServingGramsController = TextEditingController();
   String _primaryServingUnit = 'serving';
-  bool _isCustomUnit = false;
-  final _customUnitController = TextEditingController();
 
   // FocusNodes for numeric fields (math input support)
   final List<FocusNode> _numericFocusNodes = [];
@@ -286,7 +285,6 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
     _fiberController.dispose();
     _primaryServingQuantityController.dispose();
     _primaryServingGramsController.dispose();
-    _customUnitController.dispose();
     super.dispose();
   }
 
@@ -306,9 +304,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
 
     // Build primary serving from inline fields if in per-serving mode
     if (_isPerServingMode) {
-      final unit = _isCustomUnit
-          ? _customUnitController.text.trim()
-          : _primaryServingUnit;
+      final unit = _primaryServingUnit;
       final quantity = _parse(_primaryServingQuantityController.text);
       final grams = _parse(_primaryServingGramsController.text);
 
@@ -813,28 +809,43 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
                 const SizedBox(width: 8),
                 // Unit dropdown
                 Expanded(
-                  child: _isCustomUnit
-                      ? TextFormField(
-                          controller: _customUnitController,
-                          decoration: InputDecoration(
-                            labelText: 'Unit name',
-                            isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 8,
-                              horizontal: 8,
-                            ),
-                            suffixIcon: IconButton(
-                              icon: const Icon(Icons.close, size: 18),
-                              onPressed: () {
-                                setState(() {
-                                  _isCustomUnit = false;
-                                  _customUnitController.clear();
-                                });
-                              },
-                            ),
+                  child: UnitSelectField(
+                    label: 'Unit',
+                    value: _primaryServingUnit,
+                    availableUnits: [
+                      ..._availableUnits,
+                      ..._servings.where((s) => s.unit != 'g').map((s) => s.unit),
+                    ],
+                    onChanged: (val) {
+                      setState(() {
+                        _primaryServingUnit = val;
+                        // If selecting an existing serving, update grams field
+                        final existingServing = _servings.firstWhere(
+                          (s) => s.unit == val,
+                          orElse: () => const FoodServing(
+                            foodId: 0,
+                            unit: '',
+                            grams: 0,
+                            quantity: 1,
                           ),
-                        )
-                      : _buildUnitDropdown(),
+                        );
+                        if (existingServing.grams > 0) {
+                          _primaryServingGramsController.text =
+                              existingServing.grams.toStringAsFixed(0);
+                          _primaryServingQuantityController.text =
+                              _formatQuantity(existingServing.quantity);
+                          _selectedServingForMacroInput = existingServing;
+                          // Auto-calculate macros
+                          if (widget.originalFood != null) {
+                            _updateMacroFieldsForServing(
+                              widget.originalFood!,
+                              existingServing,
+                            );
+                          }
+                        }
+                      });
+                    },
+                  ),
                 ),
                 const SizedBox(width: 8),
                 const Text('='),
@@ -884,95 +895,6 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
     );
   }
 
-  Widget _buildUnitDropdown() {
-    // Build list of unit options
-    final units = <String>['serving'];
-
-    // Add units from database that aren't already in the list
-    for (final unit in _availableUnits) {
-      if (!units.contains(unit)) {
-        units.add(unit);
-      }
-    }
-
-    // Add units from current food's servings
-    for (final serving in _servings) {
-      if (serving.unit != 'g' && !units.contains(serving.unit)) {
-        units.add(serving.unit);
-      }
-    }
-
-    // Ensure current selection is in the list
-    if (!units.contains(_primaryServingUnit)) {
-      units.insert(0, _primaryServingUnit);
-    }
-
-    return InputDecorator(
-      decoration: const InputDecoration(
-        labelText: 'Unit',
-        isDense: true,
-        contentPadding: EdgeInsets.symmetric(
-          vertical: 8,
-          horizontal: 8,
-        ),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: _primaryServingUnit,
-          dropdownColor: Colors.grey[800],
-          isExpanded: true,
-          isDense: true,
-          items: [
-        ...units.map(
-          (unit) => DropdownMenuItem(
-            value: unit,
-            child: Text(unit),
-          ),
-        ),
-        const DropdownMenuItem(
-          value: '_custom_',
-          child: Text('Custom...'),
-        ),
-      ],
-          onChanged: (val) {
-            if (val == '_custom_') {
-              setState(() {
-                _isCustomUnit = true;
-              });
-            } else if (val != null) {
-              setState(() {
-                _primaryServingUnit = val;
-                // If selecting an existing serving, update grams field
-                final existingServing = _servings.firstWhere(
-                  (s) => s.unit == val,
-                  orElse: () => const FoodServing(
-                    foodId: 0,
-                    unit: '',
-                    grams: 0,
-                    quantity: 1,
-                  ),
-                );
-                if (existingServing.grams > 0) {
-                  _primaryServingGramsController.text =
-                      existingServing.grams.toStringAsFixed(0);
-                  _primaryServingQuantityController.text =
-                      _formatQuantity(existingServing.quantity);
-                  _selectedServingForMacroInput = existingServing;
-                  // Auto-calculate macros
-                  if (widget.originalFood != null) {
-                    _updateMacroFieldsForServing(
-                      widget.originalFood!,
-                      existingServing,
-                    );
-                  }
-                }
-              });
-            }
-          },
-        ),
-      ),
-    );
-  }
 
   Widget _buildMacroSection() {
     return Container(
@@ -990,7 +912,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
-                'Values for ${_primaryServingQuantityController.text} ${_isCustomUnit ? _customUnitController.text : _primaryServingUnit} (${_primaryServingGramsController.text}g)',
+                'Values for ${_primaryServingQuantityController.text} $_primaryServingUnit (${_primaryServingGramsController.text}g)',
                 style: TextStyle(color: Colors.grey[400], fontSize: 12),
               ),
             ),
@@ -1074,10 +996,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
           // Don't show 'g' unit or the primary serving being edited
           if (serving.unit == 'g') return const SizedBox.shrink();
           if (_isPerServingMode &&
-              serving.unit ==
-                  (_isCustomUnit
-                      ? _customUnitController.text
-                      : _primaryServingUnit)) {
+              serving.unit == _primaryServingUnit) {
             return const SizedBox.shrink();
           }
 

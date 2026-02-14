@@ -27,6 +27,7 @@ import 'package:image_picker/image_picker.dart' as image_picker;
 import 'package:meal_of_record/screens/square_camera_screen.dart';
 import 'package:meal_of_record/widgets/food_image_widget.dart';
 import 'package:meal_of_record/services/image_storage_service.dart';
+import 'package:meal_of_record/widgets/unit_select_field.dart';
 
 class RecipeEditScreen extends StatefulWidget {
   const RecipeEditScreen({super.key});
@@ -43,6 +44,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
   late TextEditingController _notesController;
   late TextEditingController _emojiController;
   List<model_cat.Category> _allCategories = [];
+  List<String> _availableUnits = [];
 
   @override
   void initState() {
@@ -59,6 +61,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
     _notesController = TextEditingController(text: provider.notes);
     _emojiController = TextEditingController(text: provider.emoji);
     _loadCategories();
+    _loadAvailableUnits();
   }
 
   Future<void> _loadCategories() async {
@@ -66,6 +69,15 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
     if (mounted) {
       setState(() {
         _allCategories = cats;
+      });
+    }
+  }
+
+  Future<void> _loadAvailableUnits() async {
+    final units = await DatabaseService.instance.getDistinctUnits();
+    if (mounted) {
+      setState(() {
+        _availableUnits = units;
       });
     }
   }
@@ -319,12 +331,10 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: TextField(
-                controller: _portionNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Portion Unit Name',
-                  hintText: 'e.g. Cookie, Slice',
-                ),
+              child: UnitSelectField(
+                label: 'Portion Unit Name',
+                value: provider.portionName,
+                availableUnits: _availableUnits,
                 onChanged: provider.setPortionName,
               ),
             ),

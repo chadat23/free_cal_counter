@@ -122,7 +122,7 @@ void main() {
 
     // Enter custom unit name
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Unit name'),
+      find.widgetWithText(TextFormField, 'Unit'),
       'Slice',
     );
 

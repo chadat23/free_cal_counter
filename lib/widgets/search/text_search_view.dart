@@ -429,24 +429,24 @@ class _TextSearchViewState extends State<TextSearchView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, 'cancel'),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, 'scan_again'),
-                child: const Text('Scan Again'),
-              ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context, 'cancel'),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context, 'scan_again'),
+                  child: const Text('Scan Again'),
+                ),
             ],
           ),
           const Divider(),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, 'off_search'),
-                child: const Text('Search Open Food Facts'),
-              ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context, 'off_search'),
+                  child: const Text('Search Open Food Facts'),
+                ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, 'create'),
                 child: const Text('Create Food'),

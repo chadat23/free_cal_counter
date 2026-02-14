@@ -157,6 +157,30 @@ void main() {
     );
 
     testWidgets(
+      'barcode search with no results shows enhanced not-found dialog with consistent ElevatedButton style',
+      (tester) async {
+        when(mockSearchProvider.isBarcodeSearch).thenReturn(true);
+        when(mockSearchProvider.searchResults).thenReturn([]);
+        when(mockSearchProvider.lastScannedBarcode).thenReturn('999');
+
+        await tester.pumpWidget(buildWidget());
+        await tester.pumpAndSettle();
+
+        expect(find.byType(AlertDialog), findsOneWidget);
+        expect(find.text('Barcode Not Found'), findsOneWidget);
+
+        // Verify all 4 action buttons are ElevatedButtons
+        final elevatedButtons = find.byType(ElevatedButton);
+        expect(elevatedButtons, findsNWidgets(4));
+
+        expect(find.descendant(of: elevatedButtons, matching: find.text('Scan Again')), findsOneWidget);
+        expect(find.descendant(of: elevatedButtons, matching: find.text('Search Open Food Facts')), findsOneWidget);
+        expect(find.descendant(of: elevatedButtons, matching: find.text('Create Food')), findsOneWidget);
+        expect(find.descendant(of: elevatedButtons, matching: find.text('Cancel')), findsOneWidget);
+      },
+    );
+
+    testWidgets(
       'barcode search with no results shows enhanced not-found dialog',
       (tester) async {
         when(mockSearchProvider.isBarcodeSearch).thenReturn(true);

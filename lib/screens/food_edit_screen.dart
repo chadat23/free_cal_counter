@@ -1004,10 +1004,10 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
             ),
           const SizedBox(height: 16),
           _buildMacroRow(_caloriesController, 'Calories', 'kcal'),
-          _buildMacroRow(_proteinController, 'Protein', 'g'),
           _buildMacroRow(_fatController, 'Fat', 'g'),
           _buildMacroRow(_carbsController, 'Carbs', 'g'),
           _buildMacroRow(_fiberController, 'Fiber', 'g'),
+          _buildMacroRow(_proteinController, 'Protein', 'g'),
         ],
       ),
     );

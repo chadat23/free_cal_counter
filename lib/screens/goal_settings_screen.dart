@@ -208,37 +208,30 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
           ),
           const SizedBox(height: 10),
           _buildModeSelector(),
-          const Divider(height: 40),
-          const Divider(height: 40),
-          _buildTextField(
-            controller: _anchorWeightController,
-            label:
-                _mode == GoalMode.maintain
-                    ? 'Target Weight (${_useMetric ? 'kg' : 'lb'})'
-                    : 'Starting/Reference Weight (${_useMetric ? 'kg' : 'lb'})',
-            hint: 'Your weight',
-          ),
-          if (_mode == GoalMode.maintain)
-            const Padding(
-              padding: EdgeInsets.only(bottom: 16.0),
-              child: Text(
-                'Used to estimate initial maintenance calories.',
-                style: TextStyle(color: Colors.grey, fontSize: 12),
-              ),
-            ),
-          SwitchListTile(
-            title: const Text('Smart Target Calculations'),
-            subtitle: const Text(
-              'When enabled, targets are automatically adjusted based on weight trends after the first week.',
-            ),
-            value: _enableSmartTargets,
-            onChanged: (val) => setState(() => _enableSmartTargets = val),
-          ),
+          //const Divider(height: 40),
+          const Divider(height: 20),
           SwitchListTile(
             title: const Text('Use Metric Units (kg)'),
             subtitle: const Text('Affects calorie drift calculation'),
             value: _useMetric,
             onChanged: (val) => setState(() => _useMetric = val),
+          ),
+          SwitchListTile(
+            title: const Text('Smart Target Calculations'),
+            subtitle: const Text(
+              'Targets are auto-adjusted based on weight/food trends after the first week.',
+            ),
+            value: _enableSmartTargets,
+            onChanged: (val) => setState(() => _enableSmartTargets = val),
+          ),
+          const Divider(height: 20),
+          _buildTextField(
+            controller: _anchorWeightController,
+            label:
+                _mode == GoalMode.maintain
+                    ? 'Target Weight (${_useMetric ? 'kg' : 'lb'})'
+                    : 'Starting Weight (${_useMetric ? 'kg' : 'lb'})',
+            hint: 'Your weight',
           ),
           _buildTextField(
             controller: _maintenanceCalController,
@@ -260,7 +253,6 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
           ),
           const SizedBox(height: 10),
           _buildCalcModeSelector(),
-          const SizedBox(height: 20),
           const SizedBox(height: 20),
           _buildProteinSection(),
           const SizedBox(height: 10),

@@ -26,9 +26,9 @@ From the **Overview** or **Log** screen, tap the Search bar at the bottom.
 
 ### 2. Find Your Food
 Type the name of the food. The app searches your local database first.
-- If it's something you've had before, it will appear at the top in the **Live DB** results.
-- If it's new, look in the **Reference DB** results.
-- Still can't find it? Tap the **Globe icon** to search the Open Food Facts (OFF) database.
+- If it's something you've had before, it will appear towards the top in the results with a gray background.
+- If it's something you've never logged before, look in the Standard Foods results which will display below previously logged search results (blue backgrounds being gold standard USDA data, red being historic USDA data)
+- Still can't find it? Tap the **Globe icon** to search the Open Food Facts (OFF) database. **Note**: Tapping on the images at the side of the OFF search results will expand them.
 
 ![[Screenshot: Search results with Live DB items at the top and the Globe icon highlighted]](assets/search_results.png)
 

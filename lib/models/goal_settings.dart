@@ -5,6 +5,11 @@ enum MacroCalculationMode {
   proteinCarbs, // New: Enter Protein + Carbs, Fat is remainder
 }
 
+enum ProteinTargetMode {
+  fixed, // User enters specific grams
+  percentageOfWeight, // User enters multiplier (g per weight unit)
+}
+
 class GoalSettings {
   final double anchorWeight;
   final double maintenanceCaloriesStart;
@@ -14,6 +19,8 @@ class GoalSettings {
   final double fiberTarget; // In grams
   final GoalMode mode;
   final MacroCalculationMode calculationMode;
+  final ProteinTargetMode proteinTargetMode;
+  final double proteinMultiplier;
   final double fixedDelta; // Used for gain/lose modes
   final DateTime lastTargetUpdate;
   final bool useMetric;
@@ -29,6 +36,8 @@ class GoalSettings {
     required this.fiberTarget,
     required this.mode,
     required this.calculationMode,
+    required this.proteinTargetMode,
+    required this.proteinMultiplier,
     required this.fixedDelta,
     required this.lastTargetUpdate,
     this.useMetric = false,
@@ -53,6 +62,11 @@ class GoalSettings {
         (e) => e.toString() == (json['calculationMode'] as String),
         orElse: () => MacroCalculationMode.proteinCarbs,
       ),
+      proteinTargetMode: ProteinTargetMode.values.firstWhere(
+        (e) => e.toString() == (json['proteinTargetMode'] as String? ?? ''),
+        orElse: () => ProteinTargetMode.fixed,
+      ),
+      proteinMultiplier: (json['proteinMultiplier'] as num? ?? 1.0).toDouble(),
       fixedDelta: (json['fixedDelta'] as num? ?? 0.0).toDouble(),
       lastTargetUpdate: DateTime.fromMillisecondsSinceEpoch(
         json['lastTargetUpdate'] as int? ?? 0,
@@ -73,6 +87,8 @@ class GoalSettings {
       'fiberTarget': fiberTarget,
       'mode': mode.toString(),
       'calculationMode': calculationMode.toString(),
+      'proteinTargetMode': proteinTargetMode.toString(),
+      'proteinMultiplier': proteinMultiplier,
       'fixedDelta': fixedDelta,
       'lastTargetUpdate': lastTargetUpdate.millisecondsSinceEpoch,
       'useMetric': useMetric,
@@ -92,6 +108,8 @@ class GoalSettings {
       fiberTarget: 38.0,
       mode: GoalMode.maintain,
       calculationMode: MacroCalculationMode.proteinCarbs,
+      proteinTargetMode: ProteinTargetMode.fixed,
+      proteinMultiplier: 1.0,
       fixedDelta: 0.0,
       lastTargetUpdate: DateTime(2000), // Far in the past to trigger update
       useMetric: false,
@@ -110,6 +128,8 @@ class GoalSettings {
     double? fiberTarget,
     GoalMode? mode,
     MacroCalculationMode? calculationMode,
+    ProteinTargetMode? proteinTargetMode,
+    double? proteinMultiplier,
     double? fixedDelta,
     DateTime? lastTargetUpdate,
     bool? useMetric,
@@ -126,6 +146,8 @@ class GoalSettings {
       fiberTarget: fiberTarget ?? this.fiberTarget,
       mode: mode ?? this.mode,
       calculationMode: calculationMode ?? this.calculationMode,
+      proteinTargetMode: proteinTargetMode ?? this.proteinTargetMode,
+      proteinMultiplier: proteinMultiplier ?? this.proteinMultiplier,
       fixedDelta: fixedDelta ?? this.fixedDelta,
       lastTargetUpdate: lastTargetUpdate ?? this.lastTargetUpdate,
       useMetric: useMetric ?? this.useMetric,

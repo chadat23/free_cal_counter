@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:meal_of_record/models/goal_settings.dart';
 import 'package:meal_of_record/providers/goals_provider.dart';
 import 'package:meal_of_record/providers/navigation_provider.dart';
+import 'package:meal_of_record/providers/weight_provider.dart';
+import 'package:meal_of_record/services/goal_logic_service.dart';
 import 'package:meal_of_record/widgets/screen_background.dart';
 import 'package:meal_of_record/utils/ui_utils.dart';
 
@@ -21,8 +23,10 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
   late TextEditingController _carbController;
   late TextEditingController _fiberController;
   late TextEditingController _fixedDeltaController;
+  late TextEditingController _proteinMultiplierController;
   late GoalMode _mode;
   late MacroCalculationMode _calcMode;
+  late ProteinTargetMode _proteinTargetMode;
   late bool _useMetric;
   late bool _enableSmartTargets;
 
@@ -53,8 +57,12 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
     _fixedDeltaController = TextEditingController(
       text: settings.fixedDelta.toString(),
     );
+    _proteinMultiplierController = TextEditingController(
+      text: settings.proteinMultiplier.toString(),
+    );
     _mode = settings.mode;
     _calcMode = settings.calculationMode;
+    _proteinTargetMode = settings.proteinTargetMode;
     _useMetric = settings.useMetric;
     _enableSmartTargets = settings.enableSmartTargets;
   }
@@ -68,6 +76,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
     _carbController.dispose();
     _fiberController.dispose();
     _fixedDeltaController.dispose();
+    _proteinMultiplierController.dispose();
     super.dispose();
   }
 
@@ -83,10 +92,23 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
     }
 
     final protein = double.tryParse(_proteinController.text);
-    if (protein == null || protein <= 0) {
+    if (_proteinTargetMode == ProteinTargetMode.fixed &&
+        (protein == null || protein <= 0)) {
       UiUtils.showAutoDismissDialog(
         context,
         'Please enter valid protein target',
+      );
+      return;
+    }
+
+    final proteinMultiplier = double.tryParse(
+      _proteinMultiplierController.text,
+    );
+    if (_proteinTargetMode == ProteinTargetMode.percentageOfWeight &&
+        (proteinMultiplier == null || proteinMultiplier <= 0)) {
+      UiUtils.showAutoDismissDialog(
+        context,
+        'Please enter valid protein multiplier',
       );
       return;
     }
@@ -112,17 +134,17 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
     }
 
     // For maintain mode, validate target weight
+    // For maintain mode, validate target weight
     double? targetWeight;
-    if (_mode == GoalMode.maintain) {
-      targetWeight = double.tryParse(_anchorWeightController.text);
-      if (targetWeight == null || targetWeight <= 0) {
-        UiUtils.showAutoDismissDialog(
-          context,
-          'Please enter a valid target weight',
-        );
-        return;
-      }
+    targetWeight = double.tryParse(_anchorWeightController.text);
+    if (targetWeight == null || targetWeight <= 0) {
+      UiUtils.showAutoDismissDialog(
+        context,
+        'Please enter a valid weight',
+      );
+      return;
     }
+
 
     // For lose/gain modes, validate delta
     double? delta;
@@ -142,12 +164,14 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
       anchorWeight:
           targetWeight ?? double.tryParse(_anchorWeightController.text) ?? 0.0,
       maintenanceCaloriesStart: maintenanceCal,
-      proteinTarget: protein,
+      proteinTarget: protein ?? 0.0, // May be recalculated if multiplier
       fatTarget: fat ?? 0.0,
       carbTarget: carbs ?? 0.0,
       fiberTarget: fiber,
       mode: _mode,
       calculationMode: _calcMode,
+      proteinTargetMode: _proteinTargetMode,
+      proteinMultiplier: proteinMultiplier ?? 1.0,
       fixedDelta: _mode != GoalMode.maintain ? delta! : 0.0,
       lastTargetUpdate: goalsProvider.settings.lastTargetUpdate,
       useMetric: _useMetric,
@@ -185,11 +209,22 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
           const SizedBox(height: 10),
           _buildModeSelector(),
           const Divider(height: 40),
+          const Divider(height: 40),
+          _buildTextField(
+            controller: _anchorWeightController,
+            label:
+                _mode == GoalMode.maintain
+                    ? 'Target Weight (${_useMetric ? 'kg' : 'lb'})'
+                    : 'Starting/Reference Weight (${_useMetric ? 'kg' : 'lb'})',
+            hint: 'Your weight',
+          ),
           if (_mode == GoalMode.maintain)
-            _buildTextField(
-              controller: _anchorWeightController,
-              label: 'Target Weight (${_useMetric ? 'kg' : 'lb'})',
-              hint: 'Your target weight',
+            const Padding(
+              padding: EdgeInsets.only(bottom: 16.0),
+              child: Text(
+                'Used to estimate initial maintenance calories.',
+                style: TextStyle(color: Colors.grey, fontSize: 12),
+              ),
             ),
           SwitchListTile(
             title: const Text('Smart Target Calculations'),
@@ -226,11 +261,9 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
           const SizedBox(height: 10),
           _buildCalcModeSelector(),
           const SizedBox(height: 20),
-          _buildTextField(
-            controller: _proteinController,
-            label: 'Protein (g)',
-            keyboardType: TextInputType.number,
-          ),
+          const SizedBox(height: 20),
+          _buildProteinSection(),
+          const SizedBox(height: 10),
           if (_calcMode == MacroCalculationMode.proteinFat)
             _buildTextField(
               controller: _fatController,
@@ -290,6 +323,102 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
         ),
       ],
     );
+  }
+
+  Widget _buildProteinSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Protein Target',
+          style: TextStyle(fontSize: 14, color: Colors.grey),
+        ),
+        const SizedBox(height: 8),
+        SegmentedButton<ProteinTargetMode>(
+          segments: const [
+            ButtonSegment(value: ProteinTargetMode.fixed, label: Text('Fixed')),
+            ButtonSegment(
+              value: ProteinTargetMode.percentageOfWeight,
+              label: Text('Multiplier'),
+            ),
+          ],
+          selected: {_proteinTargetMode},
+          onSelectionChanged: (newSelection) {
+            setState(() {
+              _proteinTargetMode = newSelection.first;
+            });
+          },
+        ),
+        const SizedBox(height: 16),
+        if (_proteinTargetMode == ProteinTargetMode.fixed)
+          _buildTextField(
+            controller: _proteinController,
+            label: 'Protein Target (g)',
+            keyboardType: TextInputType.number,
+          )
+        else ...[
+          _buildTextField(
+            controller: _proteinMultiplierController,
+            label: 'Multiplier (g per ${_useMetric ? 'kg' : 'lb'})',
+            hint: _useMetric ? 'e.g. 2.0' : 'e.g. 1.0',
+            keyboardType: TextInputType.number,
+          ),
+          FutureBuilder<double>(
+            future: _calculateProjectedProtein(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData && snapshot.data! > 0) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: Text(
+                    'Estimated Target: ${snapshot.data!.toStringAsFixed(1)} g',
+                    style: const TextStyle(
+                      fontStyle: FontStyle.italic,
+                      color: Colors.blueGrey,
+                    ),
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+        ],
+      ],
+    );
+  }
+
+  Future<double> _calculateProjectedProtein() async {
+    final multiplier =
+        double.tryParse(_proteinMultiplierController.text) ?? 0.0;
+    if (multiplier <= 0) return 0.0;
+
+    // Use logic similar to GoalsProvider to find reference weight
+    final weightProvider = Provider.of<WeightProvider>(context, listen: false);
+    final weights = weightProvider.recentWeights;
+
+    double referenceWeight = 0.0;
+
+    // 1. Try Trend
+    if (weights.isNotEmpty) {
+      referenceWeight = GoalLogicService.calculateTrendWeight(weights);
+    }
+
+    // 2. Try Latest (if trend failed or empty, though recentWeights comes from local state)
+    // If recentWeights is empty, we might not have loaded them?
+    // weightProvider loads on init usually or we can assume what's in memory is what we have.
+    if (referenceWeight <= 0 && weights.isNotEmpty) {
+      // Sort to be sure
+      final sorted = List.of(weights)
+        ..sort((a, b) => a.date.compareTo(b.date));
+      referenceWeight = sorted.last.weight;
+    }
+
+    // 3. Fallback to Anchor
+    if (referenceWeight <= 0) {
+      referenceWeight =
+          double.tryParse(_anchorWeightController.text) ?? 0.0;
+    }
+
+    return referenceWeight * multiplier;
   }
 
   Widget _buildModeSelector() {

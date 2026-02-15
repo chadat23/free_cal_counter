@@ -6,6 +6,7 @@ import 'package:meal_of_record/models/macro_goals.dart';
 import 'package:meal_of_record/services/database_service.dart';
 import 'package:meal_of_record/models/daily_macro_stats.dart';
 import 'package:meal_of_record/services/goal_logic_service.dart';
+import 'package:meal_of_record/models/weight.dart';
 
 class GoalsProvider extends ChangeNotifier {
   static const String _settingsKey = 'goal_settings';
@@ -156,6 +157,19 @@ class GoalsProvider extends ChangeNotifier {
 
   /// The core calculation engine for dynamic macro targets.
   Future<void> recalculateTargets({bool isInitialSetup = false}) async {
+    final now = _clock();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final analysisStart = yesterday.subtract(const Duration(days: 90));
+
+    // Fetch weights if needed for Smart TDEE OR Dynamic Protein
+    // We fetch a broad range to support both inputs
+    List<Weight> weights = [];
+    if (_settings.enableSmartTargets ||
+        _settings.proteinTargetMode == ProteinTargetMode.percentageOfWeight) {
+      weights = await _databaseService.getWeightsForRange(analysisStart, now);
+    }
+
     double targetCalories = _settings.maintenanceCaloriesStart;
 
     // Use initial setup logic (manual calories) if requested OR if smart targets are disabled
@@ -180,17 +194,6 @@ class GoalsProvider extends ChangeNotifier {
       );
     } else {
       // Smart mode: use Kalman TDEE
-      final now = _clock();
-      final today = DateTime(now.year, now.month, now.day);
-      final yesterday = today.subtract(const Duration(days: 1));
-      final analysisStart = yesterday.subtract(const Duration(days: 90));
-
-      // 1. Fetch weights
-      final weights = await _databaseService.getWeightsForRange(
-        analysisStart,
-        now,
-      );
-
       // 2. Cold boot check
       if (!GoalLogicService.hasEnoughWeightData(weights, now: now)) {
         // Fall back to manual mode
@@ -278,6 +281,34 @@ class GoalsProvider extends ChangeNotifier {
         }
 
         _settings = _settings.copyWith(lastTargetUpdate: _clock());
+      }
+    }
+
+    // --- Dynamic Protein Calculation ---
+    if (_settings.proteinTargetMode == ProteinTargetMode.percentageOfWeight) {
+      double referenceWeight = 0.0;
+      
+      // 1. Try Trend Weight
+      final trend = GoalLogicService.calculateTrendWeight(weights);
+      if (trend > 0) {
+        referenceWeight = trend;
+      } else if (weights.isNotEmpty) {
+        // 2. Try Latest Weight
+        referenceWeight = weights.last.weight; // weights are sorted by date in Service query? Usually yes but ensure handling.
+        // Actually Service returns them sorted ASC by date usually. 
+        // Let's safe guard:
+        if (weights.length > 1) {
+           weights.sort((a, b) => a.date.compareTo(b.date));
+           referenceWeight = weights.last.weight;
+        }
+      } else {
+        // 3. Fallback to Anchor Weight
+        referenceWeight = _settings.anchorWeight;
+      }
+
+      if (referenceWeight > 0) {
+        final newProtein = referenceWeight * _settings.proteinMultiplier;
+        _settings = _settings.copyWith(proteinTarget: newProtein);
       }
     }
 

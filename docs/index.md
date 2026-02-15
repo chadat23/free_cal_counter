@@ -1,6 +1,6 @@
 # Getting Started with Meal of Record
 
-Welcome to Meal of Record! This app is designed to help you track your calories, macros, and weight over time with a focus on speed, flexibility, and data integrity.
+Welcome to Meal of Record! This app is designed to help you achieve your fitness goals by tracking your calories, macros, and weight over time with a focus on speed, flexibility, and data integrity and privacy.
 
 ## App Overview
 
@@ -8,8 +8,8 @@ Meal of Record is built to be fast, private, and reliable. Your data lives on yo
 
 - **Fast Entry**: Quick search and barcode scanning to get your meals logged in seconds.
 - **Flexible Recipes**: Create complex recipes or simple templates you can "dump" and edit.
-- **Smart Goals**: Automatically adjust your calorie targets based on your actual weight trends.
-- **Data Protection**: Automatic backups to Google Drive and a versioning system that keeps your history accurate even if you update food definitions.
+- **Smart Goals**: Automatically adjust your calorie targets based on your actual weight and eating trends.
+- **Data Protection**: Automatic backups to your NAS and a versioning system that keeps your history accurate even if you update food or recipe definitions.
 
 ![[Screenshot: The Overview screen showing the week's macro progress and weight graph]](assets/overview_screen.png)
 

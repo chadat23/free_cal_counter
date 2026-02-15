@@ -49,9 +49,9 @@ class _MyAppState extends State<MyApp> {
 
       await DatabaseService.instance.init();
 
-      if (kDebugMode) {
-        await DebugSeeder.seed();
-      }
+      //if (kDebugMode) {
+      //  await DebugSeeder.seed();
+      //}
 
       // Set user agent for OpenFoodFacts API
       OpenFoodAPIConfiguration.userAgent = UserAgent(

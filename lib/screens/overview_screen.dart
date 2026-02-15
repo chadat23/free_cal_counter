@@ -161,6 +161,39 @@ class _OverviewScreenState extends State<OverviewScreen> {
     }
   }
 
+  Widget _buildGoalsWarning() {
+    final goalsProvider = Provider.of<GoalsProvider>(context, listen: false);
+    if (goalsProvider.isGoalsSet) return const SizedBox.shrink();
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.amber.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.amber.withOpacity(0.5)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.warning_amber_rounded, color: Colors.amber),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Text(
+              'Goals not set. Nutrient targets and trends may not be accurate.',
+              style: TextStyle(fontSize: 13, color: Colors.white),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/goal_settings');
+            },
+            child: const Text('Set up Goals'),
+          ),
+        ],
+      ),
+    );
+  }
+
   List<NutritionTarget> _buildTargets(
     List<DailyMacroStats> stats,
     MacroGoals goals,
@@ -282,6 +315,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
                 ? const Center(child: CircularProgressIndicator())
                 : ListView(
                     children: [
+                      _buildGoalsWarning(),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: NutritionTargetsOverviewChart(

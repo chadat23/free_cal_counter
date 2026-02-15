@@ -24,4 +24,11 @@ I want all of the numeric inputs to be calculators that can add, subtract, multi
 
 When manually creating new foods, it's a little wonkey, and unclear how it works regarding portions. it needs to be more clear, also, right now I find that the easiest thing to do is to convert (using a calculator app on my phone) the macros from whatever the serving size is on the label to per 100g, and that's a chore.
 
+workflows:
+log a food from the overview screen
+update a food while logging it
+create a new food
+create a recipe
+thourough explination of units/targets/subtract container/etc from the Quantity Edit screen
+
 Please review the relevant code, and then once reviewed, ask me any questions you have. Come up with a plan (which should include appropreate tests), ask more questions, plan, and continue that cycle untill you're fully happy with your plan and have no questions. The final plan should be maintainable, flexible, and shouldn't be more verbose or convoluted than necessary. Also, if you find that the updates touch or are involved in bad or strangely conviluted code, mention it in case it makes sense to simplify it. 

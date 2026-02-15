@@ -28,21 +28,23 @@ From the **Overview** or **Log** screen, tap the Search bar at the bottom.
 Type the name of the food. The app searches your local database first.
 - If it's something you've had before, it will appear towards the top in the results with a gray background.
 - If it's something you've never logged before, look in the Standard Foods results which will display below previously logged search results (blue backgrounds being gold standard USDA data, red being historic USDA data)
-- Still can't find it? Tap the **Globe icon** to search the Open Food Facts (OFF) database. **Note**: Tapping on the images at the side of the OFF search results will expand them.
+- Still can't find it? Tap the **Globe icon** to search the Open Food Facts (OFF) database.
+- *Tip*: Tapping on the images at the side of the OFF search results will expand them.
 
 ![[Screenshot: Search results with Live DB items at the top and the Globe icon highlighted]](assets/search_results.png)
 
 ### 3. Add to Log Queue
 Tap the **(+) button** on a food item to add one default serving to your **Log Queue**.
-- *Tip:* If you need to enter a specific weight (e.g., 150g of chicken), tap the food item itself instead of the (+) button to open the **Quantity Edit Screen**.
+- *Tip:* You can use the dropdown menue to select between common serving sizes.
+- *Tip:* If you need to enter a specific weight (e.g., 150g of chicken) or unit of measure, tap the food item itself instead of the (+) button to open the **Quantity Edit Screen**.
 
 ### 4. Review the Log Queue
-As you add items, they appear in the bar at the top of the search screen. Tap the **Down Arrow** to open the **Log Queue Screen**. Here you can see the combined impact of this meal on your daily targets.
+As you add items, they appear in the bar at the top of the search screen. Tap the **Down Arrow** to open the **Log Queue Screen**. Think of this a a scratch pad where you can see the combined impact of the meal you're prepping on your daily targets.
 
 ![[Screenshot: The Log Queue screen showing a list of pending items and their macro sum]](assets/log_queue.png)
 
 ### 5. Log It!
-Once your meal is complete in the queue, tap the **Log button** (checkmark or "Log"). This commits all items to your daily log with the current timestamp.
+Once your meal has been completely added to the queue, tap the **Log button** (checkmark or "Log"). This commits all items to your daily log with the current timestamp.
 
 ---
 
@@ -50,6 +52,6 @@ Once your meal is complete in the queue, tap the **Log button** (checkmark or "L
 
 - **Overview**: Your dashboard for the week. See macro bars for each day and your weight trend.
 - **Log**: Your daily diary. Move between days to see what you ate and edit past entries.
-- **Search**: The gateway to adding data. Toggles between Text, Barcode, and Recipes.
+- **Search**: The gateway to adding data. Toggles between Text, Barcode, Recipes, and more one off actions.
 - **Weight**: A simple screen to record your weight each day.
 - **Settings**: Where you manage goals, backups, and app preferences.

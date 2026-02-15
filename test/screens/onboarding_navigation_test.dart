@@ -13,6 +13,7 @@ import 'onboarding_navigation_test.mocks.dart';
 
 import 'package:meal_of_record/providers/log_provider.dart';
 import 'package:meal_of_record/screens/navigation_container_screen.dart';
+import 'package:meal_of_record/models/macro_goals.dart';
 
 @GenerateMocks([GoalsProvider, NavigationProvider, WeightProvider, LogProvider])
 void main() {
@@ -44,6 +45,7 @@ void main() {
     when(
       mockLogProvider.getDailyMacroStats(any, any),
     ).thenAnswer((_) async => []);
+    when(mockGoalsProvider.currentGoals).thenReturn(MacroGoals.hardcoded());
   });
 
   testWidgets('Saving initial goals should return to Overview screen (tab 0)', (
@@ -80,7 +82,7 @@ void main() {
 
     await fillField('Target Weight (lb)', '150');
     await fillField('Initial Maintenance Calories', '2340');
-    await fillField('Protein (g)', '150');
+    await fillField('Protein Target (g)', '150');
     await fillField('Carbs (g)', '200');
     await fillField('Fiber (g)', '38');
 
@@ -143,7 +145,7 @@ void main() {
       when(mockGoalsProvider.hasSeenWelcome).thenReturn(true);
 
       // Close dialog
-      await tester.tap(find.text('Get Started'));
+      await tester.tap(find.text('Set up Goals'));
       await tester.pumpAndSettle();
 
       // Re-build navigation screen

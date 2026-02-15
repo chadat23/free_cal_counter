@@ -123,5 +123,36 @@ void main() {
       expect(find.byType(NutritionTargetsOverviewChart), findsOneWidget);
       expect(find.byType(SearchRibbon), findsOneWidget);
     });
+
+    testWidgets('shows warning banner when goals are not set', (tester) async {
+      when(mockGoalsProvider.isGoalsSet).thenReturn(false);
+
+      await tester.pumpWidget(createTestWidget());
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(
+        find.text(
+          'Goals not set. Nutrient targets and trends may not be accurate.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Set up Goals'), findsOneWidget);
+    });
+
+    testWidgets('hides warning banner when goals are set', (tester) async {
+      when(mockGoalsProvider.isGoalsSet).thenReturn(true);
+
+      await tester.pumpWidget(createTestWidget());
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(
+        find.text(
+          'Goals not set. Nutrient targets and trends may not be accurate.',
+        ),
+        findsNothing,
+      );
+    });
   });
 }

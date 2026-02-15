@@ -119,15 +119,28 @@ class NavigationContainerScreen extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: const Text('Welcome!'),
         content: const Text(
-          'To get started, please set up your initial weight goals so we can tailor the app to you.',
+          'To get started, please set up your initial weight goals so we can tailor the app to you. Alternatively, you can restore from a backup if you have one.',
         ),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.pop(context); // Close dialog
+            },
+            child: const Text('Stay on Overview'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+              Navigator.pushNamed(context, AppRouter.dataManagementRoute);
+            },
+            child: const Text('Restore from Backup'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
               Navigator.pushNamed(context, AppRouter.goalSettingsRoute);
             },
-            child: const Text('Get Started'),
+            child: const Text('Set up Goals'),
           ),
         ],
       ),

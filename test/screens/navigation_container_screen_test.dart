@@ -108,6 +108,12 @@ void main() {
                   const Scaffold(body: Text('Goal Settings Screen')),
             );
           }
+          if (settings.name == AppRouter.dataManagementRoute) {
+            return MaterialPageRoute(
+              builder: (_) =>
+                  const Scaffold(body: Text('Data Management Screen')),
+            );
+          }
           return null;
         },
         home: const NavigationContainerScreen(),
@@ -115,17 +121,7 @@ void main() {
     );
   }
 
-  testWidgets('shows welcome dialog when goals are not set', (tester) async {
-    when(mockGoalsProvider.isGoalsSet).thenReturn(false);
-
-    await tester.pumpWidget(createWidget());
-    await tester.pumpAndSettle();
-
-    expect(find.text('Welcome!'), findsOneWidget);
-    expect(find.text('Get Started'), findsOneWidget);
-  });
-
-  testWidgets('navigates to settings when Get Started is pressed', (
+  testWidgets('shows welcome dialog with three options when goals are not set', (
     tester,
   ) async {
     when(mockGoalsProvider.isGoalsSet).thenReturn(false);
@@ -133,10 +129,48 @@ void main() {
     await tester.pumpWidget(createWidget());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Get Started'));
+    expect(find.text('Welcome!'), findsOneWidget);
+    expect(find.text('Stay on Overview'), findsOneWidget);
+    expect(find.text('Restore from Backup'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text('Set up Goals'),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('navigates to goal settings when Set up Goals is pressed', (
+    tester,
+  ) async {
+    when(mockGoalsProvider.isGoalsSet).thenReturn(false);
+
+    await tester.pumpWidget(createWidget());
+    await tester.pumpAndSettle();
+
+    final setupButton = find.descendant(
+      of: find.byType(AlertDialog),
+      matching: find.text('Set up Goals'),
+    );
+    await tester.tap(setupButton);
     await tester.pumpAndSettle();
 
     expect(find.text('Goal Settings Screen'), findsOneWidget);
+  });
+
+  testWidgets('navigates to data management when Restore from Backup is pressed', (
+    tester,
+  ) async {
+    when(mockGoalsProvider.isGoalsSet).thenReturn(false);
+
+    await tester.pumpWidget(createWidget());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Restore from Backup'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Data Management Screen'), findsOneWidget);
   });
 
   testWidgets('does not show dialog when goals are set', (tester) async {

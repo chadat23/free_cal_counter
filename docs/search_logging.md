@@ -4,10 +4,10 @@ The search experience in Meal of Record is designed for high-density information
 
 ## Finding What You Need
 
-The Search screen is divided into three primary tabs:
+The Search screen is divided into four primary tabs:
 
 ### 1. Text Search
-The default tab. It searches your **Live DB** first, then the **Reference DB**. 
+The default tab. It searches your previously logged foods as well as the local Standard Foods. 
 - **Subtle Indicators**: A small icon or note on a search result indicates if you've logged that specific item before.
 - **OFF Integration**: If you can't find a local result, tap the **Globe** to pull data from Open Food Facts.
 

@@ -69,8 +69,10 @@ class NasBackupService {
   /// Returns true on success.
   Future<bool> uploadBackup(File zipFile, {int retentionCount = 7}) async {
     try {
-      final fileName =
-          'meal_of_record_${DateTime.now().toIso8601String()}.zip';
+      final now = DateTime.now();
+      final timestamp =
+          '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}_${now.hour.toString().padLeft(2, '0')}-${now.minute.toString().padLeft(2, '0')}-${now.second.toString().padLeft(2, '0')}';
+      final fileName = 'meal_of_record_$timestamp.zip';
       debugPrint('NasBackupService: Uploading $fileName...');
 
       final client = await _createHttpClient();

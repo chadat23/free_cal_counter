@@ -75,7 +75,7 @@ class DatabaseService {
     await _referenceDb.close();
 
     try {
-      if (backupFile.path.endsWith('.zip')) {
+      if (backupFile.path.toLowerCase().endsWith('.zip')) {
         // Zip restore
         final bytes = await backupFile.readAsBytes();
         final archive = ZipDecoder().decodeBytes(bytes);

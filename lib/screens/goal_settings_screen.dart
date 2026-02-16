@@ -29,6 +29,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
   late ProteinTargetMode _proteinTargetMode;
   late bool _useMetric;
   late bool _enableSmartTargets;
+  late GoalSettings _initialSettings;
 
   @override
   void initState() {
@@ -65,6 +66,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
     _proteinTargetMode = settings.proteinTargetMode;
     _useMetric = settings.useMetric;
     _enableSmartTargets = settings.enableSmartTargets;
+    _initialSettings = settings;
   }
 
   @override
@@ -191,9 +193,79 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
     Navigator.pop(context);
   }
 
+  bool _hasChanges() {
+    final maintenanceCal =
+        double.tryParse(_maintenanceCalController.text) ?? 0.0;
+    final protein = double.tryParse(_proteinController.text) ?? 0.0;
+    final proteinMultiplier =
+        double.tryParse(_proteinMultiplierController.text) ?? 0.0;
+    final fat = double.tryParse(_fatController.text) ?? 0.0;
+    final carbs = double.tryParse(_carbController.text) ?? 0.0;
+    final fiber = double.tryParse(_fiberController.text) ?? 0.0;
+    final anchorWeight = double.tryParse(_anchorWeightController.text) ?? 0.0;
+    final delta = double.tryParse(_fixedDeltaController.text) ?? 0.0;
+
+    return _mode != _initialSettings.mode ||
+        _calcMode != _initialSettings.calculationMode ||
+        _proteinTargetMode != _initialSettings.proteinTargetMode ||
+        _useMetric != _initialSettings.useMetric ||
+        _enableSmartTargets != _initialSettings.enableSmartTargets ||
+        maintenanceCal != _initialSettings.maintenanceCaloriesStart ||
+        protein != _initialSettings.proteinTarget ||
+        proteinMultiplier != _initialSettings.proteinMultiplier ||
+        fat != _initialSettings.fatTarget ||
+        carbs != _initialSettings.carbTarget ||
+        fiber != _initialSettings.fiberTarget ||
+        anchorWeight != _initialSettings.anchorWeight ||
+        (_mode != GoalMode.maintain && delta != _initialSettings.fixedDelta);
+  }
+
+  Future<void> _showDiscardChangesDialog() async {
+    final result = await showDialog<String>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Unsaved Changes'),
+            content: const Text(
+              'You have unsaved changes. Do you want to save them before leaving?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, 'cancel'),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, 'discard'),
+                child: const Text('Discard'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, 'save'),
+                child: const Text('Save'),
+              ),
+            ],
+          ),
+    );
+
+    if (result == 'discard') {
+      if (mounted) Navigator.pop(context);
+    } else if (result == 'save') {
+      _save();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ScreenBackground(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        if (!_hasChanges()) {
+          Navigator.pop(context);
+          return;
+        }
+        await _showDiscardChangesDialog();
+      },
+      child: ScreenBackground(
       appBar: AppBar(
         title: const Text('Goals & Targets'),
         backgroundColor: Colors.transparent,
@@ -281,8 +353,9 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildCalcModeSelector() {
     return Column(

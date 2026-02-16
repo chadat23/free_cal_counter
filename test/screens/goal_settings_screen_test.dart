@@ -233,4 +233,182 @@ void main() {
       expect(find.text('159.6'), findsOneWidget);
     },
   );
+
+  group('Unsaved Changes Dialog', () {
+    testWidgets('Pops immediately if no changes', (tester) async {
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider<GoalsProvider>.value(
+              value: mockGoalsProvider,
+            ),
+            ChangeNotifierProvider<WeightProvider>.value(
+              value: mockWeightProvider,
+            ),
+          ],
+          child: const MaterialApp(home: GoalSettingsScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Trigger back navigation
+      final dynamic widgetsAppState = tester.state(find.byType(WidgetsApp));
+      await widgetsAppState.didPopRoute();
+      await tester.pumpAndSettle();
+
+      // Screen should be gone (MaterialApp home is gone, or check navigator)
+      expect(find.byType(GoalSettingsScreen), findsNothing);
+    });
+
+    testWidgets('Shows dialog if has changes and back is pressed', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider<GoalsProvider>.value(
+              value: mockGoalsProvider,
+            ),
+            ChangeNotifierProvider<WeightProvider>.value(
+              value: mockWeightProvider,
+            ),
+          ],
+          child: const MaterialApp(home: GoalSettingsScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Make a change
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Target Weight (lb)'),
+        '180',
+      );
+      await tester.pump();
+
+      // Trigger back navigation
+      final dynamic widgetsAppState = tester.state(find.byType(WidgetsApp));
+      await widgetsAppState.didPopRoute();
+      await tester.pumpAndSettle();
+
+      // Dialog should be visible
+      expect(find.text('Unsaved Changes'), findsOneWidget);
+    });
+
+    testWidgets('Dialog Cancel stays on screen', (tester) async {
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider<GoalsProvider>.value(
+              value: mockGoalsProvider,
+            ),
+            ChangeNotifierProvider<WeightProvider>.value(
+              value: mockWeightProvider,
+            ),
+          ],
+          child: const MaterialApp(home: GoalSettingsScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Target Weight (lb)'),
+        '180',
+      );
+      await tester.pump();
+
+      final dynamic widgetsAppState = tester.state(find.byType(WidgetsApp));
+      await widgetsAppState.didPopRoute();
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      // Dialog gone, screen still there
+      expect(find.text('Unsaved Changes'), findsNothing);
+      expect(find.byType(GoalSettingsScreen), findsOneWidget);
+    });
+
+    testWidgets('Dialog Discard pops screen', (tester) async {
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider<GoalsProvider>.value(
+              value: mockGoalsProvider,
+            ),
+            ChangeNotifierProvider<WeightProvider>.value(
+              value: mockWeightProvider,
+            ),
+          ],
+          child: const MaterialApp(home: GoalSettingsScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Target Weight (lb)'),
+        '180',
+      );
+      await tester.pump();
+
+      final dynamic widgetsAppState = tester.state(find.byType(WidgetsApp));
+      await widgetsAppState.didPopRoute();
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Discard'));
+      await tester.pumpAndSettle();
+
+      // Screen gone
+      expect(find.byType(GoalSettingsScreen), findsNothing);
+    });
+
+    testWidgets('Dialog Save validates and saves', (tester) async {
+      when(
+        mockGoalsProvider.saveSettings(
+          any,
+          isInitialSetup: anyNamed('isInitialSetup'),
+        ),
+      ).thenAnswer((_) async {});
+
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider<GoalsProvider>.value(
+              value: mockGoalsProvider,
+            ),
+            ChangeNotifierProvider<NavigationProvider>.value(
+              value: mockNavigationProvider,
+            ),
+            ChangeNotifierProvider<WeightProvider>.value(
+              value: mockWeightProvider,
+            ),
+          ],
+          child: const MaterialApp(home: GoalSettingsScreen()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Make a valid change
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Target Weight (lb)'),
+        '180',
+      );
+      await tester.pump();
+
+      final dynamic widgetsAppState = tester.state(find.byType(WidgetsApp));
+      await widgetsAppState.didPopRoute();
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      // Should have called save and navigator popped
+      verify(
+        mockGoalsProvider.saveSettings(
+          any,
+          isInitialSetup: anyNamed('isInitialSetup'),
+        ),
+      ).called(1);
+      expect(find.byType(GoalSettingsScreen), findsNothing);
+    });
+  });
 }

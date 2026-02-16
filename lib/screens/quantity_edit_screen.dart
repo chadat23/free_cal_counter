@@ -16,6 +16,7 @@ import 'package:meal_of_record/models/food_portion.dart';
 import 'package:meal_of_record/models/food_container.dart';
 import 'package:meal_of_record/widgets/serving_info_sheet.dart';
 import 'package:meal_of_record/widgets/math_input_bar.dart';
+import 'package:meal_of_record/config/app_router.dart';
 
 class QuantityEditScreen extends StatefulWidget {
   final QuantityEditConfig config;
@@ -683,6 +684,53 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
   }
 
   Future<void> _handleEditDefinition() async {
+    if (_food.source == 'recipe') {
+      try {
+        final recipe = await DatabaseService.instance.getRecipeById(_food.id);
+        if (!mounted) return;
+
+        final recipeProvider = Provider.of<RecipeProvider>(context, listen: false);
+        recipeProvider.loadFromRecipe(recipe);
+
+        final result = await Navigator.pushNamed(context, AppRouter.recipeEditRoute);
+
+        if (result == true && mounted) {
+          // Reload food from database to get latest changes
+          final updatedFood = await DatabaseService.instance.getFoodById(
+            _food.id,
+            'live',
+          );
+
+          if (updatedFood != null && mounted) {
+            setState(() {
+              _food = updatedFood;
+              // Also update selected unit if it no longer exists
+              if (!_food.servings.any((s) => s.unit == _selectedUnit)) {
+                _selectedUnit = _food.servings.first.unit;
+              }
+            });
+
+            // Refresh the food in the log queue to propagate name/image changes
+            final logProvider = Provider.of<LogProvider>(context, listen: false);
+            await logProvider.refreshFoodInQueue(_food.id, updatedFood);
+
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Recipe updated')),
+              );
+            }
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error updating recipe: $e')));
+        }
+      }
+      return;
+    }
+
     try {
       final result = await Navigator.push<FoodEditResult>(
         context,

@@ -132,7 +132,7 @@ void main() {
 
     await fillField('Target Weight (lb)', '155.5');
     await fillField('Initial Maintenance Calories', '2340');
-    await fillField('Protein (g)', '150');
+    await fillField('Protein Target (g)', '150');
     await fillField('Carbs (g)', '200');
     await fillField('Fiber (g)', '38');
 
@@ -153,5 +153,34 @@ void main() {
       ),
     ).called(1);
     verify(mockNavigationProvider.changeTab(0)).called(1);
+  });
+
+  testWidgets(
+    'Estimated protein target is NOT displayed when using Multiplier mode',
+    (tester) async {
+      // Select Multiplier mode
+      final settings = GoalSettings.defaultSettings().copyWith(
+      proteinTargetMode: ProteinTargetMode.percentageOfWeight,
+      proteinMultiplier: 1.0,
+      anchorWeight: 155.5,
+    );
+    when(mockGoalsProvider.settings).thenReturn(settings);
+    when(mockWeightProvider.recentWeights).thenReturn([]);
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<GoalsProvider>.value(value: mockGoalsProvider),
+          ChangeNotifierProvider<WeightProvider>.value(
+            value: mockWeightProvider,
+          ),
+        ],
+        child: const MaterialApp(home: GoalSettingsScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Verify "Estimated Target:" is NOT present
+    expect(find.textContaining('Estimated Target:'), findsNothing);
   });
 }

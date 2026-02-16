@@ -355,63 +355,11 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
             hint: _useMetric ? 'e.g. 2.0' : 'e.g. 1.0',
             keyboardType: TextInputType.number,
           ),
-          FutureBuilder<double>(
-            future: _calculateProjectedProtein(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData && snapshot.data! > 0) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16.0),
-                  child: Text(
-                    'Estimated Target: ${snapshot.data!.toStringAsFixed(1)} g',
-                    style: const TextStyle(
-                      fontStyle: FontStyle.italic,
-                      color: Colors.blueGrey,
-                    ),
-                  ),
-                );
-              }
-              return const SizedBox.shrink();
-            },
-          ),
         ],
       ],
     );
   }
 
-  Future<double> _calculateProjectedProtein() async {
-    final multiplier =
-        double.tryParse(_proteinMultiplierController.text) ?? 0.0;
-    if (multiplier <= 0) return 0.0;
-
-    // Use logic similar to GoalsProvider to find reference weight
-    final weightProvider = Provider.of<WeightProvider>(context, listen: false);
-    final weights = weightProvider.recentWeights;
-
-    double referenceWeight = 0.0;
-
-    // 1. Try Trend
-    if (weights.isNotEmpty) {
-      referenceWeight = GoalLogicService.calculateTrendWeight(weights);
-    }
-
-    // 2. Try Latest (if trend failed or empty, though recentWeights comes from local state)
-    // If recentWeights is empty, we might not have loaded them?
-    // weightProvider loads on init usually or we can assume what's in memory is what we have.
-    if (referenceWeight <= 0 && weights.isNotEmpty) {
-      // Sort to be sure
-      final sorted = List.of(weights)
-        ..sort((a, b) => a.date.compareTo(b.date));
-      referenceWeight = sorted.last.weight;
-    }
-
-    // 3. Fallback to Anchor
-    if (referenceWeight <= 0) {
-      referenceWeight =
-          double.tryParse(_anchorWeightController.text) ?? 0.0;
-    }
-
-    return referenceWeight * multiplier;
-  }
 
   Widget _buildModeSelector() {
     return SegmentedButton<GoalMode>(

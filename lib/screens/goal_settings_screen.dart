@@ -370,8 +370,22 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
       ],
       selected: {_mode},
       onSelectionChanged: (newSelection) {
+        final newMode = newSelection.first;
+        if (newMode == GoalMode.maintain && _mode != GoalMode.maintain) {
+          // Switching TO maintain mode - set to trend weight
+          final weightProvider = Provider.of<WeightProvider>(
+            context,
+            listen: false,
+          );
+          final trend = GoalLogicService.calculateTrendWeight(
+            weightProvider.weights,
+          );
+          if (trend > 0) {
+            _anchorWeightController.text = trend.toStringAsFixed(1);
+          }
+        }
         setState(() {
-          _mode = newSelection.first;
+          _mode = newMode;
         });
       },
     );

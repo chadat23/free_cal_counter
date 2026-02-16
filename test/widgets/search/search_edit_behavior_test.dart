@@ -21,9 +21,11 @@ import 'package:meal_of_record/providers/recipe_provider.dart';
 import 'package:meal_of_record/providers/goals_provider.dart';
 import 'package:meal_of_record/models/macro_goals.dart';
 
+import 'package:meal_of_record/providers/navigation_provider.dart';
+
 import 'search_edit_behavior_test.mocks.dart';
 
-@GenerateMocks([LogProvider, SearchProvider, RecipeProvider, GoalsProvider])
+@GenerateMocks([LogProvider, SearchProvider, RecipeProvider, GoalsProvider, NavigationProvider])
 void main() {
   setUpAll(() async {
     final liveDb = LiveDatabase(connection: NativeDatabase.memory());
@@ -36,12 +38,14 @@ void main() {
     late MockSearchProvider mockSearchProvider;
     late MockRecipeProvider mockRecipeProvider;
     late MockGoalsProvider mockGoalsProvider;
+    late MockNavigationProvider mockNavigationProvider;
 
     setUp(() {
       mockLogProvider = MockLogProvider();
       mockSearchProvider = MockSearchProvider();
       mockRecipeProvider = MockRecipeProvider();
       mockGoalsProvider = MockGoalsProvider();
+      mockNavigationProvider = MockNavigationProvider();
 
       when(mockLogProvider.logQueue).thenReturn([]);
       when(mockLogProvider.totalCalories).thenReturn(0.0);
@@ -61,6 +65,8 @@ void main() {
       when(mockRecipeProvider.totalFiber).thenReturn(0.0);
 
       when(mockGoalsProvider.currentGoals).thenReturn(MacroGoals.hardcoded());
+
+      when(mockNavigationProvider.showConsumed).thenReturn(true);
     });
 
     testWidgets(
@@ -107,6 +113,9 @@ void main() {
               ),
               ChangeNotifierProvider<GoalsProvider>.value(
                 value: mockGoalsProvider,
+              ),
+              ChangeNotifierProvider<NavigationProvider>.value(
+                value: mockNavigationProvider,
               ),
             ],
             child: MaterialApp(
@@ -189,6 +198,9 @@ void main() {
               ),
               ChangeNotifierProvider<GoalsProvider>.value(
                 value: mockGoalsProvider,
+              ),
+              ChangeNotifierProvider<NavigationProvider>.value(
+                value: mockNavigationProvider,
               ),
             ],
             child: MaterialApp(

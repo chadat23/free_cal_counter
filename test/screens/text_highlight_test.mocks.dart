@@ -20,6 +20,7 @@ import 'package:meal_of_record/models/recipe_item.dart' as _i14;
 import 'package:meal_of_record/models/weight.dart' as _i20;
 import 'package:meal_of_record/providers/goals_provider.dart' as _i16;
 import 'package:meal_of_record/providers/log_provider.dart' as _i5;
+import 'package:meal_of_record/providers/navigation_provider.dart' as _i21;
 import 'package:meal_of_record/providers/recipe_provider.dart' as _i12;
 import 'package:meal_of_record/providers/weight_provider.dart' as _i19;
 import 'package:mockito/mockito.dart' as _i1;
@@ -1058,6 +1059,99 @@ class MockWeightProvider extends _i1.Mock implements _i19.WeightProvider {
             returnValueForMissingStub: _i9.Future<void>.value(),
           )
           as _i9.Future<void>);
+
+  @override
+  void addListener(_i11.VoidCallback? listener) => super.noSuchMethod(
+    Invocation.method(#addListener, [listener]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void removeListener(_i11.VoidCallback? listener) => super.noSuchMethod(
+    Invocation.method(#removeListener, [listener]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void dispose() => super.noSuchMethod(
+    Invocation.method(#dispose, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void notifyListeners() => super.noSuchMethod(
+    Invocation.method(#notifyListeners, []),
+    returnValueForMissingStub: null,
+  );
+}
+
+/// A class which mocks [NavigationProvider].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockNavigationProvider extends _i1.Mock
+    implements _i21.NavigationProvider {
+  MockNavigationProvider() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  int get selectedIndex =>
+      (super.noSuchMethod(Invocation.getter(#selectedIndex), returnValue: 0)
+          as int);
+
+  @override
+  bool get shouldFocusSearch =>
+      (super.noSuchMethod(
+            Invocation.getter(#shouldFocusSearch),
+            returnValue: false,
+          )
+          as bool);
+
+  @override
+  bool get showConsumed =>
+      (super.noSuchMethod(Invocation.getter(#showConsumed), returnValue: false)
+          as bool);
+
+  @override
+  bool get hasListeners =>
+      (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
+          as bool);
+
+  @override
+  void setShowConsumed(bool? value) => super.noSuchMethod(
+    Invocation.method(#setShowConsumed, [value]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void changeTab(int? index) => super.noSuchMethod(
+    Invocation.method(#changeTab, [index]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void goToSearch() => super.noSuchMethod(
+    Invocation.method(#goToSearch, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void goToDataManagement() => super.noSuchMethod(
+    Invocation.method(#goToDataManagement, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void resetSearchFocus() => super.noSuchMethod(
+    Invocation.method(#resetSearchFocus, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void goBack() => super.noSuchMethod(
+    Invocation.method(#goBack, []),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void addListener(_i11.VoidCallback? listener) => super.noSuchMethod(

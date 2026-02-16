@@ -32,6 +32,7 @@ class _UnitSelectFieldState extends State<UnitSelectField> {
 
   void _checkInitialValue() {
     // If value is not 'serving' and not in available units, it's custom
+    // OR if the value matches what would serve as custom text input
     final isKnown = ['serving', ...widget.availableUnits].contains(widget.value);
     _isCustom = !isKnown && widget.value.isNotEmpty;
     _customController = TextEditingController(text: _isCustom ? widget.value : '');
@@ -40,15 +41,22 @@ class _UnitSelectFieldState extends State<UnitSelectField> {
   @override
   void didUpdateWidget(UnitSelectField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.value != oldWidget.value || widget.availableUnits != oldWidget.availableUnits) {
-       _checkValueUpdate();
+    if (widget.value != oldWidget.value ||
+        widget.availableUnits != oldWidget.availableUnits) {
+      _checkValueUpdate();
     }
   }
 
   void _checkValueUpdate() {
     final isKnown = ['serving', ...widget.availableUnits].contains(widget.value);
-    final shouldBeCustom = !isKnown && widget.value.isNotEmpty;
-    
+    bool shouldBeCustom = !isKnown && widget.value.isNotEmpty;
+
+    // If we are already in custom mode, and the new value matches what's in the text field,
+    // we assume the user typed it and wants to stay in custom mode (e.g. they typed "cup" which is known).
+    if (_isCustom && widget.value == _customController.text) {
+      shouldBeCustom = true;
+    }
+
     if (shouldBeCustom != _isCustom) {
       setState(() {
         _isCustom = shouldBeCustom;

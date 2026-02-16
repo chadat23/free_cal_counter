@@ -14,7 +14,7 @@ class RecipeProvider extends ChangeNotifier {
   String _name = '';
   double _servingsCreated = 1.0;
   double? _finalWeightGrams;
-  String _portionName = 'portion';
+  String _portionName = 'serving';
   String _notes = '';
   bool _isTemplate = false;
   String _emoji = '🍴';
@@ -234,7 +234,7 @@ class RecipeProvider extends ChangeNotifier {
     _name = '';
     _servingsCreated = 1.0;
     _finalWeightGrams = null;
-    _portionName = 'portion';
+    _portionName = 'serving';
     _notes = '';
     _isTemplate = false;
     _emoji = '🍴';

@@ -3,113 +3,224 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meal_of_record/widgets/unit_select_field.dart';
 
 void main() {
-  testWidgets('UnitSelectField shows dropdown and updates value', (tester) async {
-    String selectedValue = 'serving';
-    final availableUnits = ['cup', 'bowl'];
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (context, setState) {
-              return UnitSelectField(
-                label: 'Unit',
-                value: selectedValue,
-                availableUnits: availableUnits,
-                onChanged: (val) {
-                  setState(() {
-                    selectedValue = val;
-                  });
-                },
-              );
-            },
+  group('UnitSelectField', () {
+    testWidgets('shows dropdown with initial known value', (tester) async {
+      String currentValue = 'cup';
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                return UnitSelectField(
+                  label: 'Unit',
+                  value: currentValue,
+                  availableUnits: const ['cup', 'oz', 'gram'],
+                  onChanged: (val) {
+                    setState(() {
+                      currentValue = val;
+                    });
+                  },
+                );
+              },
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    // Initial state: dropdown showing 'serving'
-    expect(find.text('serving'), findsOneWidget);
-    expect(find.byType(DropdownButton<String>), findsOneWidget);
+      // Should show dropdown
+      expect(find.byType(DropdownButton<String>), findsOneWidget);
+      expect(find.text('cup'), findsOneWidget);
+      expect(find.byType(TextFormField), findsNothing);
+    });
 
-    // Open dropdown
-    await tester.tap(find.text('serving'));
-    await tester.pumpAndSettle();
-
-    // Select 'cup'
-    await tester.tap(find.text('cup').last);
-    await tester.pumpAndSettle();
-
-    expect(selectedValue, 'cup');
-  });
-
-  testWidgets('UnitSelectField toggles to custom and back', (tester) async {
-    String selectedValue = 'serving';
-    final availableUnits = ['cup'];
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StatefulBuilder(
-            builder: (context, setState) {
-              return UnitSelectField(
-                label: 'Unit',
-                value: selectedValue,
-                availableUnits: availableUnits,
-                onChanged: (val) {
-                  setState(() {
-                    selectedValue = val;
-                  });
-                },
-              );
-            },
+    testWidgets('shows text field with initial custom value', (tester) async {
+      String currentValue = 'bowl';
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                return UnitSelectField(
+                  label: 'Unit',
+                  value: currentValue,
+                  availableUnits: const ['cup', 'oz', 'gram'],
+                  onChanged: (val) {
+                    setState(() {
+                      currentValue = val;
+                    });
+                  },
+                );
+              },
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    // Open dropdown and select 'Custom...'
-    await tester.tap(find.text('serving'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Custom...'));
-    await tester.pumpAndSettle();
+      // Should show text field
+      expect(find.byType(TextFormField), findsOneWidget);
+      expect(find.text('bowl'), findsOneWidget);
+      expect(find.byType(DropdownButton<String>), findsNothing);
+    });
 
-    // Should now show a text field
-    expect(find.byType(TextField), findsOneWidget);
-
-    // Type a custom unit
-    await tester.enterText(find.byType(TextField), 'box');
-    expect(selectedValue, 'box');
-
-    // Click close icon
-    await tester.tap(find.byIcon(Icons.close));
-    await tester.pumpAndSettle();
-
-    // Should be back to dropdown with 'serving'
-    expect(find.byType(DropdownButton<String>), findsOneWidget);
-    expect(selectedValue, 'serving');
-    expect(find.text('serving'), findsOneWidget);
-  });
-
-  testWidgets('UnitSelectField starts in custom mode if value not in list', (tester) async {
-    String selectedValue = 'bag';
-    final availableUnits = ['cup', 'bowl'];
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: UnitSelectField(
-            label: 'Unit',
-            value: selectedValue,
-            availableUnits: availableUnits,
-            onChanged: (val) => selectedValue = val,
+    testWidgets('switches to custom mode when "Custom..." is selected', (tester) async {
+      String currentValue = 'cup';
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                return UnitSelectField(
+                  label: 'Unit',
+                  value: currentValue,
+                  availableUnits: const ['cup', 'oz'],
+                  onChanged: (val) {
+                    setState(() {
+                      currentValue = val;
+                    });
+                  },
+                );
+              },
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    // Should start with text field containing 'bag'
-    expect(find.byType(TextField), findsOneWidget);
-    expect(find.text('bag'), findsOneWidget);
+      // Open dropdown
+      await tester.tap(find.byType(DropdownButton<String>));
+      await tester.pumpAndSettle();
+
+      // Select Custom...
+      await tester.tap(find.text('Custom...'));
+      await tester.pumpAndSettle();
+
+      // Should now be text field
+      expect(find.byType(TextFormField), findsOneWidget);
+      expect(find.byType(DropdownButton<String>), findsNothing);
+    });
+
+    testWidgets('switches back to dropdown mode when close icon is tapped', (tester) async {
+      String currentValue = 'bowl'; // Custom
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                return UnitSelectField(
+                  label: 'Unit',
+                  value: currentValue,
+                  availableUnits: const ['cup', 'oz'],
+                  onChanged: (val) {
+                    setState(() {
+                      currentValue = val;
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Verify custom mode
+      expect(find.byType(TextFormField), findsOneWidget);
+
+      // Tap close icon
+      await tester.tap(find.byIcon(Icons.close));
+      await tester.pumpAndSettle();
+
+      // Should be dropdown mode defaulting to 'serving' (as per implementation)
+      expect(find.byType(DropdownButton<String>), findsOneWidget);
+      expect(find.text('serving'), findsOneWidget);
+    });
+    
+    testWidgets('updates text field when external value changes in custom mode', (tester) async {
+      String currentValue = 'bowl';
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                return Column(
+                  children: [
+                    UnitSelectField(
+                      label: 'Unit',
+                      value: currentValue,
+                      availableUnits: const ['cup'],
+                      onChanged: (val) {
+                        setState(() {
+                          currentValue = val;
+                        });
+                      },
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          currentValue = 'plate';
+                        });
+                      },
+                      child: const Text('Change Value'),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('bowl'), findsOneWidget);
+
+      await tester.tap(find.text('Change Value'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('plate'), findsOneWidget);
+    });
+
+    testWidgets('does not switch to dropdown while typing custom value that matches existing unit', (tester) async {
+      String currentValue = 'c';
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                return UnitSelectField(
+                  label: 'Unit',
+                  value: currentValue,
+                  availableUnits: const ['cup'],
+                  onChanged: (val) {
+                    setState(() {
+                      currentValue = val;
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Initial state: 'c' is not in ['cup'], so it should be custom (text field)
+      expect(find.byType(TextFormField), findsOneWidget);
+
+      // Type 'u' -> 'cu'
+      await tester.enterText(find.byType(TextFormField), 'cu');
+      await tester.pumpAndSettle();
+      expect(find.byType(TextFormField), findsOneWidget); // Still custom
+
+      // Type 'p' -> 'cup'
+      // 'cup' IS in availableUnits. Logic might force it to dropdown.
+      await tester.enterText(find.byType(TextFormField), 'cup');
+      await tester.pumpAndSettle();
+
+      // If checks pass, it means the widget stayed as TextFormField.
+      // If it fails (finds DropdownButton), the bug is confirmed.
+      expect(find.byType(TextFormField), findsOneWidget, reason: 'Should remain text field to allow further typing');
+    });
   });
 }

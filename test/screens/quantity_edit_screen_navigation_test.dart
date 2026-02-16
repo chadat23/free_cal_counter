@@ -24,16 +24,18 @@ import 'package:meal_of_record/services/open_food_facts_service.dart';
 import 'package:meal_of_record/services/search_service.dart';
 import 'package:meal_of_record/services/emoji_service.dart';
 import 'package:meal_of_record/services/food_sorting_service.dart';
+import 'package:meal_of_record/providers/navigation_provider.dart';
 
 import 'quantity_edit_screen_navigation_test.mocks.dart';
 
 class MockNavigatorObserver extends Mock implements NavigatorObserver {}
 
-@GenerateMocks([LogProvider, RecipeProvider, GoalsProvider])
+@GenerateMocks([LogProvider, RecipeProvider, GoalsProvider, NavigationProvider])
 void main() {
   late MockLogProvider mockLogProvider;
   late MockRecipeProvider mockRecipeProvider;
   late MockGoalsProvider mockGoalsProvider;
+  late MockNavigationProvider mockNavigationProvider;
   late MockNavigatorObserver mockNavigatorObserver;
 
   setUpAll(() async {
@@ -46,6 +48,7 @@ void main() {
     mockLogProvider = MockLogProvider();
     mockRecipeProvider = MockRecipeProvider();
     mockGoalsProvider = MockGoalsProvider();
+    mockNavigationProvider = MockNavigationProvider();
     mockNavigatorObserver = MockNavigatorObserver();
 
     when(mockLogProvider.totalCalories).thenReturn(0.0);
@@ -62,6 +65,7 @@ void main() {
     when(mockRecipeProvider.servingsCreated).thenReturn(1.0);
 
     when(mockGoalsProvider.currentGoals).thenReturn(MacroGoals.hardcoded());
+    when(mockNavigationProvider.showConsumed).thenReturn(true);
   });
 
   Widget createTestWidget(QuantityEditConfig config) {
@@ -85,6 +89,7 @@ void main() {
         ChangeNotifierProvider<LogProvider>.value(value: mockLogProvider),
         ChangeNotifierProvider<RecipeProvider>.value(value: mockRecipeProvider),
         ChangeNotifierProvider<GoalsProvider>.value(value: mockGoalsProvider),
+        ChangeNotifierProvider<NavigationProvider>.value(value: mockNavigationProvider),
       ],
       child: MaterialApp(
         onGenerateRoute: router.generateRoute,

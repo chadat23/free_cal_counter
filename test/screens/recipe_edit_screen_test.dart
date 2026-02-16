@@ -36,14 +36,26 @@ void main() {
       expect(find.text('Portions Count'), findsOneWidget);
       expect(find.text('Portion Unit Name'), findsOneWidget);
       expect(find.text('Total Recipe Macros'), findsOneWidget);
-      expect(find.text('Macros per portion'), findsOneWidget);
+      expect(find.text('Macros per serving'), findsOneWidget);
       expect(find.text('Categories'), findsOneWidget);
 
       // Enter portion unit name
+      // Enter portion unit name
+      // Open dropdown
+      await tester.tap(find.text('serving')); // Initial value
+      await tester.pumpAndSettle();
+      
+      // Select Custom...
+      await tester.tap(find.text('Custom...'));
+      await tester.pumpAndSettle();
+
+      // Now enter text in the custom field
       await tester.enterText(
-        find.widgetWithText(TextField, 'Portion Unit Name'),
+        find.widgetWithText(TextFormField, 'Portion Unit Name'),
         'Muffin',
       );
+      
+      // Verify provider updated
       expect(provider.portionName, 'Muffin');
 
       await tester.pump();

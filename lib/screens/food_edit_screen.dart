@@ -1194,67 +1194,75 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
 
     await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(serving == null ? 'Add Serving' : 'Edit Serving'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-              controller: nameCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Unit Name (e.g. cup, slice)',
-              ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            title: Text(serving == null ? 'Add Serving' : 'Edit Serving'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                UnitSelectField(
+                  label: 'Unit Name (e.g. cup, slice)',
+                  value: nameCtrl.text,
+                  availableUnits: _availableUnits,
+                  onChanged: (val) {
+                    setDialogState(() {
+                      nameCtrl.text = val;
+                    });
+                  },
+                ),
+                TextFormField(
+                  controller: quantityCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Quantity (e.g. 1.0)',
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                ),
+                TextFormField(
+                  controller: gramsCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Weight for Quantity (g)',
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                ),
+              ],
             ),
-            TextFormField(
-              controller: quantityCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Quantity (e.g. 1.0)',
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
               ),
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-            ),
-            TextFormField(
-              controller: gramsCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Weight for Quantity (g)',
-              ),
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              final name = nameCtrl.text.trim();
-              final grams = double.tryParse(gramsCtrl.text) ?? 0.0;
-              final qty = double.tryParse(quantityCtrl.text) ?? 1.0;
-              if (name.isNotEmpty && grams > 0) {
-                setState(() {
-                  final newServing = FoodServing(
-                    foodId: widget.originalFood?.id ?? 0,
-                    unit: name,
-                    grams: grams,
-                    quantity: qty,
-                  );
-                  if (index != null) {
-                    _servings[index] = newServing;
-                  } else {
-                    _servings.add(newServing);
+              TextButton(
+                onPressed: () {
+                  final name = nameCtrl.text.trim();
+                  final grams = double.tryParse(gramsCtrl.text) ?? 0.0;
+                  final qty = double.tryParse(quantityCtrl.text) ?? 1.0;
+                  if (name.isNotEmpty && grams > 0) {
+                    setState(() {
+                      final newServing = FoodServing(
+                        foodId: widget.originalFood?.id ?? 0,
+                        unit: name,
+                        grams: grams,
+                        quantity: qty,
+                      );
+                      if (index != null) {
+                        _servings[index] = newServing;
+                      } else {
+                        _servings.add(newServing);
+                      }
+                    });
+                    Navigator.pop(context);
                   }
-                });
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Save'),
-          ),
-        ],
+                },
+                child: const Text('Save'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

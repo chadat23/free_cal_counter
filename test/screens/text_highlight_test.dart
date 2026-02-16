@@ -21,14 +21,17 @@ import 'package:meal_of_record/services/reference_database.dart' as ref_db;
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 
+import 'package:meal_of_record/providers/navigation_provider.dart';
+
 import 'text_highlight_test.mocks.dart';
 
-@GenerateMocks([LogProvider, RecipeProvider, GoalsProvider, WeightProvider])
+@GenerateMocks([LogProvider, RecipeProvider, GoalsProvider, WeightProvider, NavigationProvider])
 void main() {
   late MockLogProvider mockLogProvider;
   late MockRecipeProvider mockRecipeProvider;
   late MockGoalsProvider mockGoalsProvider;
   late MockWeightProvider mockWeightProvider;
+  late MockNavigationProvider mockNavigationProvider;
 
   setUpAll(() {
     final liveDb = live_db.LiveDatabase(connection: NativeDatabase.memory());
@@ -41,6 +44,9 @@ void main() {
     mockRecipeProvider = MockRecipeProvider();
     mockGoalsProvider = MockGoalsProvider();
     mockWeightProvider = MockWeightProvider();
+    mockNavigationProvider = MockNavigationProvider();
+
+    when(mockNavigationProvider.showConsumed).thenReturn(true);
 
     when(mockWeightProvider.getWeightForDate(any)).thenReturn(null);
     when(mockWeightProvider.loadWeights(any, any)).thenAnswer((_) async {});
@@ -80,6 +86,7 @@ void main() {
         ChangeNotifierProvider<RecipeProvider>.value(value: mockRecipeProvider),
         ChangeNotifierProvider<GoalsProvider>.value(value: mockGoalsProvider),
         ChangeNotifierProvider<WeightProvider>.value(value: mockWeightProvider),
+        ChangeNotifierProvider<NavigationProvider>.value(value: mockNavigationProvider),
       ],
       child: MaterialApp(home: Scaffold(body: child)),
     );

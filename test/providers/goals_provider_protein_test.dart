@@ -12,6 +12,7 @@ import 'goals_provider_test.mocks.dart';
 
 @GenerateMocks([DatabaseService])
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   late MockDatabaseService mockDatabaseService;
 
   setUp(() {

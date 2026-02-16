@@ -23,11 +23,11 @@ class NavigationContainerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final navigationProvider = Provider.of<NavigationProvider>(context);
     final selectedIndex = navigationProvider.selectedIndex;
+    final goalsProvider = Provider.of<GoalsProvider>(context);
 
     // Check for weekly target update notification or first-time setup
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!context.mounted) return;
-      final goalsProvider = Provider.of<GoalsProvider>(context, listen: false);
 
       if (!goalsProvider.isLoading) {
         if (!goalsProvider.hasSeenWelcome && !goalsProvider.isGoalsSet) {

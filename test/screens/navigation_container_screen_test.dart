@@ -173,12 +173,20 @@ void main() {
     expect(find.text('Data Management Screen'), findsOneWidget);
   });
 
-  testWidgets('does not show dialog when goals are set', (tester) async {
+  testWidgets('shows update dialog when showUpdateNotification is true', (tester) async {
     when(mockGoalsProvider.isGoalsSet).thenReturn(true);
+    when(mockGoalsProvider.showUpdateNotification).thenReturn(true);
 
     await tester.pumpWidget(createWidget());
     await tester.pumpAndSettle();
 
-    expect(find.text('Welcome!'), findsNothing);
+    expect(find.text('Weekly Goal Update'), findsOneWidget);
+    expect(find.text('Got it'), findsOneWidget);
+
+    await tester.tap(find.text('Got it'));
+    await tester.pumpAndSettle();
+
+    verify(mockGoalsProvider.dismissNotification()).called(1);
+    expect(find.text('Weekly Goal Update'), findsNothing);
   });
 }

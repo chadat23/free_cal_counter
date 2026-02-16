@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -13,16 +14,27 @@ import 'goals_provider_test.mocks.dart';
 
 @GenerateMocks([DatabaseService])
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   late MockDatabaseService mockDatabaseService;
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
     mockDatabaseService = MockDatabaseService();
+
+    // Default stubs for calls that happen during initialization
+    when(mockDatabaseService.getWeightsForRange(any, any))
+        .thenAnswer((_) async => []);
+    when(mockDatabaseService.getLoggedMacrosForDateRange(any, any))
+        .thenAnswer((_) async => []);
+    when(mockDatabaseService.getFoodsByIds(any, any))
+        .thenAnswer((_) async => {});
+    when(mockDatabaseService.getRecipesByIds(any))
+        .thenAnswer((_) async => {});
   });
 
   /// Helper: creates a GoalsProvider with a fixed clock and waits for init.
   Future<GoalsProvider> createProvider({
-    required DateTime now,
+    required DateTime Function() clock,
     GoalSettings? initialSettings,
   }) async {
     if (initialSettings != null) {
@@ -41,7 +53,7 @@ void main() {
 
     final provider = GoalsProvider(
       databaseService: mockDatabaseService,
-      clock: () => now,
+      clock: clock,
     );
     await Future.delayed(Duration.zero);
     return provider;
@@ -58,7 +70,7 @@ void main() {
 
   group('GoalsProvider basic', () {
     test('initial state should be loading then default settings', () async {
-      final provider = await createProvider(now: DateTime(2024, 1, 15));
+      final provider = await createProvider(clock: () => DateTime(2024, 1, 15));
       expect(provider.isLoading, false);
       expect(provider.settings.anchorWeight, 0.0);
       expect(provider.settings.isSet, false);
@@ -66,7 +78,7 @@ void main() {
 
     test('saveSettings should persist and mark as set', () async {
       final now = DateTime(2024, 1, 15); // Monday
-      final provider = await createProvider(now: now);
+      final provider = await createProvider(clock: () => now);
 
       final newSettings = GoalSettings(
         anchorWeight: 75.0,
@@ -119,7 +131,7 @@ void main() {
       );
 
       final provider =
-          await createProvider(now: now, initialSettings: settings);
+          await createProvider(clock: () => now, initialSettings: settings);
 
       // Cold boot fallback: manual maintenance = 2000
       expect(provider.currentGoals.calories, 2000.0);
@@ -150,7 +162,7 @@ void main() {
       );
 
       final provider =
-          await createProvider(now: now, initialSettings: settings);
+          await createProvider(clock: () => now, initialSettings: settings);
 
       // Cold boot: only 9 weights, needs 10. Falls back to manual.
       expect(provider.currentGoals.calories, 2200.0);
@@ -160,12 +172,13 @@ void main() {
   group('GoalsProvider warm start (Kalman)', () {
     /// Helper: sets up a provider with enough weight data for Kalman.
     Future<GoalsProvider> createWarmProvider({
-      required DateTime now,
+      required DateTime Function() clock,
       required GoalSettings settings,
       int weightCount = 14,
       double weightValue = 100.0,
       List<LoggedMacroDTO>? dtos,
     }) async {
+      final now = clock();
       final weights = buildRecentWeights(now, weightCount, weight: weightValue);
 
       when(mockDatabaseService.getWeightsForRange(any, any))
@@ -173,7 +186,7 @@ void main() {
       when(mockDatabaseService.getLoggedMacrosForDateRange(any, any))
           .thenAnswer((_) async => dtos ?? []);
 
-      return createProvider(now: now, initialSettings: settings);
+      return createProvider(clock: clock, initialSettings: settings);
     }
 
     GoalSettings baseSettings({
@@ -221,7 +234,7 @@ void main() {
       }
 
       final provider = await createWarmProvider(
-        now: now,
+        clock: () => now,
         settings: baseSettings(),
         weightCount: 14,
         weightValue: 100.0,
@@ -235,7 +248,7 @@ void main() {
     test('maintain mode: target = Kalman TDEE', () async {
       final now = DateTime(2024, 1, 15, 10);
       final provider = await createWarmProvider(
-        now: now,
+        clock: () => now,
         settings: baseSettings(mode: GoalMode.maintain),
       );
 
@@ -247,7 +260,7 @@ void main() {
     test('lose mode: target = Kalman TDEE - fixedDelta', () async {
       final now = DateTime(2024, 1, 15, 10);
       final provider = await createWarmProvider(
-        now: now,
+        clock: () => now,
         settings: baseSettings(mode: GoalMode.lose, fixedDelta: 500),
       );
 
@@ -258,7 +271,7 @@ void main() {
     test('gain mode: target = Kalman TDEE + fixedDelta', () async {
       final now = DateTime(2024, 1, 15, 10);
       final provider = await createWarmProvider(
-        now: now,
+        clock: () => now,
         settings: baseSettings(mode: GoalMode.gain, fixedDelta: 500),
       );
 
@@ -269,7 +282,7 @@ void main() {
     test('updates maintenanceCaloriesStart with Kalman result', () async {
       final now = DateTime(2024, 1, 15, 10);
       final provider = await createWarmProvider(
-        now: now,
+        clock: () => now,
         settings: baseSettings(maintenance: 1800),
       );
 
@@ -308,7 +321,7 @@ void main() {
       );
 
       final provider =
-          await createProvider(now: now, initialSettings: settings);
+          await createProvider(clock: () => now, initialSettings: settings);
 
       // Smart targets off: uses manual maintenance = 2000
       expect(provider.currentGoals.calories, 2000.0);
@@ -340,7 +353,7 @@ void main() {
       );
 
       final provider =
-          await createProvider(now: now, initialSettings: settings);
+          await createProvider(clock: () => now, initialSettings: settings);
 
       // Should have triggered recalc and notification
       expect(provider.showUpdateNotification, isTrue);
@@ -369,7 +382,7 @@ void main() {
       );
 
       final provider =
-          await createProvider(now: now, initialSettings: settings);
+          await createProvider(clock: () => now, initialSettings: settings);
 
       // lastUpdate is today, no recalc needed
       expect(provider.showUpdateNotification, isFalse);
@@ -400,7 +413,7 @@ void main() {
       );
 
       final provider =
-          await createProvider(now: now, initialSettings: settings);
+          await createProvider(clock: () => now, initialSettings: settings);
 
       // Tuesday, but lastUpdate is before last Monday -> triggers recalc
       expect(provider.showUpdateNotification, isTrue);
@@ -430,7 +443,7 @@ void main() {
       );
 
       final provider =
-          await createProvider(now: now, initialSettings: settings);
+          await createProvider(clock: () => now, initialSettings: settings);
 
       // lastUpdate (Tue Jan 16) is after lastMonday (Mon Jan 15) -> no recalc
       expect(provider.showUpdateNotification, isFalse);
@@ -481,7 +494,7 @@ void main() {
       );
 
       final provider =
-          await createProvider(now: now, initialSettings: settings);
+          await createProvider(clock: () => now, initialSettings: settings);
 
       // Should complete without error; fasted day is valid intake
       expect(provider.currentGoals.calories, isNotNull);
@@ -544,7 +557,7 @@ void main() {
       );
 
       final provider =
-          await createProvider(now: now, initialSettings: settings);
+          await createProvider(clock: () => now, initialSettings: settings);
 
       // Today's 300 cal partial log should NOT distort TDEE.
       // With stable weight + 2000 cal intake through yesterday, TDEE ~ 2000.
@@ -581,10 +594,57 @@ void main() {
       );
 
       final provider =
-          await createProvider(now: now, initialSettings: settings);
+          await createProvider(clock: () => now, initialSettings: settings);
 
       // All intake excluded -> TDEE stays near initial 2000
       expect(provider.currentGoals.calories, closeTo(2000.0, 100.0));
+    });
+  });
+
+  group('GoalsProvider Lifecycle and Timezone', () {
+    test('AppLifecycleState.resumed triggers checkWeeklyUpdate', () async {
+      var now = DateTime(2024, 1, 15, 10); // Monday
+      
+      final settings = GoalSettings.defaultSettings().copyWith(
+        isSet: true,
+        lastTargetUpdate: DateTime(2024, 1, 15),
+      );
+      
+      // Use the helper which already stubs everything
+      final provider = await createProvider(clock: () => now, initialSettings: settings);
+      
+      // Wait for any initial background tasks to settle
+      await Future.delayed(const Duration(milliseconds: 100));
+      expect(provider.isLoading, isFalse);
+      expect(provider.showUpdateNotification, isFalse);
+      
+      // Simulate time jumping to next Monday
+      now = DateTime(2024, 1, 22, 10);
+      
+      // Now simulate resume
+      provider.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      
+      // Wait for the async checkWeeklyUpdate to finish
+      // Since it's triggered by an observer, we wait a bit
+      await Future.delayed(const Duration(milliseconds: 100));
+      
+      expect(provider.showUpdateNotification, isTrue);
+    });
+
+    test('recalculateTargets unifies lastTargetUpdate to current time', () async {
+      final monday = DateTime(2024, 1, 15, 10);
+      final provider = await createProvider(clock: () => monday);
+      
+      final settings = GoalSettings.defaultSettings().copyWith(
+        mode: GoalMode.lose,
+        fixedDelta: 500,
+        enableSmartTargets: false, // Manual mode
+      );
+      
+      await provider.saveSettings(settings);
+      
+      // In old code, this would have been next Monday. In new code, it's today.
+      expect(provider.settings.lastTargetUpdate, monday);
     });
   });
 
@@ -650,7 +710,7 @@ void main() {
       );
 
       final provider =
-          await createProvider(now: now, initialSettings: settings);
+          await createProvider(clock: () => now, initialSettings: settings);
 
       // TDEE should be clamped to max 6000
       expect(provider.settings.maintenanceCaloriesStart, lessThanOrEqualTo(6000.0));
@@ -663,7 +723,7 @@ void main() {
     test('initial hasSeenWelcome should be false', () async {
       SharedPreferences.setMockInitialValues({});
       final provider = GoalsProvider(
-        databaseService: MockDatabaseService(),
+        databaseService: mockDatabaseService,
         clock: () => DateTime(2024, 1, 15),
       );
       await Future.delayed(Duration.zero);
@@ -673,7 +733,7 @@ void main() {
     test('markWelcomeSeen should persist to SharedPreferences', () async {
       SharedPreferences.setMockInitialValues({});
       final provider = GoalsProvider(
-        databaseService: MockDatabaseService(),
+        databaseService: mockDatabaseService,
         clock: () => DateTime(2024, 1, 15),
       );
       await Future.delayed(Duration.zero);
@@ -693,7 +753,7 @@ void main() {
       });
 
       final provider = GoalsProvider(
-        databaseService: MockDatabaseService(),
+        databaseService: mockDatabaseService,
         clock: () => DateTime(2024, 1, 15),
       );
       await Future.delayed(Duration.zero);

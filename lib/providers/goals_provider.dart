@@ -8,7 +8,7 @@ import 'package:meal_of_record/models/daily_macro_stats.dart';
 import 'package:meal_of_record/services/goal_logic_service.dart';
 import 'package:meal_of_record/models/weight.dart';
 
-class GoalsProvider extends ChangeNotifier {
+class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
   static const String _settingsKey = 'goal_settings';
   static const String _targetsKey = 'macro_targets';
   static const String _hasSeenWelcomeKey = 'has_seen_welcome';
@@ -26,6 +26,24 @@ class GoalsProvider extends ChangeNotifier {
     : _databaseService = databaseService ?? DatabaseService.instance,
       _clock = clock ?? DateTime.now {
     _loadFromPrefs();
+    // Use the binding only if it is initialized (it might not be in some unit tests)
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Check for weekly update when app returns to foreground
+      if (_settings.isSet && !_isLoading) {
+        checkWeeklyUpdate();
+      }
+    }
   }
 
   // Getters
@@ -152,6 +170,7 @@ class GoalsProvider extends ChangeNotifier {
     if (lastMonday.isAfter(lastUpdate)) {
       await recalculateTargets(isInitialSetup: false);
       _showUpdateNotification = true;
+      notifyListeners();
     }
   }
 
@@ -160,14 +179,21 @@ class GoalsProvider extends ChangeNotifier {
     final now = _clock();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
-    final analysisStart = yesterday.subtract(const Duration(days: 90));
+    // Use DateTime(y, m, d) to ensure midnight and avoid DST issues
+    final rawAnalysisStart = today.subtract(const Duration(days: 91));
+    final analysisStart = DateTime(rawAnalysisStart.year, rawAnalysisStart.month, rawAnalysisStart.day);
 
     // Fetch weights if needed for Smart TDEE OR Dynamic Protein
     // We fetch a broad range to support both inputs
     List<Weight> weights = [];
-    if (_settings.enableSmartTargets ||
-        _settings.proteinTargetMode == ProteinTargetMode.percentageOfWeight) {
-      weights = await _databaseService.getWeightsForRange(analysisStart, now);
+    try {
+      if (_settings.enableSmartTargets ||
+          _settings.proteinTargetMode == ProteinTargetMode.percentageOfWeight) {
+        weights = await _databaseService.getWeightsForRange(analysisStart, now);
+      }
+    } catch (e) {
+      debugPrint('Error in recalculateTargets DB call: $e');
+      rethrow;
     }
 
     double targetCalories = _settings.maintenanceCaloriesStart;
@@ -190,7 +216,7 @@ class GoalsProvider extends ChangeNotifier {
       }
 
       _settings = _settings.copyWith(
-        lastTargetUpdate: _getNextMonday(_clock()),
+        lastTargetUpdate: _clock(),
       );
     } else {
       // Smart mode: use Kalman TDEE

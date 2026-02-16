@@ -4,6 +4,7 @@ import 'package:meal_of_record/models/quantity_edit_config.dart';
 import 'package:meal_of_record/providers/log_provider.dart';
 import 'package:meal_of_record/providers/recipe_provider.dart';
 import 'package:meal_of_record/providers/goals_provider.dart';
+import 'package:meal_of_record/providers/navigation_provider.dart';
 import 'package:meal_of_record/utils/math_evaluator.dart';
 import 'package:meal_of_record/utils/quantity_edit_utils.dart';
 import 'package:meal_of_record/widgets/horizontal_mini_bar_chart.dart';
@@ -193,9 +194,11 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
     final currentGrams = _calculateCurrentGrams();
     final food = _food;
 
-    return Consumer3<LogProvider, RecipeProvider, GoalsProvider>(
-      builder: (context, logProvider, recipeProvider, goalsProvider, _) {
+    return Consumer4<LogProvider, RecipeProvider, GoalsProvider, NavigationProvider>(
+      builder: (context, logProvider, recipeProvider, goalsProvider, navProvider, _) {
         final isRecipe = widget.config.context == QuantityEditContext.recipe;
+        final showConsumed = navProvider.showConsumed;
+
         final servings =
             (isRecipe &&
                 widget.config.recipeServings != null &&
@@ -233,18 +236,33 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
           divisor: divisor,
         );
 
+        final dailyGoals = _getGoals(goalsProvider);
+        Map<String, double> portionTargets = dailyGoals;
+
+        if (!showConsumed && !isRecipe) {
+          portionTargets = {
+            'Calories': (dailyGoals['Calories']! - logProvider.loggedCalories).clamp(0, double.infinity),
+            'Protein': (dailyGoals['Protein']! - logProvider.loggedProtein).clamp(0, double.infinity),
+            'Fat': (dailyGoals['Fat']! - logProvider.loggedFat).clamp(0, double.infinity),
+            'Carbs': (dailyGoals['Carbs']! - logProvider.loggedCarbs).clamp(0, double.infinity),
+            'Fiber': (dailyGoals['Fiber']! - logProvider.loggedFiber).clamp(0, double.infinity),
+          };
+        }
+
         return Column(
           children: [
             _buildChartSection(
               isRecipe ? "Recipe's Macros" : "Day's Macros",
               parentValues,
-              isRecipe ? null : _getGoals(goalsProvider),
+              isRecipe ? null : dailyGoals,
+              showConsumed,
             ),
             const SizedBox(height: 12),
             _buildChartSection(
               isRecipe ? "Ingredient's Macros" : "Portion's Macros",
               itemValues,
-              isRecipe ? null : _getGoals(goalsProvider),
+              isRecipe ? null : portionTargets,
+              showConsumed,
             ),
           ],
         );
@@ -448,6 +466,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
     String title,
     Map<String, double> values,
     Map<String, double>? targets,
+    bool notInverted,
   ) {
     return Card(
       child: Padding(
@@ -464,6 +483,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
                     values['Calories']!,
                     targets?['Calories'] ?? 0,
                     Colors.orange,
+                    notInverted,
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -473,6 +493,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
                     values['Protein']!,
                     targets?['Protein'] ?? 0,
                     Colors.red,
+                    notInverted,
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -482,6 +503,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
                     values['Fat']!,
                     targets?['Fat'] ?? 0,
                     Colors.yellow,
+                    notInverted,
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -491,6 +513,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
                     values['Carbs']!,
                     targets?['Carbs'] ?? 0,
                     Colors.green,
+                    notInverted,
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -500,6 +523,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
                     values['Fiber']!,
                     targets?['Fiber'] ?? 0,
                     Colors.brown,
+                    notInverted,
                   ),
                 ),
               ],
@@ -510,7 +534,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
     );
   }
 
-  Widget _buildMiniBar(String label, double value, double target, Color color) {
+  Widget _buildMiniBar(String label, double value, double target, Color color, bool notInverted) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.0),
       child: HorizontalMiniBarChart(
@@ -518,6 +542,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
         target: target,
         color: color,
         macroLabel: label,
+        notInverted: notInverted,
       ),
     );
   }

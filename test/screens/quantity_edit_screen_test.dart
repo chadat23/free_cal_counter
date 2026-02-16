@@ -7,6 +7,7 @@ import 'package:meal_of_record/models/quantity_edit_config.dart';
 import 'package:meal_of_record/providers/log_provider.dart';
 import 'package:meal_of_record/providers/recipe_provider.dart';
 import 'package:meal_of_record/providers/goals_provider.dart';
+import 'package:meal_of_record/providers/navigation_provider.dart';
 import 'package:meal_of_record/models/macro_goals.dart';
 import 'package:meal_of_record/screens/quantity_edit_screen.dart';
 import 'package:mockito/annotations.dart';
@@ -15,11 +16,12 @@ import 'package:provider/provider.dart';
 
 import 'quantity_edit_screen_test.mocks.dart';
 
-@GenerateMocks([LogProvider, RecipeProvider, GoalsProvider])
+@GenerateMocks([LogProvider, RecipeProvider, GoalsProvider, NavigationProvider])
 void main() {
   late MockLogProvider mockLogProvider;
   late MockRecipeProvider mockRecipeProvider;
   late MockGoalsProvider mockGoalsProvider;
+  late MockNavigationProvider mockNavigationProvider;
 
   final mockFood = Food(
     id: 1,
@@ -40,6 +42,7 @@ void main() {
     mockLogProvider = MockLogProvider();
     mockRecipeProvider = MockRecipeProvider();
     mockGoalsProvider = MockGoalsProvider();
+    mockNavigationProvider = MockNavigationProvider();
 
     // Default mock behavior for LogProvider
     when(mockLogProvider.totalCalories).thenReturn(500.0);
@@ -63,6 +66,9 @@ void main() {
 
     // Default mock behavior for GoalsProvider
     when(mockGoalsProvider.currentGoals).thenReturn(MacroGoals.hardcoded());
+
+    // Default mock behavior for NavigationProvider
+    when(mockNavigationProvider.showConsumed).thenReturn(true);
   });
 
   Widget createTestWidget(QuantityEditConfig config) {
@@ -71,6 +77,7 @@ void main() {
         ChangeNotifierProvider<LogProvider>.value(value: mockLogProvider),
         ChangeNotifierProvider<RecipeProvider>.value(value: mockRecipeProvider),
         ChangeNotifierProvider<GoalsProvider>.value(value: mockGoalsProvider),
+        ChangeNotifierProvider<NavigationProvider>.value(value: mockNavigationProvider),
       ],
       child: MaterialApp(home: QuantityEditScreen(config: config)),
     );
@@ -228,6 +235,7 @@ void main() {
           ChangeNotifierProvider<LogProvider>.value(value: mockLogProvider),
           ChangeNotifierProvider<RecipeProvider>.value(value: mockRecipeProvider),
           ChangeNotifierProvider<GoalsProvider>.value(value: mockGoalsProvider),
+          ChangeNotifierProvider<NavigationProvider>.value(value: mockNavigationProvider),
         ],
         child: MaterialApp(
           home: Builder(

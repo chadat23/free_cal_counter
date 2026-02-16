@@ -41,6 +41,24 @@ class LogQueueTopRibbon extends StatelessWidget {
       );
     }
 
+    final navProvider = Provider.of<NavigationProvider>(context);
+    final showConsumed = navProvider.showConsumed;
+
+    // Calculate targets based on toggle
+    double targetCal = goals.calories;
+    double targetProt = goals.protein;
+    double targetFat = goals.fat;
+    double targetCarb = goals.carbs;
+    double targetFib = goals.fiber;
+
+    if (!showConsumed) {
+      targetCal = (goals.calories - logProvider.loggedCalories).clamp(0, double.infinity);
+      targetProt = (goals.protein - logProvider.loggedProtein).clamp(0, double.infinity);
+      targetFat = (goals.fat - logProvider.loggedFat).clamp(0, double.infinity);
+      targetCarb = (goals.carbs - logProvider.loggedCarbs).clamp(0, double.infinity);
+      targetFib = (goals.fiber - logProvider.loggedFiber).clamp(0, double.infinity);
+    }
+
     final projectedTargets = [
       createTarget(
         '🔥',
@@ -58,31 +76,31 @@ class LogQueueTopRibbon extends StatelessWidget {
       createTarget(
         '🔥',
         logProvider.queuedCalories,
-        goals.calories,
+        targetCal,
         Colors.blue.withValues(alpha: 0.7),
       ),
       createTarget(
         'P',
         logProvider.queuedProtein,
-        goals.protein,
+        targetProt,
         Colors.red.withValues(alpha: 0.7),
       ),
       createTarget(
         'F',
         logProvider.queuedFat,
-        goals.fat,
+        targetFat,
         Colors.orange.withValues(alpha: 0.7),
       ),
       createTarget(
         'C',
         logProvider.queuedCarbs,
-        goals.carbs,
+        targetCarb,
         Colors.green.withValues(alpha: 0.7),
       ),
       createTarget(
         'Fb',
         logProvider.queuedFiber,
-        goals.fiber,
+        targetFib,
         Colors.brown.withValues(alpha: 0.7),
       ),
     ];

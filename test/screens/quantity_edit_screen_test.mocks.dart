@@ -6,6 +6,8 @@
 import 'dart:async' as _i9;
 import 'dart:ui' as _i11;
 
+import 'package:flutter/material.dart' as _i18;
+import 'package:flutter/services.dart' as _i17;
 import 'package:meal_of_record/models/category.dart' as _i15;
 import 'package:meal_of_record/models/daily_macro_stats.dart' as _i2;
 import 'package:meal_of_record/models/food.dart' as _i10;
@@ -17,6 +19,7 @@ import 'package:meal_of_record/models/recipe.dart' as _i8;
 import 'package:meal_of_record/models/recipe_item.dart' as _i14;
 import 'package:meal_of_record/providers/goals_provider.dart' as _i16;
 import 'package:meal_of_record/providers/log_provider.dart' as _i5;
+import 'package:meal_of_record/providers/navigation_provider.dart' as _i19;
 import 'package:meal_of_record/providers/recipe_provider.dart' as _i12;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i13;
@@ -63,6 +66,26 @@ class MockLogProvider extends _i1.Mock implements _i5.LogProvider {
   @override
   double get loggedCalories =>
       (super.noSuchMethod(Invocation.getter(#loggedCalories), returnValue: 0.0)
+          as double);
+
+  @override
+  double get loggedProtein =>
+      (super.noSuchMethod(Invocation.getter(#loggedProtein), returnValue: 0.0)
+          as double);
+
+  @override
+  double get loggedFat =>
+      (super.noSuchMethod(Invocation.getter(#loggedFat), returnValue: 0.0)
+          as double);
+
+  @override
+  double get loggedCarbs =>
+      (super.noSuchMethod(Invocation.getter(#loggedCarbs), returnValue: 0.0)
+          as double);
+
+  @override
+  double get loggedFiber =>
+      (super.noSuchMethod(Invocation.getter(#loggedFiber), returnValue: 0.0)
           as double);
 
   @override
@@ -765,6 +788,19 @@ class MockGoalsProvider extends _i1.Mock implements _i16.GoalsProvider {
           as bool);
 
   @override
+  void dispose() => super.noSuchMethod(
+    Invocation.method(#dispose, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void didChangeAppLifecycleState(_i11.AppLifecycleState? state) =>
+      super.noSuchMethod(
+        Invocation.method(#didChangeAppLifecycleState, [state]),
+        returnValueForMissingStub: null,
+      );
+
+  @override
   void dismissNotification() => super.noSuchMethod(
     Invocation.method(#dismissNotification, []),
     returnValueForMissingStub: null,
@@ -823,6 +859,198 @@ class MockGoalsProvider extends _i1.Mock implements _i16.GoalsProvider {
             returnValueForMissingStub: _i9.Future<void>.value(),
           )
           as _i9.Future<void>);
+
+  @override
+  void addListener(_i11.VoidCallback? listener) => super.noSuchMethod(
+    Invocation.method(#addListener, [listener]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void removeListener(_i11.VoidCallback? listener) => super.noSuchMethod(
+    Invocation.method(#removeListener, [listener]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void notifyListeners() => super.noSuchMethod(
+    Invocation.method(#notifyListeners, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i9.Future<bool> didPopRoute() =>
+      (super.noSuchMethod(
+            Invocation.method(#didPopRoute, []),
+            returnValue: _i9.Future<bool>.value(false),
+          )
+          as _i9.Future<bool>);
+
+  @override
+  bool handleStartBackGesture(_i17.PredictiveBackEvent? backEvent) =>
+      (super.noSuchMethod(
+            Invocation.method(#handleStartBackGesture, [backEvent]),
+            returnValue: false,
+          )
+          as bool);
+
+  @override
+  void handleUpdateBackGestureProgress(_i17.PredictiveBackEvent? backEvent) =>
+      super.noSuchMethod(
+        Invocation.method(#handleUpdateBackGestureProgress, [backEvent]),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void handleCommitBackGesture() => super.noSuchMethod(
+    Invocation.method(#handleCommitBackGesture, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void handleCancelBackGesture() => super.noSuchMethod(
+    Invocation.method(#handleCancelBackGesture, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i9.Future<bool> didPushRoute(String? route) =>
+      (super.noSuchMethod(
+            Invocation.method(#didPushRoute, [route]),
+            returnValue: _i9.Future<bool>.value(false),
+          )
+          as _i9.Future<bool>);
+
+  @override
+  _i9.Future<bool> didPushRouteInformation(
+    _i18.RouteInformation? routeInformation,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#didPushRouteInformation, [routeInformation]),
+            returnValue: _i9.Future<bool>.value(false),
+          )
+          as _i9.Future<bool>);
+
+  @override
+  void didChangeMetrics() => super.noSuchMethod(
+    Invocation.method(#didChangeMetrics, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void didChangeTextScaleFactor() => super.noSuchMethod(
+    Invocation.method(#didChangeTextScaleFactor, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void didChangePlatformBrightness() => super.noSuchMethod(
+    Invocation.method(#didChangePlatformBrightness, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void didChangeLocales(List<_i11.Locale>? locales) => super.noSuchMethod(
+    Invocation.method(#didChangeLocales, [locales]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void didChangeViewFocus(_i11.ViewFocusEvent? event) => super.noSuchMethod(
+    Invocation.method(#didChangeViewFocus, [event]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i9.Future<_i11.AppExitResponse> didRequestAppExit() =>
+      (super.noSuchMethod(
+            Invocation.method(#didRequestAppExit, []),
+            returnValue: _i9.Future<_i11.AppExitResponse>.value(
+              _i11.AppExitResponse.exit,
+            ),
+          )
+          as _i9.Future<_i11.AppExitResponse>);
+
+  @override
+  void didHaveMemoryPressure() => super.noSuchMethod(
+    Invocation.method(#didHaveMemoryPressure, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void didChangeAccessibilityFeatures() => super.noSuchMethod(
+    Invocation.method(#didChangeAccessibilityFeatures, []),
+    returnValueForMissingStub: null,
+  );
+}
+
+/// A class which mocks [NavigationProvider].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockNavigationProvider extends _i1.Mock
+    implements _i19.NavigationProvider {
+  MockNavigationProvider() {
+    _i1.throwOnMissingStub(this);
+  }
+
+  @override
+  int get selectedIndex =>
+      (super.noSuchMethod(Invocation.getter(#selectedIndex), returnValue: 0)
+          as int);
+
+  @override
+  bool get shouldFocusSearch =>
+      (super.noSuchMethod(
+            Invocation.getter(#shouldFocusSearch),
+            returnValue: false,
+          )
+          as bool);
+
+  @override
+  bool get showConsumed =>
+      (super.noSuchMethod(Invocation.getter(#showConsumed), returnValue: false)
+          as bool);
+
+  @override
+  bool get hasListeners =>
+      (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
+          as bool);
+
+  @override
+  void setShowConsumed(bool? value) => super.noSuchMethod(
+    Invocation.method(#setShowConsumed, [value]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void changeTab(int? index) => super.noSuchMethod(
+    Invocation.method(#changeTab, [index]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void goToSearch() => super.noSuchMethod(
+    Invocation.method(#goToSearch, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void goToDataManagement() => super.noSuchMethod(
+    Invocation.method(#goToDataManagement, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void resetSearchFocus() => super.noSuchMethod(
+    Invocation.method(#resetSearchFocus, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void goBack() => super.noSuchMethod(
+    Invocation.method(#goBack, []),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void addListener(_i11.VoidCallback? listener) => super.noSuchMethod(

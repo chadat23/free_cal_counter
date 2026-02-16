@@ -49,6 +49,26 @@ class MockLogProvider extends _i1.Mock implements _i3.LogProvider {
           as double);
 
   @override
+  double get loggedProtein =>
+      (super.noSuchMethod(Invocation.getter(#loggedProtein), returnValue: 0.0)
+          as double);
+
+  @override
+  double get loggedFat =>
+      (super.noSuchMethod(Invocation.getter(#loggedFat), returnValue: 0.0)
+          as double);
+
+  @override
+  double get loggedCarbs =>
+      (super.noSuchMethod(Invocation.getter(#loggedCarbs), returnValue: 0.0)
+          as double);
+
+  @override
+  double get loggedFiber =>
+      (super.noSuchMethod(Invocation.getter(#loggedFiber), returnValue: 0.0)
+          as double);
+
+  @override
   double get queuedCalories =>
       (super.noSuchMethod(Invocation.getter(#queuedCalories), returnValue: 0.0)
           as double);

@@ -48,6 +48,11 @@ class LogProvider extends ChangeNotifier {
 
   // Getters
   double get loggedCalories => _loggedCalories;
+  double get loggedProtein => _loggedProtein;
+  double get loggedFat => _loggedFat;
+  double get loggedCarbs => _loggedCarbs;
+  double get loggedFiber => _loggedFiber;
+
   double get queuedCalories => _queuedCalories;
   double get queuedProtein => _queuedProtein;
   double get queuedFat => _queuedFat;

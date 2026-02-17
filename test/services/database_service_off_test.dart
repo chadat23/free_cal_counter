@@ -48,6 +48,7 @@ void main() {
         fat: 0.1,
         carbs: 0.1,
         fiber: 0.0,
+        database: model.FoodDatabase.off,
         servings: [
           const model_serving.FoodServing(
             foodId: 0,
@@ -68,6 +69,7 @@ void main() {
         fat: 0.2,
         carbs: 0.2,
         fiber: 0.0,
+        database: model.FoodDatabase.off,
         servings: [
           const model_serving.FoodServing(
             foodId: 0,
@@ -135,6 +137,7 @@ void main() {
         fat: 0.1,
         carbs: 0.1,
         fiber: 0.0,
+        database: model.FoodDatabase.off,
         servings: [
           const model_serving.FoodServing(
             foodId: 0,
@@ -156,6 +159,7 @@ void main() {
         fat: 0.1,
         carbs: 0.1,
         fiber: 0.0,
+        database: model.FoodDatabase.off,
         servings: [
           const model_serving.FoodServing(
             foodId: 0,

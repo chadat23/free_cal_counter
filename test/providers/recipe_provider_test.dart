@@ -48,6 +48,7 @@ void main() {
       fat: 0.1,
       carbs: 0.1,
       fiber: 0.0,
+      database: model.FoodDatabase.reference,
       servings: [
         model.FoodServing(foodId: id, unit: 'g', grams: 1.0, quantity: 1.0),
       ],

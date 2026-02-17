@@ -96,6 +96,7 @@ void main() {
     when(mockSearchProvider.searchMode).thenReturn(SearchMode.text);
     when(mockSearchProvider.isBarcodeSearch).thenReturn(false);
     when(mockSearchProvider.lastScannedBarcode).thenReturn(null);
+    when(mockSearchProvider.displayNotes).thenReturn({});
 
     when(mockNavigationProvider.shouldFocusSearch).thenReturn(false);
     when(mockNavigationProvider.showConsumed).thenReturn(true);

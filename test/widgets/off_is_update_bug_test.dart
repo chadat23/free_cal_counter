@@ -45,6 +45,7 @@ void main() {
     when(mockSearchProvider.searchMode).thenReturn(SearchMode.text);
     when(mockSearchProvider.isBarcodeSearch).thenReturn(false);
     when(mockSearchProvider.lastScannedBarcode).thenReturn(null);
+    when(mockSearchProvider.displayNotes).thenReturn({});
     when(mockNavigationProvider.showConsumed).thenReturn(true);
     when(mockGoalsProvider.currentGoals).thenReturn(MacroGoals.hardcoded());
   });

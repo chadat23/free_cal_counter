@@ -7,6 +7,7 @@ class UnitSelectField extends StatefulWidget {
   final String value;
   final List<String> availableUnits;
   final ValueChanged<String> onChanged;
+  final bool allowCustom;
 
   const UnitSelectField({
     super.key,
@@ -14,6 +15,7 @@ class UnitSelectField extends StatefulWidget {
     required this.value,
     required this.availableUnits,
     required this.onChanged,
+    this.allowCustom = true,
   });
 
   @override
@@ -138,10 +140,11 @@ class _UnitSelectFieldState extends State<UnitSelectField> {
                 child: Text(unit),
               ),
             ),
-            const DropdownMenuItem(
-              value: '_custom_',
-              child: Text('Custom...'),
-            ),
+            if (widget.allowCustom)
+              const DropdownMenuItem(
+                value: '_custom_',
+                child: Text('Custom...'),
+              ),
           ],
           onChanged: (val) {
             if (val == '_custom_') {

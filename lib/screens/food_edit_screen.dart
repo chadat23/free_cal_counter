@@ -300,6 +300,14 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
         _showValidationError('Please enter the serving weight in grams');
         return;
       }
+
+      // Validation: require a valid unit in per-serving mode
+      if (_primaryServingUnit.isEmpty) {
+        _showValidationError(
+          'Please select a serving unit or create a new serving using "Add Servings"',
+        );
+        return;
+      }
     }
 
     // Build primary serving from inline fields if in per-serving mode
@@ -812,10 +820,13 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
                   child: UnitSelectField(
                     label: 'Unit',
                     value: _primaryServingUnit,
-                    availableUnits: [
-                      ..._availableUnits,
-                      ..._servings.where((s) => s.unit != 'g').map((s) => s.unit),
-                    ],
+                    availableUnits: widget.originalFood == null
+                        ? _availableUnits // New food: show all database units
+                        : _servings
+                            //.where((s) => s.unit != 'g')
+                            .map((s) => s.unit)
+                            .toList(), // Existing food: only this food's serving units
+                    allowCustom: widget.originalFood == null, // Only allow custom for new foods
                     onChanged: (val) {
                       setState(() {
                         _primaryServingUnit = val;

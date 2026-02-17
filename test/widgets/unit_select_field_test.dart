@@ -222,5 +222,75 @@ void main() {
       // If it fails (finds DropdownButton), the bug is confirmed.
       expect(find.byType(TextFormField), findsOneWidget, reason: 'Should remain text field to allow further typing');
     });
+
+    testWidgets('shows Custom option when allowCustom is true', (tester) async {
+      String currentValue = 'cup';
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                return UnitSelectField(
+                  label: 'Unit',
+                  value: currentValue,
+                  availableUnits: const ['cup', 'oz'],
+                  allowCustom: true,
+                  onChanged: (val) {
+                    setState(() {
+                      currentValue = val;
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Open dropdown
+      await tester.tap(find.byType(DropdownButton<String>));
+      await tester.pumpAndSettle();
+
+      // Should show Custom... option
+      expect(find.text('Custom...'), findsOneWidget);
+    });
+
+    testWidgets('hides Custom option when allowCustom is false', (tester) async {
+      String currentValue = 'cup';
+      
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                return UnitSelectField(
+                  label: 'Unit',
+                  value: currentValue,
+                  availableUnits: const ['cup', 'oz'],
+                  allowCustom: false,
+                  onChanged: (val) {
+                    setState(() {
+                      currentValue = val;
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Open dropdown
+      await tester.tap(find.byType(DropdownButton<String>));
+      await tester.pumpAndSettle();
+
+      // Should NOT show Custom... option
+      expect(find.text('Custom...'), findsNothing);
+      
+      // Should still show the available units
+      expect(find.text('cup'), findsWidgets);
+      expect(find.text('oz'), findsOneWidget);
+    });
   });
 }

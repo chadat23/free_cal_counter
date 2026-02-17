@@ -46,7 +46,7 @@ void main() {
       ];
       when(
         mockSearchService.searchLocal('apple'),
-      ).thenAnswer((_) async => mockFoods);
+      ).thenAnswer((_) async => SearchResults(foods: mockFoods, displayNotes: {}));
 
       // Act
       await searchProvider.textSearch('apple');
@@ -77,7 +77,7 @@ void main() {
 
         when(
           mockSearchService.getAllRecipesAsFoods(),
-        ).thenAnswer((_) async => mockRecipes);
+        ).thenAnswer((_) async => SearchResults(foods: mockRecipes, displayNotes: {}));
 
         searchProvider.setSearchMode(SearchMode.recipe);
 
@@ -114,7 +114,7 @@ void main() {
             'Lasagna',
             categoryId: anyNamed('categoryId'),
           ),
-        ).thenAnswer((_) async => mockRecipes);
+        ).thenAnswer((_) async => SearchResults(foods: mockRecipes, displayNotes: {}));
 
         searchProvider.setSearchMode(SearchMode.recipe);
 
@@ -186,13 +186,13 @@ void main() {
           ),
         ];
         // First, perform a text search to set the current query
-        when(mockSearchService.searchLocal(query)).thenAnswer((_) async => []);
+        when(mockSearchService.searchLocal(query)).thenAnswer((_) async => const SearchResults(foods: [], displayNotes: {}));
         await searchProvider.textSearch(query);
 
         // Now, stub the OFF search
         when(
           mockSearchService.searchOff(query),
-        ).thenAnswer((_) async => mockOffFoods);
+        ).thenAnswer((_) async => SearchResults(foods: mockOffFoods, displayNotes: {}));
 
         // Act
         await searchProvider.performOffSearch();
@@ -207,7 +207,7 @@ void main() {
       // Arrange
       const query = 'error_query';
       // Set the current query
-      when(mockSearchService.searchLocal(query)).thenAnswer((_) async => []);
+      when(mockSearchService.searchLocal(query)).thenAnswer((_) async => const SearchResults(foods: [], displayNotes: {}));
       await searchProvider.textSearch(query);
 
       // Stub the OFF search to throw an error

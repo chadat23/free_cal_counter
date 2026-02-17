@@ -82,7 +82,7 @@ class _TextSearchViewState extends State<TextSearchView> {
               key: ValueKey('${food.id}_${food.source}'),
               food: food,
               isUpdate: isUpdate,
-              note: food.usageNote,
+              note: searchProvider.displayNotes[food.id],
               onAdd: (selectedUnit) async {
                 if (isUpdate && config.onSaveOverride == null) {
                   // If already in queue and no override, edit existing
@@ -294,7 +294,6 @@ class _TextSearchViewState extends State<TextSearchView> {
                 try {
                   await DatabaseService.instance.deleteFood(
                     food.id,
-                    food.source,
                   );
 
                   // Refresh search results

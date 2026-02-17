@@ -5,6 +5,15 @@ import 'package:meal_of_record/services/database_service.dart';
 import 'package:meal_of_record/services/open_food_facts_service.dart';
 import 'package:meal_of_record/services/food_sorting_service.dart';
 
+/// Holds search results with a separate display notes map,
+/// so user-entered usageNotes are never overwritten.
+class SearchResults {
+  final List<model.Food> foods;
+  final Map<int, String?> displayNotes; // "Logged", "In Recipe", etc.
+
+  const SearchResults({required this.foods, required this.displayNotes});
+}
+
 class SearchService {
   final DatabaseService databaseService;
   final OffApiService offApiService;
@@ -64,12 +73,12 @@ class SearchService {
     return sortedFoods.take(50).toList();
   }
 
-  Future<List<model.Food>> searchLocal(String query, {int? categoryId}) async {
+  Future<SearchResults> searchLocal(String query, {int? categoryId}) async {
     if (query.isEmpty) {
       if (categoryId != null) {
         return searchRecipesOnly(query, categoryId: categoryId);
       }
-      return [];
+      return const SearchResults(foods: [], displayNotes: {});
     }
 
     // 1. Query live and reference databases separately
@@ -100,32 +109,31 @@ class SearchService {
     );
 
     // 6. Combine results: strictly Live first, then Reference
-    // Recipes are excluded from general search per requirements
     final combinedResults = [...sortedLiveFoods, ...sortedReferenceFoods];
 
     // 7. Limit to a reasonable number to avoid UI lag
     final limitedResults = combinedResults.take(50).toList();
 
-    // 8. Add usage notes and emojis
+    // 8. Get usage notes separately (not written to food.usageNote)
     final usageNotes = await databaseService.getFoodsUsageNotes(limitedResults);
 
+    // 9. Apply emojis only (no usageNote overwrite)
     final resultsWithEmoji = limitedResults
         .map(
           (food) => food.copyWith(
             emoji: (food.emoji == null || food.emoji == '🍴' || food.emoji == '')
                 ? emojiForFoodName(food.name)
                 : food.emoji,
-            usageNote: usageNotes[food.id],
           ),
         )
         .toList();
 
-    return resultsWithEmoji;
+    return SearchResults(foods: resultsWithEmoji, displayNotes: usageNotes);
   }
 
-  Future<List<model.Food>> searchOff(String query) async {
+  Future<SearchResults> searchOff(String query) async {
     if (query.isEmpty) {
-      return [];
+      return const SearchResults(foods: [], displayNotes: {});
     }
     final offResults = await offApiService.searchFoodsByName(query);
     final usageNotes = await databaseService.getFoodsUsageNotes(offResults);
@@ -136,14 +144,16 @@ class SearchService {
             emoji: (food.emoji == null || food.emoji == '🍴' || food.emoji == '')
                 ? emojiForFoodName(food.name)
                 : food.emoji,
-            usageNote: usageNotes[food.id],
           ),
         )
         .toList();
-    return _applyFuzzyMatching(query, resultsWithEmoji);
+    return SearchResults(
+      foods: _applyFuzzyMatching(query, resultsWithEmoji),
+      displayNotes: usageNotes,
+    );
   }
 
-  Future<List<model.Food>> getAllRecipesAsFoods({int? categoryId}) async {
+  Future<SearchResults> getAllRecipesAsFoods({int? categoryId}) async {
     final recipes = await databaseService.getRecipesBySearch(
       '',
       categoryId: categoryId,
@@ -151,20 +161,18 @@ class SearchService {
     final foods = recipes.map((r) => r.toFood()).toList();
     final usageNotes = await databaseService.getFoodsUsageNotes(foods);
 
-    // Map recipes to foods
     final resultsWithEmoji = foods.map((food) {
       return food.copyWith(
         emoji: (food.emoji == null || food.emoji == '🍴' || food.emoji == '')
             ? emojiForFoodName(food.name)
             : food.emoji,
-        usageNote: usageNotes[food.id],
       );
     }).toList();
 
-    return resultsWithEmoji;
+    return SearchResults(foods: resultsWithEmoji, displayNotes: usageNotes);
   }
 
-  Future<List<model.Food>> searchRecipesOnly(
+  Future<SearchResults> searchRecipesOnly(
     String query, {
     int? categoryId,
   }) async {
@@ -192,7 +200,7 @@ class SearchService {
     // 4. Limit to avoid UI lag
     final limitedResults = foods.take(50).toList();
 
-    // 5. Add usage notes and emojis
+    // 5. Get usage notes separately (not written to food.usageNote)
     final usageNotes = await databaseService.getFoodsUsageNotes(limitedResults);
 
     final resultsWithEmoji = limitedResults.map((food) {
@@ -200,10 +208,9 @@ class SearchService {
         emoji: (food.emoji == null || food.emoji == '🍴' || food.emoji == '')
             ? emojiForFoodName(food.name)
             : food.emoji,
-        usageNote: usageNotes[food.id],
       );
     }).toList();
 
-    return resultsWithEmoji;
+    return SearchResults(foods: resultsWithEmoji, displayNotes: usageNotes);
   }
 }

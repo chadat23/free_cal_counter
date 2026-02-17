@@ -323,6 +323,7 @@ class OffApiService {
       fiber: baseFiberPerGram,
       sourceBarcode: product.barcode,
       servings: units,
+      database: model.FoodDatabase.off,
     );
   }
 }

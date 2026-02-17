@@ -19,6 +19,9 @@ class SearchProvider extends ChangeNotifier {
   List<model.Food> _searchResults = [];
   List<model.Food> get searchResults => _searchResults;
 
+  Map<int, String?> _displayNotes = {};
+  Map<int, String?> get displayNotes => _displayNotes;
+
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
@@ -51,9 +54,15 @@ class SearchProvider extends ChangeNotifier {
     textSearch('');
   }
 
+  void _applySearchResults(SearchResults results) {
+    _searchResults = results.foods;
+    _displayNotes = results.displayNotes;
+  }
+
   void setSearchMode(SearchMode mode) {
     _searchMode = mode;
-    _searchResults = []; // Clear results when switching modes
+    _searchResults = [];
+    _displayNotes = {};
     _clearErrorMessage();
     notifyListeners();
   }
@@ -75,26 +84,29 @@ class SearchProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      final SearchResults results;
       if (_searchMode == SearchMode.recipe) {
         if (query.isEmpty) {
-          _searchResults = await searchService.getAllRecipesAsFoods(
+          results = await searchService.getAllRecipesAsFoods(
             categoryId: _selectedCategoryId,
           );
         } else {
-          _searchResults = await searchService.searchRecipesOnly(
+          results = await searchService.searchRecipesOnly(
             query,
             categoryId: _selectedCategoryId,
           );
         }
       } else {
-        _searchResults = await searchService.searchLocal(
+        results = await searchService.searchLocal(
           query,
           categoryId: _selectedCategoryId,
         );
       }
+      _applySearchResults(results);
     } catch (e) {
       _errorMessage = 'Failed to search for food: ${e.toString()}';
       _searchResults = [];
+      _displayNotes = {};
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -110,10 +122,12 @@ class SearchProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _searchResults = await searchService.searchOff(_currentQuery);
+      final results = await searchService.searchOff(_currentQuery);
+      _applySearchResults(results);
     } catch (e) {
       _errorMessage = 'Failed to search for food: ${e.toString()}';
       _searchResults = [];
+      _displayNotes = {};
     } finally {
       _isLoading = false;
       notifyListeners();

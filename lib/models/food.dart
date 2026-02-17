@@ -1,6 +1,9 @@
 import 'package:meal_of_record/models/food_serving.dart';
 import 'package:meal_of_record/services/image_storage_service.dart';
 
+/// Tracks which database a Food object came from (transient, not stored in DB).
+enum FoodDatabase { live, reference, off }
+
 class Food {
   final int id;
   final String source;
@@ -18,6 +21,7 @@ class Food {
   final int? sourceFdcId;
   final String? sourceBarcode;
   final bool hidden;
+  final FoodDatabase database;
 
   Food({
     required this.id,
@@ -36,6 +40,7 @@ class Food {
     this.sourceFdcId,
     this.sourceBarcode,
     this.hidden = false,
+    this.database = FoodDatabase.live,
   });
 
   Food copyWith({
@@ -55,6 +60,7 @@ class Food {
     int? sourceFdcId,
     String? sourceBarcode,
     bool? hidden,
+    FoodDatabase? database,
   }) {
     return Food(
       id: id ?? this.id,
@@ -73,6 +79,7 @@ class Food {
       sourceFdcId: sourceFdcId ?? this.sourceFdcId,
       sourceBarcode: sourceBarcode ?? this.sourceBarcode,
       hidden: hidden ?? this.hidden,
+      database: database ?? this.database,
     );
   }
 
@@ -98,6 +105,7 @@ class Food {
       sourceFdcId: json['sourceFdcId'] as int?,
       sourceBarcode: json['sourceBarcode'] as String?,
       hidden: json['hidden'] as bool? ?? false,
+      database: FoodDatabase.live, // transient, not stored in DB
     );
   }
 

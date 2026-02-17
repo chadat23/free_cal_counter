@@ -3,15 +3,15 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i7;
+import 'dart:async' as _i8;
 import 'dart:ui' as _i12;
 
 import 'package:flutter/material.dart' as _i14;
 import 'package:flutter/services.dart' as _i13;
 import 'package:meal_of_record/models/category.dart' as _i17;
-import 'package:meal_of_record/models/food.dart' as _i8;
-import 'package:meal_of_record/models/goal_settings.dart' as _i5;
-import 'package:meal_of_record/models/macro_goals.dart' as _i6;
+import 'package:meal_of_record/models/food.dart' as _i9;
+import 'package:meal_of_record/models/goal_settings.dart' as _i6;
+import 'package:meal_of_record/models/macro_goals.dart' as _i7;
 import 'package:meal_of_record/models/recipe.dart' as _i18;
 import 'package:meal_of_record/models/recipe_item.dart' as _i16;
 import 'package:meal_of_record/providers/goals_provider.dart' as _i11;
@@ -19,7 +19,7 @@ import 'package:meal_of_record/providers/recipe_provider.dart' as _i15;
 import 'package:meal_of_record/services/database_service.dart' as _i2;
 import 'package:meal_of_record/services/food_sorting_service.dart' as _i4;
 import 'package:meal_of_record/services/open_food_facts_service.dart' as _i3;
-import 'package:meal_of_record/services/search_service.dart' as _i9;
+import 'package:meal_of_record/services/search_service.dart' as _i5;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i10;
 
@@ -55,13 +55,18 @@ class _FakeFoodSortingService_2 extends _i1.SmartFake
     : super(parent, parentInvocation);
 }
 
-class _FakeGoalSettings_3 extends _i1.SmartFake implements _i5.GoalSettings {
-  _FakeGoalSettings_3(Object parent, Invocation parentInvocation)
+class _FakeSearchResults_3 extends _i1.SmartFake implements _i5.SearchResults {
+  _FakeSearchResults_3(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeMacroGoals_4 extends _i1.SmartFake implements _i6.MacroGoals {
-  _FakeMacroGoals_4(Object parent, Invocation parentInvocation)
+class _FakeGoalSettings_4 extends _i1.SmartFake implements _i6.GoalSettings {
+  _FakeGoalSettings_4(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeMacroGoals_5 extends _i1.SmartFake implements _i7.MacroGoals {
+  _FakeMacroGoals_5(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
@@ -74,26 +79,26 @@ class MockOffApiService extends _i1.Mock implements _i3.OffApiService {
   }
 
   @override
-  _i7.Future<_i8.Food?> fetchFoodByBarcode(String? barcode) =>
+  _i8.Future<_i9.Food?> fetchFoodByBarcode(String? barcode) =>
       (super.noSuchMethod(
             Invocation.method(#fetchFoodByBarcode, [barcode]),
-            returnValue: _i7.Future<_i8.Food?>.value(),
+            returnValue: _i8.Future<_i9.Food?>.value(),
           )
-          as _i7.Future<_i8.Food?>);
+          as _i8.Future<_i9.Food?>);
 
   @override
-  _i7.Future<List<_i8.Food>> searchFoodsByName(String? query) =>
+  _i8.Future<List<_i9.Food>> searchFoodsByName(String? query) =>
       (super.noSuchMethod(
             Invocation.method(#searchFoodsByName, [query]),
-            returnValue: _i7.Future<List<_i8.Food>>.value(<_i8.Food>[]),
+            returnValue: _i8.Future<List<_i9.Food>>.value(<_i9.Food>[]),
           )
-          as _i7.Future<List<_i8.Food>>);
+          as _i8.Future<List<_i9.Food>>);
 }
 
 /// A class which mocks [SearchService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockSearchService extends _i1.Mock implements _i9.SearchService {
+class MockSearchService extends _i1.Mock implements _i5.SearchService {
   MockSearchService() {
     _i1.throwOnMissingStub(this);
   }
@@ -143,33 +148,54 @@ class MockSearchService extends _i1.Mock implements _i9.SearchService {
           as _i4.FoodSortingService);
 
   @override
-  _i7.Future<List<_i8.Food>> searchLocal(String? query, {int? categoryId}) =>
+  _i8.Future<_i5.SearchResults> searchLocal(String? query, {int? categoryId}) =>
       (super.noSuchMethod(
             Invocation.method(#searchLocal, [query], {#categoryId: categoryId}),
-            returnValue: _i7.Future<List<_i8.Food>>.value(<_i8.Food>[]),
+            returnValue: _i8.Future<_i5.SearchResults>.value(
+              _FakeSearchResults_3(
+                this,
+                Invocation.method(
+                  #searchLocal,
+                  [query],
+                  {#categoryId: categoryId},
+                ),
+              ),
+            ),
           )
-          as _i7.Future<List<_i8.Food>>);
+          as _i8.Future<_i5.SearchResults>);
 
   @override
-  _i7.Future<List<_i8.Food>> searchOff(String? query) =>
+  _i8.Future<_i5.SearchResults> searchOff(String? query) =>
       (super.noSuchMethod(
             Invocation.method(#searchOff, [query]),
-            returnValue: _i7.Future<List<_i8.Food>>.value(<_i8.Food>[]),
+            returnValue: _i8.Future<_i5.SearchResults>.value(
+              _FakeSearchResults_3(
+                this,
+                Invocation.method(#searchOff, [query]),
+              ),
+            ),
           )
-          as _i7.Future<List<_i8.Food>>);
+          as _i8.Future<_i5.SearchResults>);
 
   @override
-  _i7.Future<List<_i8.Food>> getAllRecipesAsFoods({int? categoryId}) =>
+  _i8.Future<_i5.SearchResults> getAllRecipesAsFoods({int? categoryId}) =>
       (super.noSuchMethod(
             Invocation.method(#getAllRecipesAsFoods, [], {
               #categoryId: categoryId,
             }),
-            returnValue: _i7.Future<List<_i8.Food>>.value(<_i8.Food>[]),
+            returnValue: _i8.Future<_i5.SearchResults>.value(
+              _FakeSearchResults_3(
+                this,
+                Invocation.method(#getAllRecipesAsFoods, [], {
+                  #categoryId: categoryId,
+                }),
+              ),
+            ),
           )
-          as _i7.Future<List<_i8.Food>>);
+          as _i8.Future<_i5.SearchResults>);
 
   @override
-  _i7.Future<List<_i8.Food>> searchRecipesOnly(
+  _i8.Future<_i5.SearchResults> searchRecipesOnly(
     String? query, {
     int? categoryId,
   }) =>
@@ -179,9 +205,18 @@ class MockSearchService extends _i1.Mock implements _i9.SearchService {
               [query],
               {#categoryId: categoryId},
             ),
-            returnValue: _i7.Future<List<_i8.Food>>.value(<_i8.Food>[]),
+            returnValue: _i8.Future<_i5.SearchResults>.value(
+              _FakeSearchResults_3(
+                this,
+                Invocation.method(
+                  #searchRecipesOnly,
+                  [query],
+                  {#categoryId: categoryId},
+                ),
+              ),
+            ),
           )
-          as _i7.Future<List<_i8.Food>>);
+          as _i8.Future<_i5.SearchResults>);
 }
 
 /// A class which mocks [GoalsProvider].
@@ -193,26 +228,26 @@ class MockGoalsProvider extends _i1.Mock implements _i11.GoalsProvider {
   }
 
   @override
-  _i5.GoalSettings get settings =>
+  _i6.GoalSettings get settings =>
       (super.noSuchMethod(
             Invocation.getter(#settings),
-            returnValue: _FakeGoalSettings_3(
+            returnValue: _FakeGoalSettings_4(
               this,
               Invocation.getter(#settings),
             ),
           )
-          as _i5.GoalSettings);
+          as _i6.GoalSettings);
 
   @override
-  _i6.MacroGoals get currentGoals =>
+  _i7.MacroGoals get currentGoals =>
       (super.noSuchMethod(
             Invocation.getter(#currentGoals),
-            returnValue: _FakeMacroGoals_4(
+            returnValue: _FakeMacroGoals_5(
               this,
               Invocation.getter(#currentGoals),
             ),
           )
-          as _i6.MacroGoals);
+          as _i7.MacroGoals);
 
   @override
   bool get isLoading =>
@@ -265,8 +300,8 @@ class MockGoalsProvider extends _i1.Mock implements _i11.GoalsProvider {
   );
 
   @override
-  _i7.Future<void> saveSettings(
-    _i5.GoalSettings? newSettings, {
+  _i8.Future<void> saveSettings(
+    _i6.GoalSettings? newSettings, {
     bool? isInitialSetup = false,
   }) =>
       (super.noSuchMethod(
@@ -275,48 +310,48 @@ class MockGoalsProvider extends _i1.Mock implements _i11.GoalsProvider {
               [newSettings],
               {#isInitialSetup: isInitialSetup},
             ),
-            returnValue: _i7.Future<void>.value(),
-            returnValueForMissingStub: _i7.Future<void>.value(),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
           )
-          as _i7.Future<void>);
+          as _i8.Future<void>);
 
   @override
-  _i7.Future<void> markWelcomeSeen() =>
+  _i8.Future<void> markWelcomeSeen() =>
       (super.noSuchMethod(
             Invocation.method(#markWelcomeSeen, []),
-            returnValue: _i7.Future<void>.value(),
-            returnValueForMissingStub: _i7.Future<void>.value(),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
           )
-          as _i7.Future<void>);
+          as _i8.Future<void>);
 
   @override
-  _i7.Future<void> reload() =>
+  _i8.Future<void> reload() =>
       (super.noSuchMethod(
             Invocation.method(#reload, []),
-            returnValue: _i7.Future<void>.value(),
-            returnValueForMissingStub: _i7.Future<void>.value(),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
           )
-          as _i7.Future<void>);
+          as _i8.Future<void>);
 
   @override
-  _i7.Future<void> checkWeeklyUpdate() =>
+  _i8.Future<void> checkWeeklyUpdate() =>
       (super.noSuchMethod(
             Invocation.method(#checkWeeklyUpdate, []),
-            returnValue: _i7.Future<void>.value(),
-            returnValueForMissingStub: _i7.Future<void>.value(),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
           )
-          as _i7.Future<void>);
+          as _i8.Future<void>);
 
   @override
-  _i7.Future<void> recalculateTargets({bool? isInitialSetup = false}) =>
+  _i8.Future<void> recalculateTargets({bool? isInitialSetup = false}) =>
       (super.noSuchMethod(
             Invocation.method(#recalculateTargets, [], {
               #isInitialSetup: isInitialSetup,
             }),
-            returnValue: _i7.Future<void>.value(),
-            returnValueForMissingStub: _i7.Future<void>.value(),
+            returnValue: _i8.Future<void>.value(),
+            returnValueForMissingStub: _i8.Future<void>.value(),
           )
-          as _i7.Future<void>);
+          as _i8.Future<void>);
 
   @override
   void addListener(_i12.VoidCallback? listener) => super.noSuchMethod(
@@ -337,12 +372,12 @@ class MockGoalsProvider extends _i1.Mock implements _i11.GoalsProvider {
   );
 
   @override
-  _i7.Future<bool> didPopRoute() =>
+  _i8.Future<bool> didPopRoute() =>
       (super.noSuchMethod(
             Invocation.method(#didPopRoute, []),
-            returnValue: _i7.Future<bool>.value(false),
+            returnValue: _i8.Future<bool>.value(false),
           )
-          as _i7.Future<bool>);
+          as _i8.Future<bool>);
 
   @override
   bool handleStartBackGesture(_i13.PredictiveBackEvent? backEvent) =>
@@ -372,22 +407,22 @@ class MockGoalsProvider extends _i1.Mock implements _i11.GoalsProvider {
   );
 
   @override
-  _i7.Future<bool> didPushRoute(String? route) =>
+  _i8.Future<bool> didPushRoute(String? route) =>
       (super.noSuchMethod(
             Invocation.method(#didPushRoute, [route]),
-            returnValue: _i7.Future<bool>.value(false),
+            returnValue: _i8.Future<bool>.value(false),
           )
-          as _i7.Future<bool>);
+          as _i8.Future<bool>);
 
   @override
-  _i7.Future<bool> didPushRouteInformation(
+  _i8.Future<bool> didPushRouteInformation(
     _i14.RouteInformation? routeInformation,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#didPushRouteInformation, [routeInformation]),
-            returnValue: _i7.Future<bool>.value(false),
+            returnValue: _i8.Future<bool>.value(false),
           )
-          as _i7.Future<bool>);
+          as _i8.Future<bool>);
 
   @override
   void didChangeMetrics() => super.noSuchMethod(
@@ -420,14 +455,14 @@ class MockGoalsProvider extends _i1.Mock implements _i11.GoalsProvider {
   );
 
   @override
-  _i7.Future<_i12.AppExitResponse> didRequestAppExit() =>
+  _i8.Future<_i12.AppExitResponse> didRequestAppExit() =>
       (super.noSuchMethod(
             Invocation.method(#didRequestAppExit, []),
-            returnValue: _i7.Future<_i12.AppExitResponse>.value(
+            returnValue: _i8.Future<_i12.AppExitResponse>.value(
               _i12.AppExitResponse.exit,
             ),
           )
-          as _i7.Future<_i12.AppExitResponse>);
+          as _i8.Future<_i12.AppExitResponse>);
 
   @override
   void didHaveMemoryPressure() => super.noSuchMethod(
@@ -678,12 +713,12 @@ class MockRecipeProvider extends _i1.Mock implements _i15.RecipeProvider {
   );
 
   @override
-  _i7.Future<bool> saveRecipe() =>
+  _i8.Future<bool> saveRecipe() =>
       (super.noSuchMethod(
             Invocation.method(#saveRecipe, []),
-            returnValue: _i7.Future<bool>.value(false),
+            returnValue: _i8.Future<bool>.value(false),
           )
-          as _i7.Future<bool>);
+          as _i8.Future<bool>);
 
   @override
   void reset() => super.noSuchMethod(
@@ -692,25 +727,25 @@ class MockRecipeProvider extends _i1.Mock implements _i15.RecipeProvider {
   );
 
   @override
-  _i7.Future<String> exportRecipe(_i18.Recipe? recipe) =>
+  _i8.Future<String> exportRecipe(_i18.Recipe? recipe) =>
       (super.noSuchMethod(
             Invocation.method(#exportRecipe, [recipe]),
-            returnValue: _i7.Future<String>.value(
+            returnValue: _i8.Future<String>.value(
               _i10.dummyValue<String>(
                 this,
                 Invocation.method(#exportRecipe, [recipe]),
               ),
             ),
           )
-          as _i7.Future<String>);
+          as _i8.Future<String>);
 
   @override
-  _i7.Future<int?> importRecipe(String? jsonContent) =>
+  _i8.Future<int?> importRecipe(String? jsonContent) =>
       (super.noSuchMethod(
             Invocation.method(#importRecipe, [jsonContent]),
-            returnValue: _i7.Future<int?>.value(),
+            returnValue: _i8.Future<int?>.value(),
           )
-          as _i7.Future<int?>);
+          as _i8.Future<int?>);
 
   @override
   void addListener(_i12.VoidCallback? listener) => super.noSuchMethod(

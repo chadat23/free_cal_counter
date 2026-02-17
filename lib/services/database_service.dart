@@ -194,6 +194,7 @@ class DatabaseService {
   model.Food _mapFoodData(
     dynamic foodData,
     List<model_serving.FoodServing> servings,
+    model.FoodDatabase database,
   ) {
     return model.Food(
       id: foodData.id,
@@ -210,7 +211,8 @@ class DatabaseService {
       parentId: foodData.parentId,
       sourceFdcId: foodData.sourceFdcId,
       sourceBarcode: foodData.sourceBarcode,
-      usageNote: foodData.usageNote, // Added usageNote
+      usageNote: foodData.usageNote,
+      database: database,
     );
   }
 
@@ -238,10 +240,12 @@ class DatabaseService {
         .toSet();
 
     // Collect all parentIds to filter out superseded versions
+    // Only consider non-hidden children to avoid hiding parents when the child is hidden
     final parentIdRows =
         await (_liveDb.selectOnly(_liveDb.foods)
               ..addColumns([_liveDb.foods.parentId])
-              ..where(_liveDb.foods.parentId.isNotNull()))
+              ..where(_liveDb.foods.parentId.isNotNull())
+              ..where(_liveDb.foods.hidden.equals(false)))
             .get();
     final parentIds = parentIdRows
         .map((r) => r.read(_liveDb.foods.parentId))
@@ -272,7 +276,7 @@ class DatabaseService {
     for (final foodData in liveFoodsData) {
       if (!parentIds.contains(foodData.id)) {
         final servings = liveServingsMap[foodData.id] ?? [];
-        results.add(_mapFoodData(foodData, servings));
+        results.add(_mapFoodData(foodData, servings, model.FoodDatabase.live));
       }
     }
 
@@ -280,7 +284,7 @@ class DatabaseService {
     for (final foodData in refFoodsData) {
       if (!liveSourceIds.contains(foodData.id)) {
         final servings = refServingsMap[foodData.id] ?? [];
-        results.add(_mapFoodData(foodData, servings));
+        results.add(_mapFoodData(foodData, servings, model.FoodDatabase.reference));
       }
     }
 
@@ -414,7 +418,7 @@ class DatabaseService {
     final food = await (_liveDb.select(
       _liveDb.foods,
     )..where((f) => f.sourceBarcode.equals(barcode))).getSingleOrNull();
-    return food == null ? null : _mapFoodData(food, []);
+    return food == null ? null : _mapFoodData(food, [], model.FoodDatabase.live);
   }
 
   // ========== BARCODE OPERATIONS (NEW TABLE) ==========
@@ -493,7 +497,7 @@ class DatabaseService {
     final food = await (_liveDb.select(
       _liveDb.foods,
     )..where((f) => f.sourceFdcId.equals(fdcId))).getSingleOrNull();
-    return food == null ? null : _mapFoodData(food, []);
+    return food == null ? null : _mapFoodData(food, [], model.FoodDatabase.live);
   }
 
   Future<void> logPortions(
@@ -507,12 +511,8 @@ class DatabaseService {
     for (final portion in portions) {
       final food = portion.food;
 
-      if (food.source != 'recipe' &&
-          food.source != 'live' &&
-          food.source != 'user_created' &&
-          food.source != 'off_cache' &&
-          food.source != 'system') {
-        // Reference or Foundation - check if we already have a live copy
+      if (food.database != model.FoodDatabase.live) {
+        // Reference, OFF, or Foundation - check if we already have a live copy
         // For OFF items, check by barcode
         var existing;
 
@@ -561,10 +561,7 @@ class DatabaseService {
 
         if (food.source == 'recipe') {
           recipeId = food.id;
-        } else if (food.source == 'live' ||
-            food.source == 'user_created' ||
-            food.source == 'off_cache' ||
-            food.source == 'system') {
+        } else if (food.database == model.FoodDatabase.live) {
           foodId = food.id;
         } else if (food.source == 'off') {
           // OFF Item: Look up by barcode
@@ -709,10 +706,10 @@ class DatabaseService {
     bool isUsed = false;
     model.Food? existingLiveFood;
 
-    if (food.id > 0) {
+    if (food.id > 0 && food.database == model.FoodDatabase.live) {
       existingLiveFood = await getFoodById(food.id, 'live');
       if (existingLiveFood != null) {
-        isUsed = await isFoodReferenced(food.id, 'live');
+        isUsed = await isFoodReferenced(food.id);
       }
     }
 
@@ -909,7 +906,7 @@ class DatabaseService {
 
     if (food.source == 'recipe') {
       recipeId = food.id;
-    } else if (food.source == 'live') {
+    } else if (food.database == model.FoodDatabase.live) {
       foodId = food.id;
     } else {
       // Should not typically happen during UPDATE unless we switch foods?
@@ -1072,7 +1069,7 @@ class DatabaseService {
             .getSingleOrNull();
 
     if (existing != null) {
-      return _mapFoodData(existing, []);
+      return _mapFoodData(existing, [], model.FoodDatabase.live);
     }
 
     final id = await _liveDb
@@ -1102,6 +1099,7 @@ class DatabaseService {
       fiber: 0,
       emoji: '🌙',
       hidden: true,
+      database: model.FoodDatabase.live,
     );
   }
 
@@ -1279,11 +1277,12 @@ class DatabaseService {
     }
 
     final servingsMap = await getServingsForFoods(ids, source);
+    final database = source == 'live' ? model.FoodDatabase.live : model.FoodDatabase.reference;
     final Map<int, model.Food> results = {};
 
     for (final foodData in foodsData) {
       final servings = servingsMap[foodData.id] ?? [];
-      results[foodData.id] = _mapFoodData(foodData, servings);
+      results[foodData.id] = _mapFoodData(foodData, servings, database);
     }
 
     return results;
@@ -1601,7 +1600,7 @@ class DatabaseService {
 
   Future<model.Food> ensureFoodExists(model.Food food) async {
     // If it's already in the live database, return it
-    if (food.source == 'live') {
+    if (food.database == model.FoodDatabase.live) {
       return food;
     }
 
@@ -1613,7 +1612,7 @@ class DatabaseService {
 
       if (existingByFdc != null) {
         final servings = await getServingsForFood(existingByFdc.id, 'live');
-        return _mapFoodData(existingByFdc, servings);
+        return _mapFoodData(existingByFdc, servings, model.FoodDatabase.live);
       }
     }
 
@@ -1630,7 +1629,7 @@ class DatabaseService {
     final existing = await existingQuery.getSingleOrNull();
     if (existing != null) {
       final servings = await getServingsForFood(existing.id, 'live');
-      return _mapFoodData(existing, servings);
+      return _mapFoodData(existing, servings, model.FoodDatabase.live);
     }
 
     // If not, save it to the live database (copy logic)
@@ -1642,15 +1641,6 @@ class DatabaseService {
 
     final foodIds = foods.map((f) => f.id).toList();
     final Map<int, String?> results = {};
-
-    final isLiveSourceMap = {
-      for (var f in foods)
-        f.id:
-            (f.source == 'live' ||
-            f.source == 'user_created' ||
-            f.source == 'off_cache' ||
-            f.source == 'recipe'),
-    };
 
     // Batch fetch logged entries
     final loggedFoodIdsRows =
@@ -1691,11 +1681,6 @@ class DatabaseService {
         .toSet();
 
     for (final food in foods) {
-      if (!(isLiveSourceMap[food.id] ?? false)) {
-        results[food.id] = null;
-        continue;
-      }
-
       final isRecipe = food.source == 'recipe';
       final isLogged = isRecipe
           ? loggedRecipeSet.contains(food.id)
@@ -1767,16 +1752,16 @@ class DatabaseService {
         }
 
         final servings = await getServingsForFood(existing.id, 'live');
-        return _mapFoodData(existing, servings);
+        return _mapFoodData(existing, servings, model.FoodDatabase.live);
       }
 
-      // Insert new food into live database
+      // Insert new food into live database, preserving original source provenance
       final foodId = await _liveDb
           .into(_liveDb.foods)
           .insert(
             FoodsCompanion.insert(
               name: foodName,
-              source: 'live',
+              source: sourceFood.source,
               emoji: Value(sourceFood.emoji),
               thumbnail: Value(sourceFood.thumbnail),
               usageNote: Value(sourceFood.usageNote),
@@ -1833,59 +1818,38 @@ class DatabaseService {
       final newFoodRow = await (_liveDb.select(
         _liveDb.foods,
       )..where((t) => t.id.equals(foodId))).getSingle();
-      return _mapFoodData(newFoodRow, servings);
+      return _mapFoodData(newFoodRow, servings, model.FoodDatabase.live);
     });
   }
 
-  Future<void> softDeleteFood(int foodId, String source) async {
-    // Only foods in the live database can be soft-deleted
-    if (source != 'live') {
-      throw Exception('Only live database foods can be soft-deleted');
-    }
-
+  Future<void> softDeleteFood(int foodId) async {
     await (_liveDb.update(_liveDb.foods)..where((t) => t.id.equals(foodId)))
         .write(const FoodsCompanion(hidden: Value(true)));
     BackupConfigService.instance.markDirty();
   }
 
-  Future<bool> isFoodReferenced(int foodId, String source) async {
+  Future<bool> isFoodReferenced(int foodId) async {
     // Check if referenced in logged_portions
-    if (source == 'live' ||
-        source == 'user' ||
-        source == 'user_created' ||
-        source == 'off_cache' ||
-        source == 'system' ||
-        source == 'recipe') {
-      final loggedQuery = _liveDb.select(_liveDb.loggedPortions)
-        ..where((t) => t.foodId.equals(foodId))
-        ..limit(1);
-      final logged = await loggedQuery.getSingleOrNull();
+    final loggedQuery = _liveDb.select(_liveDb.loggedPortions)
+      ..where((t) => t.foodId.equals(foodId))
+      ..limit(1);
+    final logged = await loggedQuery.getSingleOrNull();
 
-      // Check if used in recipes
-      final usedQuery = _liveDb.select(_liveDb.recipeItems)
-        ..where((t) => t.ingredientFoodId.equals(foodId))
-        ..limit(1);
-      final used = await usedQuery.getSingleOrNull();
+    // Check if used in recipes
+    final usedQuery = _liveDb.select(_liveDb.recipeItems)
+      ..where((t) => t.ingredientFoodId.equals(foodId))
+      ..limit(1);
+    final used = await usedQuery.getSingleOrNull();
 
-      return logged != null || used != null;
-    }
-    // Reference foods are physically in Ref DB, but usage is via Live copies.
-    // If checking if a Ref food is "referenced", we'd check if any Live food points to it?
-    // But currently this is mainly used for Live foods versioning/deletion.
-    return false;
+    return logged != null || used != null;
   }
 
-  Future<void> deleteFood(int foodId, String source) async {
-    // Reference database foods cannot be deleted
-    if (source != 'live') {
-      throw Exception('Reference foods cannot be deleted');
-    }
-
-    final isReferenced = await isFoodReferenced(foodId, source);
+  Future<void> deleteFood(int foodId) async {
+    final isReferenced = await isFoodReferenced(foodId);
 
     if (isReferenced) {
       // Soft delete if referenced
-      await softDeleteFood(foodId, source);
+      await softDeleteFood(foodId);
     } else {
       // Hard delete if not referenced
       await _liveDb.transaction(() async {
@@ -1913,10 +1877,12 @@ class DatabaseService {
             .get();
 
     // Filter out foods with parentId (these are older versions)
+    // Only consider non-hidden children to avoid hiding parents when the child is hidden
     final parentIdRows =
         await (_liveDb.selectOnly(_liveDb.foods)
               ..addColumns([_liveDb.foods.parentId])
-              ..where(_liveDb.foods.parentId.isNotNull()))
+              ..where(_liveDb.foods.parentId.isNotNull())
+              ..where(_liveDb.foods.hidden.equals(false)))
             .get();
     final parentIds = parentIdRows
         .map((r) => r.read(_liveDb.foods.parentId))
@@ -1928,7 +1894,7 @@ class DatabaseService {
     for (final foodData in liveFoodsData) {
       if (!parentIds.contains(foodData.id)) {
         filteredLiveFoods.add(
-          _mapFoodData(foodData, []),
+          _mapFoodData(foodData, [], model.FoodDatabase.live),
         ); // Temporary empty servings
         idsToFetch.add(foodData.id);
       }
@@ -1957,7 +1923,7 @@ class DatabaseService {
 
     final List<model.Food> refFoods = [];
     for (final foodData in refFoodsData) {
-      refFoods.add(_mapFoodData(foodData, servingsMap[foodData.id] ?? []));
+      refFoods.add(_mapFoodData(foodData, servingsMap[foodData.id] ?? [], model.FoodDatabase.reference));
     }
 
     return refFoods;
@@ -2165,7 +2131,7 @@ class DatabaseService {
 
     if (existingData != null) {
       final servings = await getServingsForFood(existingData.id, 'live');
-      return _mapFoodData(existingData, servings);
+      return _mapFoodData(existingData, servings, model.FoodDatabase.live);
     }
 
     // Create the system Quick Add food
@@ -2204,6 +2170,7 @@ class DatabaseService {
       fiber: 0.0,
       emoji: '⚡',
       hidden: true,
+      database: model.FoodDatabase.live,
       servings: [
         const model_serving.FoodServing(
           foodId: 0,

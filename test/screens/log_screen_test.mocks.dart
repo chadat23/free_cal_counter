@@ -614,6 +614,14 @@ class MockSearchProvider extends _i1.Mock implements _i17.SearchProvider {
           as List<_i8.Food>);
 
   @override
+  Map<int, String?> get displayNotes =>
+      (super.noSuchMethod(
+            Invocation.getter(#displayNotes),
+            returnValue: <int, String?>{},
+          )
+          as Map<int, String?>);
+
+  @override
   bool get isLoading =>
       (super.noSuchMethod(Invocation.getter(#isLoading), returnValue: false)
           as bool);
@@ -1224,26 +1232,26 @@ class MockDatabaseService extends _i1.Mock implements _i3.DatabaseService {
           as _i14.Future<_i8.Food>);
 
   @override
-  _i14.Future<void> softDeleteFood(int? foodId, String? source) =>
+  _i14.Future<void> softDeleteFood(int? foodId) =>
       (super.noSuchMethod(
-            Invocation.method(#softDeleteFood, [foodId, source]),
+            Invocation.method(#softDeleteFood, [foodId]),
             returnValue: _i14.Future<void>.value(),
             returnValueForMissingStub: _i14.Future<void>.value(),
           )
           as _i14.Future<void>);
 
   @override
-  _i14.Future<bool> isFoodReferenced(int? foodId, String? source) =>
+  _i14.Future<bool> isFoodReferenced(int? foodId) =>
       (super.noSuchMethod(
-            Invocation.method(#isFoodReferenced, [foodId, source]),
+            Invocation.method(#isFoodReferenced, [foodId]),
             returnValue: _i14.Future<bool>.value(false),
           )
           as _i14.Future<bool>);
 
   @override
-  _i14.Future<void> deleteFood(int? foodId, String? source) =>
+  _i14.Future<void> deleteFood(int? foodId) =>
       (super.noSuchMethod(
-            Invocation.method(#deleteFood, [foodId, source]),
+            Invocation.method(#deleteFood, [foodId]),
             returnValue: _i14.Future<void>.value(),
             returnValueForMissingStub: _i14.Future<void>.value(),
           )

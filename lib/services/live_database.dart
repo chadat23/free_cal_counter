@@ -26,7 +26,7 @@ class LiveDatabase extends _$LiveDatabase {
   LiveDatabase({required QueryExecutor connection}) : super(connection);
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration {
@@ -78,6 +78,51 @@ class LiveDatabase extends _$LiveDatabase {
         }
         if (from < 12) {
           await m.createTable(foodBarcodes);
+        }
+        if (from < 13) {
+          // Fix source provenance: foods incorrectly set to 'live' should
+          // reflect their original data source.
+          // 1. Foods with sourceFdcId: look up reference DB source
+          //    (handled via raw SQL join against reference DB - not possible
+          //     cross-database, so we use heuristics)
+          // 2. Foods with sourceBarcode and no sourceFdcId -> 'off'
+          await customStatement('''
+            UPDATE foods SET source = 'off'
+            WHERE source = 'live'
+              AND source_barcode IS NOT NULL
+              AND source_fdc_id IS NULL
+              AND parent_id IS NULL
+          ''');
+          // 3. Foods with sourceFdcId: these came from USDA reference DB.
+          //    We can't easily determine FOUNDATION vs SR_LEGACY without
+          //    querying the reference DB, so mark as 'FOUNDATION' (the more
+          //    common/better source). This is a best-effort heuristic.
+          await customStatement('''
+            UPDATE foods SET source = 'FOUNDATION'
+            WHERE source = 'live'
+              AND source_fdc_id IS NOT NULL
+              AND parent_id IS NULL
+          ''');
+          // 4. Remaining 'live' foods with no sourceFdcId, no sourceBarcode,
+          //    no parentId -> 'user' (user-created)
+          //    (Exclude system foods which already have source='system')
+          await customStatement('''
+            UPDATE foods SET source = 'user'
+            WHERE source = 'live'
+              AND source_fdc_id IS NULL
+              AND source_barcode IS NULL
+              AND parent_id IS NULL
+              AND name != 'Fasted'
+              AND name != 'Quick Add'
+          ''');
+          // 5. Fix corrupt parentId: clear parentId on any food where
+          //    the parent doesn't actually exist or is from a different
+          //    source lineage (the Strawberries/Celery ID collision bug)
+          await customStatement('''
+            UPDATE foods SET parent_id = NULL
+            WHERE parent_id IS NOT NULL
+              AND parent_id NOT IN (SELECT id FROM foods)
+          ''');
         }
       },
       beforeOpen: (details) async {

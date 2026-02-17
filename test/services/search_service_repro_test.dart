@@ -113,14 +113,14 @@ void main() {
 
       // Assert
       expect(
-        results.length,
+        results.foods.length,
         2,
         reason: 'Recipes should be excluded from general search',
       );
 
       // 'Skippy Extra Crunchy' is Live/Logged, so it should be first
-      expect(results.first.name, 'Skippy Extra Crunchy');
-      expect(results.last.name, 'Extra White Bread');
+      expect(results.foods.first.name, 'Skippy Extra Crunchy');
+      expect(results.foods.last.name, 'Extra White Bread');
     },
   );
 
@@ -164,10 +164,10 @@ void main() {
       final results = await searchService.searchRecipesOnly('extra');
 
       // Assert
-      expect(results.length, 2);
+      expect(results.foods.length, 2);
       // 'Extra Fancy Salad' is logged, so it should be first
-      expect(results.first.name, 'Extra Fancy Salad');
-      expect(results.last.name, 'Extra Simple Toast');
+      expect(results.foods.first.name, 'Extra Fancy Salad');
+      expect(results.foods.last.name, 'Extra Simple Toast');
     },
   );
 }

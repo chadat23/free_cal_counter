@@ -80,10 +80,8 @@ class SlidableSearchResult extends StatelessWidget {
   void _confirmDelete(BuildContext context) {
     if (onDelete == null) return;
 
-    // Spec 1.3.3.1.7.2.2.1: If reference db, prompt user
-    if (food.source != 'logged_foods' &&
-        food.source != 'recipe' &&
-        food.source != 'off') {
+    // Only live database foods can be deleted
+    if (food.database != FoodDatabase.live) {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(

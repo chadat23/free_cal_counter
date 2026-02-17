@@ -538,26 +538,26 @@ class MockDatabaseService extends _i1.Mock implements _i5.DatabaseService {
           as _i6.Future<_i4.Food>);
 
   @override
-  _i6.Future<void> softDeleteFood(int? foodId, String? source) =>
+  _i6.Future<void> softDeleteFood(int? foodId) =>
       (super.noSuchMethod(
-            Invocation.method(#softDeleteFood, [foodId, source]),
+            Invocation.method(#softDeleteFood, [foodId]),
             returnValue: _i6.Future<void>.value(),
             returnValueForMissingStub: _i6.Future<void>.value(),
           )
           as _i6.Future<void>);
 
   @override
-  _i6.Future<bool> isFoodReferenced(int? foodId, String? source) =>
+  _i6.Future<bool> isFoodReferenced(int? foodId) =>
       (super.noSuchMethod(
-            Invocation.method(#isFoodReferenced, [foodId, source]),
+            Invocation.method(#isFoodReferenced, [foodId]),
             returnValue: _i6.Future<bool>.value(false),
           )
           as _i6.Future<bool>);
 
   @override
-  _i6.Future<void> deleteFood(int? foodId, String? source) =>
+  _i6.Future<void> deleteFood(int? foodId) =>
       (super.noSuchMethod(
-            Invocation.method(#deleteFood, [foodId, source]),
+            Invocation.method(#deleteFood, [foodId]),
             returnValue: _i6.Future<void>.value(),
             returnValueForMissingStub: _i6.Future<void>.value(),
           )

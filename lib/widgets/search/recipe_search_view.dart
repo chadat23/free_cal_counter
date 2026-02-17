@@ -175,7 +175,7 @@ class _RecipeSearchViewState extends State<RecipeSearchView> {
                     future: db.getRecipeById(food.id),
                     builder: (context, snapshot) {
                       final recipe = snapshot.data;
-                      String? finalNote = food.usageNote;
+                      String? finalNote = provider.displayNotes[food.id];
                       if (recipe?.isTemplate ?? false) {
                         finalNote = finalNote != null
                             ? 'Only Dumpable • $finalNote'

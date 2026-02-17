@@ -75,11 +75,11 @@ void main() {
     final results = await searchService.searchLocal('Apple');
 
     // Assert
-    expect(results.length, 1, reason: 'Should have found 1 result');
-    expect(results.first.name, 'Apple');
-    expect(results.first.servings, isNotEmpty);
+    expect(results.foods.length, 1, reason: 'Should have found 1 result');
+    expect(results.foods.first.name, 'Apple');
+    expect(results.foods.first.servings, isNotEmpty);
     // The quantity should be defaulted to 1.0
-    expect(results.first.servings.first.quantity, 1.0);
+    expect(results.foods.first.servings.first.quantity, 1.0);
   });
 
   test('searchLocal should populate usageNote for logged items', () async {
@@ -118,7 +118,7 @@ void main() {
     final results = await searchService.searchLocal('Apple');
 
     // Assert
-    expect(results.length, 1);
-    expect(results.first.usageNote, 'Logged');
+    expect(results.foods.length, 1);
+    expect(results.displayNotes[foodId], 'Logged');
   });
 }

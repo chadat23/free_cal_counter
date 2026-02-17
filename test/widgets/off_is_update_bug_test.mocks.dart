@@ -502,6 +502,14 @@ class MockSearchProvider extends _i1.Mock implements _i15.SearchProvider {
           as List<_i13.Food>);
 
   @override
+  Map<int, String?> get displayNotes =>
+      (super.noSuchMethod(
+            Invocation.getter(#displayNotes),
+            returnValue: <int, String?>{},
+          )
+          as Map<int, String?>);
+
+  @override
   bool get isLoading =>
       (super.noSuchMethod(Invocation.getter(#isLoading), returnValue: false)
           as bool);

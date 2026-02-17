@@ -76,6 +76,7 @@ class Recipe {
       fiber: fiberPerGram,
       emoji: emoji,
       thumbnail: thumbnail,
+      database: FoodDatabase.live,
       servings: [
         FoodServing(
           foodId: id,

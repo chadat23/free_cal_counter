@@ -366,6 +366,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
       fiber: _parse(_fiberController.text) * factor,
       source: widget.originalFood?.source ?? 'user',
       servings: _servings,
+      database: widget.originalFood?.database ?? FoodDatabase.live,
     );
 
     try {
@@ -1074,7 +1075,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
       name: _nameController.text.isNotEmpty
           ? _nameController.text
           : 'New Food',
-      source: 'user',
+      source: widget.originalFood?.source ?? 'user',
       calories: _parse(_caloriesController.text) * factor,
       protein: _parse(_proteinController.text) * factor,
       fat: _parse(_fatController.text) * factor,

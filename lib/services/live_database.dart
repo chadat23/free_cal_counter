@@ -89,9 +89,9 @@ class LiveDatabase extends _$LiveDatabase {
           await customStatement('''
             UPDATE foods SET source = 'off'
             WHERE source = 'live'
-              AND source_barcode IS NOT NULL
-              AND source_fdc_id IS NULL
-              AND parent_id IS NULL
+              AND sourceBarcode IS NOT NULL
+              AND sourceFdcId IS NULL
+              AND parentId IS NULL
           ''');
           // 3. Foods with sourceFdcId: these came from USDA reference DB.
           //    We can't easily determine FOUNDATION vs SR_LEGACY without
@@ -100,8 +100,8 @@ class LiveDatabase extends _$LiveDatabase {
           await customStatement('''
             UPDATE foods SET source = 'FOUNDATION'
             WHERE source = 'live'
-              AND source_fdc_id IS NOT NULL
-              AND parent_id IS NULL
+              AND sourceFdcId IS NOT NULL
+              AND parentId IS NULL
           ''');
           // 4. Remaining 'live' foods with no sourceFdcId, no sourceBarcode,
           //    no parentId -> 'user' (user-created)
@@ -109,9 +109,9 @@ class LiveDatabase extends _$LiveDatabase {
           await customStatement('''
             UPDATE foods SET source = 'user'
             WHERE source = 'live'
-              AND source_fdc_id IS NULL
-              AND source_barcode IS NULL
-              AND parent_id IS NULL
+              AND sourceFdcId IS NULL
+              AND sourceBarcode IS NULL
+              AND parentId IS NULL
               AND name != 'Fasted'
               AND name != 'Quick Add'
           ''');
@@ -119,11 +119,12 @@ class LiveDatabase extends _$LiveDatabase {
           //    the parent doesn't actually exist or is from a different
           //    source lineage (the Strawberries/Celery ID collision bug)
           await customStatement('''
-            UPDATE foods SET parent_id = NULL
-            WHERE parent_id IS NOT NULL
-              AND parent_id NOT IN (SELECT id FROM foods)
+            UPDATE foods SET parentId = NULL
+            WHERE parentId IS NOT NULL
+              AND parentId NOT IN (SELECT id FROM foods)
           ''');
         }
+
       },
       beforeOpen: (details) async {
         if (details.wasCreated) {

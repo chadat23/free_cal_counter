@@ -1876,17 +1876,13 @@ class DatabaseService {
               ..where((f) => f.hidden.equals(false)))
             .get();
 
-    // Filter out foods with parentId (these are older versions)
-    // Only consider non-hidden children to avoid hiding parents when the child is hidden
-    final parentIdRows =
-        await (_liveDb.selectOnly(_liveDb.foods)
-              ..addColumns([_liveDb.foods.parentId])
-              ..where(_liveDb.foods.parentId.isNotNull())
-              ..where(_liveDb.foods.hidden.equals(false)))
-            .get();
-    final parentIds = parentIdRows
-        .map((r) => r.read(_liveDb.foods.parentId))
-        .whereType<int>()
+    // Filter out old versions: only hide a parent if a visible child with
+    // source='live' points to it. Non-live sources (off, FOUNDATION, etc.)
+    // can have coincidental parentId collisions that don't represent real
+    // version lineage.
+    final parentIds = liveFoodsData
+        .where((f) => f.parentId != null && f.source == 'live')
+        .map((f) => f.parentId!)
         .toSet();
 
     final List<model.Food> filteredLiveFoods = [];
@@ -1895,7 +1891,7 @@ class DatabaseService {
       if (!parentIds.contains(foodData.id)) {
         filteredLiveFoods.add(
           _mapFoodData(foodData, [], model.FoodDatabase.live),
-        ); // Temporary empty servings
+        );
         idsToFetch.add(foodData.id);
       }
     }

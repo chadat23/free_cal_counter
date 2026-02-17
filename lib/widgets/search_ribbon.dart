@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:meal_of_record/providers/navigation_provider.dart';
 import 'package:meal_of_record/providers/log_provider.dart';
 import 'package:meal_of_record/providers/search_provider.dart';
+import 'package:meal_of_record/models/search_mode.dart';
 
 class SearchRibbon extends StatefulWidget {
   final bool isSearchActive;
@@ -93,7 +94,20 @@ class _SearchRibbonState extends State<SearchRibbon> {
                     ),
                     onChanged: (value) {
                       if (!_clearing) {
+                        // Call onChanged first to set the query in SearchProvider
                         widget.onChanged?.call(value);
+                        
+                        // Then auto-switch from food tab to text tab if needed
+                        // This order is important: the query must be set before switching modes
+                        // to prevent the _onSearchProviderChanged listener from clearing the text
+                        final searchProvider = Provider.of<SearchProvider>(
+                          context,
+                          listen: false,
+                        );
+                        if (searchProvider.searchMode == SearchMode.food &&
+                            value.isNotEmpty) {
+                          searchProvider.setSearchMode(SearchMode.text);
+                        }
                       }
                     },
                   )

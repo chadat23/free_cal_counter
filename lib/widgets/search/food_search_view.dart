@@ -23,6 +23,8 @@ class FoodSearchView extends StatelessWidget {
           _buildQuickAddButton(context),
           const SizedBox(height: 16),
           _buildCreateFoodButton(context),
+          const SizedBox(height: 16),
+          _buildFastedDayButton(context),
         ],
       ),
     );
@@ -119,6 +121,31 @@ class FoodSearchView extends StatelessWidget {
           }
         },
       ),
+    );
+  }
+
+  Widget _buildFastedDayButton(BuildContext context) {
+    return Consumer<LogProvider>(
+      builder: (context, logProvider, child) {
+        final isFasted = logProvider.isFasted;
+        return SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            icon: Icon(
+              isFasted ? Icons.check_box : Icons.check_box_outline_blank,
+              size: 32,
+            ),
+            label: const Text('Fasted Day', style: TextStyle(fontSize: 18)),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              backgroundColor: isFasted ? Colors.green : null,
+            ),
+            onPressed: () {
+              logProvider.toggleFasted(logProvider.currentDate);
+            },
+          ),
+        );
+      },
     );
   }
 }

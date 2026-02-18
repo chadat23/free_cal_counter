@@ -42,6 +42,7 @@ class LogProvider extends ChangeNotifier {
   final List<model.FoodPortion> _logQueue = [];
   List<model.LoggedPortion> _loggedPortion = [];
   bool _isFasted = false;
+  DateTime _currentDate = DateTime.now();
 
   // Multiselect state
   final Set<int> _selectedPortionIds = {};
@@ -74,6 +75,7 @@ class LogProvider extends ChangeNotifier {
   List<model.FoodPortion> get logQueue => _logQueue;
   List<model.LoggedPortion> get loggedPortion => _loggedPortion;
   bool get isFasted => _isFasted;
+  DateTime get currentDate => _currentDate;
   Set<int> get selectedPortionIds => _selectedPortionIds;
   bool get hasSelectedPortions => _selectedPortionIds.isNotEmpty;
   int get selectedPortionCount => _selectedPortionIds.length;
@@ -195,6 +197,7 @@ class LogProvider extends ChangeNotifier {
 
   // Database Operations
   Future<void> loadLoggedPortionsForDate(DateTime date) async {
+    _currentDate = date;
     final portions = await DatabaseService.instance.getLoggedPortionsForDate(
       date,
     );

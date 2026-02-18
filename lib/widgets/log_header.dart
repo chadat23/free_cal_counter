@@ -4,7 +4,6 @@ import 'package:meal_of_record/models/nutrition_target.dart';
 import 'package:meal_of_record/widgets/horizontal_mini_bar_chart.dart';
 import 'package:meal_of_record/config/app_colors.dart';
 import 'package:meal_of_record/providers/navigation_provider.dart';
-import 'package:meal_of_record/providers/log_provider.dart';
 import 'package:provider/provider.dart';
 
 class LogHeader extends StatefulWidget {
@@ -81,8 +80,6 @@ class _LogHeaderState extends State<LogHeader> {
                   );
                 },
               ),
-              const Spacer(),
-              _buildDayOptionsMenu(context),
             ],
           ),
           const SizedBox(height: 16),
@@ -140,40 +137,6 @@ class _LogHeaderState extends State<LogHeader> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildDayOptionsMenu(BuildContext context) {
-    return Consumer<LogProvider>(
-      builder: (context, logProvider, child) {
-        final isFasted = logProvider.isFasted;
-
-        return PopupMenuButton<String>(
-          icon: const Icon(Icons.more_vert, color: Colors.white),
-          onSelected: (value) {
-            if (value == 'fasted') {
-              logProvider.toggleFasted(widget.date);
-            }
-          },
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              value: 'fasted',
-              child: Row(
-                children: [
-                  Checkbox(
-                    value: isFasted,
-                    onChanged: (val) {
-                      logProvider.toggleFasted(widget.date);
-                      Navigator.pop(context); // Close menu
-                    },
-                  ),
-                  const Text('Fasted Day'),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }

@@ -105,7 +105,7 @@ class LogQueueTopRibbon extends StatelessWidget {
       ),
     ];
 
-    Widget buildChartRow(List<NutritionTarget> targets, String label) {
+    Widget buildChartRow(List<NutritionTarget> targets, String label, {bool forceNotInverted = false}) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -122,7 +122,7 @@ class LogQueueTopRibbon extends StatelessWidget {
           ),
           Consumer<NavigationProvider>(
             builder: (context, navProvider, child) {
-              final notInverted = navProvider.showConsumed;
+              final notInverted = forceNotInverted || navProvider.showConsumed;
               return Row(
                 children: targets
                     .map(
@@ -184,7 +184,7 @@ class LogQueueTopRibbon extends StatelessWidget {
         buildChartRow(projectedTargets, "Day's Macros (Projected)"),
         const SizedBox(height: 4.0),
         // Row 3: Queue's Charts
-        buildChartRow(queueOnlyTargets, "Queue's Macros"),
+        buildChartRow(queueOnlyTargets, "Queue's Macros", forceNotInverted: true),
       ],
     );
   }

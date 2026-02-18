@@ -114,4 +114,23 @@ void main() {
     final queueProteinChart = charts.skip(6).first;
     expect(queueProteinChart.target, 50.0);
   });
+
+  testWidgets('Queue charts use notInverted=true even in Remaining mode', (tester) async {
+    when(mockNavigationProvider.showConsumed).thenReturn(false);
+
+    await tester.pumpWidget(createTestWidget());
+    await tester.pumpAndSettle();
+
+    final charts = tester.widgetList<HorizontalMiniBarChart>(find.byType(HorizontalMiniBarChart)).toList();
+
+    // Day's Macros charts (indices 0-4) should have notInverted=false (Remaining mode)
+    for (int i = 0; i < 5; i++) {
+      expect(charts[i].notInverted, false, reason: "Day chart at index $i should be inverted in Remaining mode");
+    }
+
+    // Queue's Macros charts (indices 5-9) should have notInverted=true always
+    for (int i = 5; i < 10; i++) {
+      expect(charts[i].notInverted, true, reason: "Queue chart at index $i should always be notInverted");
+    }
+  });
 }

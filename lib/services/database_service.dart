@@ -1132,6 +1132,15 @@ class DatabaseService {
     return results.isNotEmpty;
   }
 
+  Future<void> logFasted(DateTime date) async {
+    final isCurrentlyFasted = await isFastedOnDate(date);
+    if (isCurrentlyFasted) return;
+    final fastedFood = await _ensureFastedFood();
+    await logPortions([
+      model.FoodPortion(food: fastedFood, grams: 0, unit: 'system'),
+    ], date);
+  }
+
   Future<void> toggleFasted(DateTime date) async {
     final isCurrentlyFasted = await isFastedOnDate(date);
     final fastedFood = await _ensureFastedFood();

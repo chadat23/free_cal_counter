@@ -7,6 +7,7 @@ import 'package:meal_of_record/screens/food_edit_screen.dart';
 import 'package:meal_of_record/screens/quantity_edit_screen.dart';
 import 'package:meal_of_record/services/database_service.dart';
 import 'package:meal_of_record/widgets/quick_add_dialog.dart';
+import 'package:meal_of_record/providers/navigation_provider.dart';
 import 'package:provider/provider.dart';
 
 class FoodSearchView extends StatelessWidget {
@@ -127,21 +128,23 @@ class FoodSearchView extends StatelessWidget {
   Widget _buildFastedDayButton(BuildContext context) {
     return Consumer<LogProvider>(
       builder: (context, logProvider, child) {
-        final isFasted = logProvider.isFasted;
         return SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
-            icon: Icon(
-              isFasted ? Icons.check_box : Icons.check_box_outline_blank,
+            icon: const Icon(
+              Icons.no_meals,
               size: 32,
             ),
             label: const Text('Fasted Day', style: TextStyle(fontSize: 18)),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 20),
-              backgroundColor: isFasted ? Colors.green : null,
             ),
-            onPressed: () {
-              logProvider.toggleFasted(logProvider.currentDate);
+            onPressed: () async {
+              await logProvider.logFasted(logProvider.currentDate);
+              if (context.mounted) {
+                context.read<NavigationProvider>().changeTab(0);
+                Navigator.popUntil(context, (route) => route.isFirst);
+              }
             },
           ),
         );

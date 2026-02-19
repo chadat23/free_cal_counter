@@ -79,7 +79,7 @@ void main() {
     );
 
     expect(find.text('Today'), findsOneWidget);
-    expect(find.byType(IconButton), findsNWidgets(3));
+    expect(find.byType(IconButton), findsNWidgets(2));
 
     await tester.tap(find.byIcon(Icons.chevron_left));
     await tester.pumpAndSettle();

@@ -225,6 +225,12 @@ class LogProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> logFasted(DateTime date) async {
+    await DatabaseService.instance.logFasted(date);
+    clearQueue();
+    await loadLoggedPortionsForDate(date);
+  }
+
   Future<void> toggleFasted(DateTime date) async {
     await DatabaseService.instance.toggleFasted(date);
     await loadLoggedPortionsForDate(date);

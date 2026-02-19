@@ -44,40 +44,45 @@ import 'package:mockito/src/dummies.dart' as _i15;
 // ignore_for_file: subtype_of_sealed_class
 // ignore_for_file: invalid_use_of_internal_member
 
-class _FakeDailyMacroStats_0 extends _i1.SmartFake
+class _FakeDateTime_0 extends _i1.SmartFake implements DateTime {
+  _FakeDateTime_0(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeDailyMacroStats_1 extends _i1.SmartFake
     implements _i2.DailyMacroStats {
-  _FakeDailyMacroStats_0(Object parent, Invocation parentInvocation)
+  _FakeDailyMacroStats_1(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeDatabaseService_1 extends _i1.SmartFake
+class _FakeDatabaseService_2 extends _i1.SmartFake
     implements _i3.DatabaseService {
-  _FakeDatabaseService_1(Object parent, Invocation parentInvocation)
+  _FakeDatabaseService_2(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeOffApiService_2 extends _i1.SmartFake implements _i4.OffApiService {
-  _FakeOffApiService_2(Object parent, Invocation parentInvocation)
+class _FakeOffApiService_3 extends _i1.SmartFake implements _i4.OffApiService {
+  _FakeOffApiService_3(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeSearchService_3 extends _i1.SmartFake implements _i5.SearchService {
-  _FakeSearchService_3(Object parent, Invocation parentInvocation)
+class _FakeSearchService_4 extends _i1.SmartFake implements _i5.SearchService {
+  _FakeSearchService_4(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeFile_4 extends _i1.SmartFake implements _i6.File {
-  _FakeFile_4(Object parent, Invocation parentInvocation)
+class _FakeFile_5 extends _i1.SmartFake implements _i6.File {
+  _FakeFile_5(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeRecipe_5 extends _i1.SmartFake implements _i7.Recipe {
-  _FakeRecipe_5(Object parent, Invocation parentInvocation)
+class _FakeRecipe_6 extends _i1.SmartFake implements _i7.Recipe {
+  _FakeRecipe_6(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeFood_6 extends _i1.SmartFake implements _i8.Food {
-  _FakeFood_6(Object parent, Invocation parentInvocation)
+class _FakeFood_7 extends _i1.SmartFake implements _i8.Food {
+  _FakeFood_7(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
@@ -165,43 +170,6 @@ class MockLogProvider extends _i1.Mock implements _i9.LogProvider {
           as double);
 
   @override
-  double get dailyTargetCalories =>
-      (super.noSuchMethod(
-            Invocation.getter(#dailyTargetCalories),
-            returnValue: 0.0,
-          )
-          as double);
-
-  @override
-  double get dailyTargetProtein =>
-      (super.noSuchMethod(
-            Invocation.getter(#dailyTargetProtein),
-            returnValue: 0.0,
-          )
-          as double);
-
-  @override
-  double get dailyTargetFat =>
-      (super.noSuchMethod(Invocation.getter(#dailyTargetFat), returnValue: 0.0)
-          as double);
-
-  @override
-  double get dailyTargetCarbs =>
-      (super.noSuchMethod(
-            Invocation.getter(#dailyTargetCarbs),
-            returnValue: 0.0,
-          )
-          as double);
-
-  @override
-  double get dailyTargetFiber =>
-      (super.noSuchMethod(
-            Invocation.getter(#dailyTargetFiber),
-            returnValue: 0.0,
-          )
-          as double);
-
-  @override
   List<_i10.FoodPortion> get logQueue =>
       (super.noSuchMethod(
             Invocation.getter(#logQueue),
@@ -221,6 +189,14 @@ class MockLogProvider extends _i1.Mock implements _i9.LogProvider {
   bool get isFasted =>
       (super.noSuchMethod(Invocation.getter(#isFasted), returnValue: false)
           as bool);
+
+  @override
+  DateTime get currentDate =>
+      (super.noSuchMethod(
+            Invocation.getter(#currentDate),
+            returnValue: _FakeDateTime_0(this, Invocation.getter(#currentDate)),
+          )
+          as DateTime);
 
   @override
   Set<int> get selectedPortionIds =>
@@ -318,6 +294,15 @@ class MockLogProvider extends _i1.Mock implements _i9.LogProvider {
           as _i12.Future<void>);
 
   @override
+  _i12.Future<void> logFasted(DateTime? date) =>
+      (super.noSuchMethod(
+            Invocation.method(#logFasted, [date]),
+            returnValue: _i12.Future<void>.value(),
+            returnValueForMissingStub: _i12.Future<void>.value(),
+          )
+          as _i12.Future<void>);
+
+  @override
   _i12.Future<void> toggleFasted(DateTime? date) =>
       (super.noSuchMethod(
             Invocation.method(#toggleFasted, [date]),
@@ -368,7 +353,7 @@ class MockLogProvider extends _i1.Mock implements _i9.LogProvider {
       (super.noSuchMethod(
             Invocation.method(#getTodayStats, []),
             returnValue: _i12.Future<_i2.DailyMacroStats>.value(
-              _FakeDailyMacroStats_0(
+              _FakeDailyMacroStats_1(
                 this,
                 Invocation.method(#getTodayStats, []),
               ),
@@ -764,7 +749,7 @@ class MockSearchProvider extends _i1.Mock implements _i18.SearchProvider {
   _i3.DatabaseService get databaseService =>
       (super.noSuchMethod(
             Invocation.getter(#databaseService),
-            returnValue: _FakeDatabaseService_1(
+            returnValue: _FakeDatabaseService_2(
               this,
               Invocation.getter(#databaseService),
             ),
@@ -775,7 +760,7 @@ class MockSearchProvider extends _i1.Mock implements _i18.SearchProvider {
   _i4.OffApiService get offApiService =>
       (super.noSuchMethod(
             Invocation.getter(#offApiService),
-            returnValue: _FakeOffApiService_2(
+            returnValue: _FakeOffApiService_3(
               this,
               Invocation.getter(#offApiService),
             ),
@@ -786,7 +771,7 @@ class MockSearchProvider extends _i1.Mock implements _i18.SearchProvider {
   _i5.SearchService get searchService =>
       (super.noSuchMethod(
             Invocation.getter(#searchService),
-            returnValue: _FakeSearchService_3(
+            returnValue: _FakeSearchService_4(
               this,
               Invocation.getter(#searchService),
             ),
@@ -1055,7 +1040,7 @@ class MockDatabaseService extends _i1.Mock implements _i3.DatabaseService {
       (super.noSuchMethod(
             Invocation.method(#exportBackupAsZip, []),
             returnValue: _i12.Future<_i6.File>.value(
-              _FakeFile_4(this, Invocation.method(#exportBackupAsZip, [])),
+              _FakeFile_5(this, Invocation.method(#exportBackupAsZip, [])),
             ),
           )
           as _i12.Future<_i6.File>);
@@ -1325,6 +1310,15 @@ class MockDatabaseService extends _i1.Mock implements _i3.DatabaseService {
           as _i12.Future<bool>);
 
   @override
+  _i12.Future<void> logFasted(DateTime? date) =>
+      (super.noSuchMethod(
+            Invocation.method(#logFasted, [date]),
+            returnValue: _i12.Future<void>.value(),
+            returnValueForMissingStub: _i12.Future<void>.value(),
+          )
+          as _i12.Future<void>);
+
+  @override
   _i12.Future<void> toggleFasted(DateTime? date) =>
       (super.noSuchMethod(
             Invocation.method(#toggleFasted, [date]),
@@ -1420,7 +1414,7 @@ class MockDatabaseService extends _i1.Mock implements _i3.DatabaseService {
       (super.noSuchMethod(
             Invocation.method(#getRecipeById, [id]),
             returnValue: _i12.Future<_i7.Recipe>.value(
-              _FakeRecipe_5(this, Invocation.method(#getRecipeById, [id])),
+              _FakeRecipe_6(this, Invocation.method(#getRecipeById, [id])),
             ),
           )
           as _i12.Future<_i7.Recipe>);
@@ -1475,7 +1469,7 @@ class MockDatabaseService extends _i1.Mock implements _i3.DatabaseService {
       (super.noSuchMethod(
             Invocation.method(#ensureFoodExists, [food]),
             returnValue: _i12.Future<_i8.Food>.value(
-              _FakeFood_6(this, Invocation.method(#ensureFoodExists, [food])),
+              _FakeFood_7(this, Invocation.method(#ensureFoodExists, [food])),
             ),
           )
           as _i12.Future<_i8.Food>);
@@ -1500,7 +1494,7 @@ class MockDatabaseService extends _i1.Mock implements _i3.DatabaseService {
               {#isCopy: isCopy},
             ),
             returnValue: _i12.Future<_i8.Food>.value(
-              _FakeFood_6(
+              _FakeFood_7(
                 this,
                 Invocation.method(
                   #copyFoodToLiveDb,
@@ -1613,7 +1607,7 @@ class MockDatabaseService extends _i1.Mock implements _i3.DatabaseService {
       (super.noSuchMethod(
             Invocation.method(#getSystemQuickAddFood, []),
             returnValue: _i12.Future<_i8.Food>.value(
-              _FakeFood_6(this, Invocation.method(#getSystemQuickAddFood, [])),
+              _FakeFood_7(this, Invocation.method(#getSystemQuickAddFood, [])),
             ),
           )
           as _i12.Future<_i8.Food>);

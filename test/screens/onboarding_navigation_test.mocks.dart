@@ -47,9 +47,14 @@ class _FakeMacroGoals_1 extends _i1.SmartFake implements _i3.MacroGoals {
     : super(parent, parentInvocation);
 }
 
-class _FakeDailyMacroStats_2 extends _i1.SmartFake
+class _FakeDateTime_2 extends _i1.SmartFake implements DateTime {
+  _FakeDateTime_2(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeDailyMacroStats_3 extends _i1.SmartFake
     implements _i4.DailyMacroStats {
-  _FakeDailyMacroStats_2(Object parent, Invocation parentInvocation)
+  _FakeDailyMacroStats_3(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
@@ -587,43 +592,6 @@ class MockLogProvider extends _i1.Mock implements _i13.LogProvider {
           as double);
 
   @override
-  double get dailyTargetCalories =>
-      (super.noSuchMethod(
-            Invocation.getter(#dailyTargetCalories),
-            returnValue: 0.0,
-          )
-          as double);
-
-  @override
-  double get dailyTargetProtein =>
-      (super.noSuchMethod(
-            Invocation.getter(#dailyTargetProtein),
-            returnValue: 0.0,
-          )
-          as double);
-
-  @override
-  double get dailyTargetFat =>
-      (super.noSuchMethod(Invocation.getter(#dailyTargetFat), returnValue: 0.0)
-          as double);
-
-  @override
-  double get dailyTargetCarbs =>
-      (super.noSuchMethod(
-            Invocation.getter(#dailyTargetCarbs),
-            returnValue: 0.0,
-          )
-          as double);
-
-  @override
-  double get dailyTargetFiber =>
-      (super.noSuchMethod(
-            Invocation.getter(#dailyTargetFiber),
-            returnValue: 0.0,
-          )
-          as double);
-
-  @override
   List<_i14.FoodPortion> get logQueue =>
       (super.noSuchMethod(
             Invocation.getter(#logQueue),
@@ -643,6 +611,14 @@ class MockLogProvider extends _i1.Mock implements _i13.LogProvider {
   bool get isFasted =>
       (super.noSuchMethod(Invocation.getter(#isFasted), returnValue: false)
           as bool);
+
+  @override
+  DateTime get currentDate =>
+      (super.noSuchMethod(
+            Invocation.getter(#currentDate),
+            returnValue: _FakeDateTime_2(this, Invocation.getter(#currentDate)),
+          )
+          as DateTime);
 
   @override
   Set<int> get selectedPortionIds =>
@@ -740,6 +716,15 @@ class MockLogProvider extends _i1.Mock implements _i13.LogProvider {
           as _i7.Future<void>);
 
   @override
+  _i7.Future<void> logFasted(DateTime? date) =>
+      (super.noSuchMethod(
+            Invocation.method(#logFasted, [date]),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
+          )
+          as _i7.Future<void>);
+
+  @override
   _i7.Future<void> toggleFasted(DateTime? date) =>
       (super.noSuchMethod(
             Invocation.method(#toggleFasted, [date]),
@@ -790,7 +775,7 @@ class MockLogProvider extends _i1.Mock implements _i13.LogProvider {
       (super.noSuchMethod(
             Invocation.method(#getTodayStats, []),
             returnValue: _i7.Future<_i4.DailyMacroStats>.value(
-              _FakeDailyMacroStats_2(
+              _FakeDailyMacroStats_3(
                 this,
                 Invocation.method(#getTodayStats, []),
               ),

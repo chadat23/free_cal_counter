@@ -10,19 +10,19 @@ class VerticalMiniBarChart extends StatelessWidget {
   final double consumed;
   final double target;
   final Color color;
-  final bool notInverted;
+  final bool showConsumed;
 
   const VerticalMiniBarChart({
     super.key,
     required this.consumed,
     required this.target,
     required this.color,
-    this.notInverted = true,
+    this.showConsumed = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    final double displayValue = notInverted ? consumed : (target - consumed);
+    final double displayValue = showConsumed ? consumed : (target - consumed);
 
     return SizedBox(
       width: 24,

@@ -41,6 +41,10 @@ class _SearchScreenState extends State<SearchScreen> {
         _focusNode.requestFocus();
         navProvider.resetSearchFocus();
       }
+
+      // Ensure logged portions are fresh so bar charts show correct values
+      Provider.of<LogProvider>(context, listen: false)
+          .loadLoggedPortionsForDate(DateTime.now());
     });
   }
 

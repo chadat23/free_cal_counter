@@ -103,7 +103,7 @@ class _NutritionTargetsOverviewChartState
                                         consumed: data.dailyAmounts[dayIndex],
                                         target: data.targetAmount,
                                         color: data.color,
-                                        notInverted: showConsumed,
+                                        showConsumed: showConsumed,
                                       ),
                                     );
                                   }),

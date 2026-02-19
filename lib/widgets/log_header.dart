@@ -85,7 +85,7 @@ class _LogHeaderState extends State<LogHeader> {
           const SizedBox(height: 16),
           Consumer<NavigationProvider>(
             builder: (context, navProvider, child) {
-              final notInverted = navProvider.showConsumed;
+              final showConsumed = navProvider.showConsumed;
               return Row(
                 children: [
                   Expanded(
@@ -95,7 +95,7 @@ class _LogHeaderState extends State<LogHeader> {
                       color: widget.nutritionTargets[0].color,
                       macroLabel: widget.nutritionTargets[0].macroLabel,
                       unitLabel: widget.nutritionTargets[0].unitLabel,
-                      notInverted: notInverted,
+                      showConsumed: showConsumed,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -106,7 +106,7 @@ class _LogHeaderState extends State<LogHeader> {
                       color: widget.nutritionTargets[1].color,
                       macroLabel: widget.nutritionTargets[1].macroLabel,
                       unitLabel: widget.nutritionTargets[1].unitLabel,
-                      notInverted: notInverted,
+                      showConsumed: showConsumed,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -117,7 +117,7 @@ class _LogHeaderState extends State<LogHeader> {
                       color: widget.nutritionTargets[2].color,
                       macroLabel: widget.nutritionTargets[2].macroLabel,
                       unitLabel: widget.nutritionTargets[2].unitLabel,
-                      notInverted: notInverted,
+                      showConsumed: showConsumed,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -128,7 +128,7 @@ class _LogHeaderState extends State<LogHeader> {
                       color: widget.nutritionTargets[3].color,
                       macroLabel: widget.nutritionTargets[3].macroLabel,
                       unitLabel: widget.nutritionTargets[3].unitLabel,
-                      notInverted: notInverted,
+                      showConsumed: showConsumed,
                     ),
                   ),
                 ],

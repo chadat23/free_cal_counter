@@ -6,7 +6,7 @@ class HorizontalMiniBarChart extends StatelessWidget {
   final Color color;
   final String macroLabel;
   final String unitLabel;
-  final bool notInverted;
+  final bool showConsumed;
 
   static const double _maxVisualRatio = 1.15;
 
@@ -17,12 +17,12 @@ class HorizontalMiniBarChart extends StatelessWidget {
     required this.color,
     required this.macroLabel,
     this.unitLabel = '',
-    this.notInverted = true,
+    this.showConsumed = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    final double displayValue = notInverted ? consumed : (target - consumed);
+    final double displayValue = showConsumed ? consumed : (target - consumed);
 
     final double rawRatio = target > 0 ? displayValue / target : 0.0;
 

@@ -20,25 +20,6 @@ class LogProvider extends ChangeNotifier {
     }
   }
 
-  // State for macros
-  double _loggedCalories = 0.0;
-  double _loggedProtein = 0.0;
-  double _loggedFat = 0.0;
-  double _loggedCarbs = 0.0;
-  double _loggedFiber = 0.0;
-
-  double _queuedCalories = 0.0;
-  double _queuedProtein = 0.0;
-  double _queuedFat = 0.0;
-  double _queuedCarbs = 0.0;
-  double _queuedFiber = 0.0;
-
-  final double _dailyTargetCalories = 2000.0;
-  final double _dailyTargetProtein = 150.0;
-  final double _dailyTargetFat = 70.0;
-  final double _dailyTargetCarbs = 250.0;
-  final double _dailyTargetFiber = 30.0;
-
   final List<model.FoodPortion> _logQueue = [];
   List<model.LoggedPortion> _loggedPortion = [];
   bool _isFasted = false;
@@ -47,30 +28,26 @@ class LogProvider extends ChangeNotifier {
   // Multiselect state
   final Set<int> _selectedPortionIds = {};
 
-  // Getters
-  double get loggedCalories => _loggedCalories;
-  double get loggedProtein => _loggedProtein;
-  double get loggedFat => _loggedFat;
-  double get loggedCarbs => _loggedCarbs;
-  double get loggedFiber => _loggedFiber;
+  // Computed getters — logged macros
+  double get loggedCalories => _loggedPortion.fold(0.0, (sum, item) => sum + item.portion.food.calories * item.portion.grams);
+  double get loggedProtein => _loggedPortion.fold(0.0, (sum, item) => sum + item.portion.food.protein * item.portion.grams);
+  double get loggedFat => _loggedPortion.fold(0.0, (sum, item) => sum + item.portion.food.fat * item.portion.grams);
+  double get loggedCarbs => _loggedPortion.fold(0.0, (sum, item) => sum + item.portion.food.carbs * item.portion.grams);
+  double get loggedFiber => _loggedPortion.fold(0.0, (sum, item) => sum + item.portion.food.fiber * item.portion.grams);
 
-  double get queuedCalories => _queuedCalories;
-  double get queuedProtein => _queuedProtein;
-  double get queuedFat => _queuedFat;
-  double get queuedCarbs => _queuedCarbs;
-  double get queuedFiber => _queuedFiber;
+  // Computed getters — queued macros
+  double get queuedCalories => _logQueue.fold(0.0, (sum, item) => sum + item.food.calories * item.grams);
+  double get queuedProtein => _logQueue.fold(0.0, (sum, item) => sum + item.food.protein * item.grams);
+  double get queuedFat => _logQueue.fold(0.0, (sum, item) => sum + item.food.fat * item.grams);
+  double get queuedCarbs => _logQueue.fold(0.0, (sum, item) => sum + item.food.carbs * item.grams);
+  double get queuedFiber => _logQueue.fold(0.0, (sum, item) => sum + item.food.fiber * item.grams);
 
-  double get totalCalories => _loggedCalories + _queuedCalories;
-  double get totalProtein => _loggedProtein + _queuedProtein;
-  double get totalFat => _loggedFat + _queuedFat;
-  double get totalCarbs => _loggedCarbs + _queuedCarbs;
-  double get totalFiber => _loggedFiber + _queuedFiber;
-
-  double get dailyTargetCalories => _dailyTargetCalories;
-  double get dailyTargetProtein => _dailyTargetProtein;
-  double get dailyTargetFat => _dailyTargetFat;
-  double get dailyTargetCarbs => _dailyTargetCarbs;
-  double get dailyTargetFiber => _dailyTargetFiber;
+  // Total getters
+  double get totalCalories => loggedCalories + queuedCalories;
+  double get totalProtein => loggedProtein + queuedProtein;
+  double get totalFat => loggedFat + queuedFat;
+  double get totalCarbs => loggedCarbs + queuedCarbs;
+  double get totalFiber => loggedFiber + queuedFiber;
 
   List<model.FoodPortion> get logQueue => _logQueue;
   List<model.LoggedPortion> get loggedPortion => _loggedPortion;
@@ -83,7 +60,6 @@ class LogProvider extends ChangeNotifier {
   // Queue Operations
   void addFoodToQueue(model.FoodPortion serving) {
     _logQueue.add(serving);
-    _recalculateQueuedMacros();
     notifyListeners();
   }
 
@@ -140,20 +116,17 @@ class LogProvider extends ChangeNotifier {
   void updateFoodInQueue(int index, model.FoodPortion newPortion) {
     if (index >= 0 && index < _logQueue.length) {
       _logQueue[index] = newPortion;
-      _recalculateQueuedMacros();
       notifyListeners();
     }
   }
 
   void removeFoodFromQueue(model.FoodPortion serving) {
     _logQueue.remove(serving);
-    _recalculateQueuedMacros();
     notifyListeners();
   }
 
   void clearQueue() {
     _logQueue.clear();
-    _recalculateQueuedMacros();
     notifyListeners();
   }
 
@@ -182,7 +155,6 @@ class LogProvider extends ChangeNotifier {
     }
 
     if (changed) {
-      _recalculateQueuedMacros();
       notifyListeners();
     }
   }
@@ -221,7 +193,6 @@ class LogProvider extends ChangeNotifier {
     }).toList();
 
     _isFasted = await DatabaseService.instance.isFastedOnDate(date);
-    _recalculateLoggedMacros();
     notifyListeners();
   }
 
@@ -242,7 +213,6 @@ class LogProvider extends ChangeNotifier {
     await DatabaseService.instance.deleteLoggedPortion(food.id!);
 
     _loggedPortion.removeWhere((item) => item.id == food.id);
-    _recalculateLoggedMacros();
     notifyListeners();
   }
 
@@ -260,41 +230,6 @@ class LogProvider extends ChangeNotifier {
     // Reload the logged portions for the current date
     final date = oldLoggedPortion.timestamp;
     await loadLoggedPortionsForDate(date);
-  }
-
-  // Internal Calculation Logic
-  void _recalculateQueuedMacros() {
-    _queuedCalories = 0.0;
-    _queuedProtein = 0.0;
-    _queuedFat = 0.0;
-    _queuedCarbs = 0.0;
-    _queuedFiber = 0.0;
-
-    for (var serving in _logQueue) {
-      final food = serving.food;
-      _queuedCalories += food.calories * serving.grams;
-      _queuedProtein += food.protein * serving.grams;
-      _queuedFat += food.fat * serving.grams;
-      _queuedCarbs += food.carbs * serving.grams;
-      _queuedFiber += food.fiber * serving.grams;
-    }
-  }
-
-  void _recalculateLoggedMacros() {
-    _loggedCalories = 0.0;
-    _loggedProtein = 0.0;
-    _loggedFat = 0.0;
-    _loggedCarbs = 0.0;
-    _loggedFiber = 0.0;
-
-    for (var item in _loggedPortion) {
-      final food = item.portion.food;
-      _loggedCalories += food.calories * item.portion.grams;
-      _loggedProtein += food.protein * item.portion.grams;
-      _loggedFat += food.fat * item.portion.grams;
-      _loggedCarbs += food.carbs * item.portion.grams;
-      _loggedFiber += food.fiber * item.portion.grams;
-    }
   }
 
   Future<List<DailyMacroStats>> getDailyMacroStats(
@@ -415,9 +350,6 @@ class LogProvider extends ChangeNotifier {
     _loggedPortion.removeWhere(
       (item) => item.id != null && selectedIds.contains(item.id!),
     );
-
-    // Recalculate macros
-    _recalculateLoggedMacros();
 
     // Clear selection
     clearSelection();

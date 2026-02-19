@@ -50,11 +50,6 @@ void main() {
     when(mockLogProvider.totalFat).thenReturn(10.0);
     when(mockLogProvider.totalCarbs).thenReturn(80.0);
     when(mockLogProvider.totalFiber).thenReturn(5.0);
-    when(mockLogProvider.dailyTargetCalories).thenReturn(2000.0);
-    when(mockLogProvider.dailyTargetProtein).thenReturn(150.0);
-    when(mockLogProvider.dailyTargetFat).thenReturn(70.0);
-    when(mockLogProvider.dailyTargetCarbs).thenReturn(250.0);
-    when(mockLogProvider.dailyTargetFiber).thenReturn(30.0);
 
     // Default mock behavior for RecipeProvider
     when(mockRecipeProvider.totalCalories).thenReturn(0.0);

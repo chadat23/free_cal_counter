@@ -466,7 +466,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
     String title,
     Map<String, double> values,
     Map<String, double>? targets,
-    bool notInverted,
+    bool showConsumed,
   ) {
     return Card(
       child: Padding(
@@ -483,7 +483,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
                     values['Calories']!,
                     targets?['Calories'] ?? 0,
                     Colors.orange,
-                    notInverted,
+                    showConsumed,
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -493,7 +493,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
                     values['Protein']!,
                     targets?['Protein'] ?? 0,
                     Colors.red,
-                    notInverted,
+                    showConsumed,
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -503,7 +503,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
                     values['Fat']!,
                     targets?['Fat'] ?? 0,
                     Colors.yellow,
-                    notInverted,
+                    showConsumed,
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -513,7 +513,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
                     values['Carbs']!,
                     targets?['Carbs'] ?? 0,
                     Colors.green,
-                    notInverted,
+                    showConsumed,
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -523,7 +523,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
                     values['Fiber']!,
                     targets?['Fiber'] ?? 0,
                     Colors.brown,
-                    notInverted,
+                    showConsumed,
                   ),
                 ),
               ],
@@ -534,7 +534,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
     );
   }
 
-  Widget _buildMiniBar(String label, double value, double target, Color color, bool notInverted) {
+  Widget _buildMiniBar(String label, double value, double target, Color color, bool showConsumed) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.0),
       child: HorizontalMiniBarChart(
@@ -542,7 +542,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
         target: target,
         color: color,
         macroLabel: label,
-        notInverted: notInverted,
+        showConsumed: showConsumed,
       ),
     );
   }

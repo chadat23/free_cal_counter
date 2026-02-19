@@ -59,11 +59,11 @@ void main() {
     when(mockLogProvider.totalFat).thenReturn(0.0);
     when(mockLogProvider.totalCarbs).thenReturn(0.0);
     when(mockLogProvider.totalFiber).thenReturn(0.0);
-    when(mockLogProvider.dailyTargetCalories).thenReturn(2000.0);
-    when(mockLogProvider.dailyTargetProtein).thenReturn(150.0);
-    when(mockLogProvider.dailyTargetFat).thenReturn(70.0);
-    when(mockLogProvider.dailyTargetCarbs).thenReturn(250.0);
-    when(mockLogProvider.dailyTargetFiber).thenReturn(30.0);
+    when(mockLogProvider.loggedCalories).thenReturn(0.0);
+    when(mockLogProvider.loggedProtein).thenReturn(0.0);
+    when(mockLogProvider.loggedFat).thenReturn(0.0);
+    when(mockLogProvider.loggedCarbs).thenReturn(0.0);
+    when(mockLogProvider.loggedFiber).thenReturn(0.0);
     when(mockLogProvider.isFasted).thenReturn(false);
     // Stub loadLoggedFoodsForDate to avoid null errors if called
     when(

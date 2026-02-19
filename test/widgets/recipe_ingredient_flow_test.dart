@@ -76,11 +76,6 @@ void main() {
     when(mockLogProvider.queuedFat).thenReturn(0.0);
     when(mockLogProvider.queuedCarbs).thenReturn(0.0);
     when(mockLogProvider.queuedFiber).thenReturn(0.0);
-    when(mockLogProvider.dailyTargetCalories).thenReturn(2000.0);
-    when(mockLogProvider.dailyTargetProtein).thenReturn(150.0);
-    when(mockLogProvider.dailyTargetFat).thenReturn(70.0);
-    when(mockLogProvider.dailyTargetCarbs).thenReturn(250.0);
-    when(mockLogProvider.dailyTargetFiber).thenReturn(30.0);
     when(mockLogProvider.logQueue).thenReturn([]);
 
     when(mockRecipeProvider.totalCalories).thenReturn(0.0);

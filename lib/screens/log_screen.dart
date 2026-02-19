@@ -65,43 +65,21 @@ class _LogScreenState extends State<LogScreen> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    // Calculate nutrition targets from logged foods
-    final loggedFoods = Provider.of<LogProvider>(context).loggedPortion;
-
-    // We can use the helper from DailyMacroStats, but we need to map LoggedFood to DTO first
-    // OR just sum them up here since we have the full objects already.
-    // However, to be DRY and consistent, let's use the same logic if possible.
-    // Actually, LogProvider already computed _loggedFoods for us.
-    // Calculating stats for detailed views from the list is trivial:
-
-    double totalCalories = 0;
-    double totalProtein = 0;
-    double totalFat = 0;
-    double totalCarbs = 0;
-    double totalFiber = 0;
-
-    for (var food in loggedFoods) {
-      totalCalories += food.portion.food.calories * food.portion.grams;
-      totalProtein += food.portion.food.protein * food.portion.grams;
-      totalFat += food.portion.food.fat * food.portion.grams;
-      totalCarbs += food.portion.food.carbs * food.portion.grams;
-      totalFiber += food.portion.food.fiber * food.portion.grams;
-    }
-
+    final logProvider = Provider.of<LogProvider>(context);
     final goals = Provider.of<GoalsProvider>(context).currentGoals;
 
     final List<NutritionTarget> nutritionTargets = [
       NutritionTarget(
         color: Colors.blue,
-        thisAmount: totalCalories,
+        thisAmount: logProvider.loggedCalories,
         targetAmount: goals.calories,
         macroLabel: '🔥',
         unitLabel: '',
-        dailyAmounts: [], // Not used in LogHeader yet
+        dailyAmounts: [],
       ),
       NutritionTarget(
         color: Colors.red,
-        thisAmount: totalProtein,
+        thisAmount: logProvider.loggedProtein,
         targetAmount: goals.protein,
         macroLabel: 'P',
         unitLabel: 'g',
@@ -109,7 +87,7 @@ class _LogScreenState extends State<LogScreen> with RouteAware {
       ),
       NutritionTarget(
         color: Colors.orange,
-        thisAmount: totalFat,
+        thisAmount: logProvider.loggedFat,
         targetAmount: goals.fat,
         macroLabel: 'F',
         unitLabel: 'g',
@@ -117,7 +95,7 @@ class _LogScreenState extends State<LogScreen> with RouteAware {
       ),
       NutritionTarget(
         color: Colors.green,
-        thisAmount: totalCarbs,
+        thisAmount: logProvider.loggedCarbs,
         targetAmount: goals.carbs,
         macroLabel: 'C',
         unitLabel: 'g',
@@ -125,7 +103,7 @@ class _LogScreenState extends State<LogScreen> with RouteAware {
       ),
       NutritionTarget(
         color: Colors.brown,
-        thisAmount: totalFiber,
+        thisAmount: logProvider.loggedFiber,
         targetAmount: goals.fiber,
         macroLabel: 'Fb',
         unitLabel: 'g',

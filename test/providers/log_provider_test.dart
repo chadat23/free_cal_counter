@@ -235,5 +235,188 @@ void main() {
         expect(logProvider.queuedCalories, 100);
       },
     );
+
+    test('empty state: all computed getters return 0', () {
+      expect(logProvider.queuedCalories, 0.0);
+      expect(logProvider.queuedProtein, 0.0);
+      expect(logProvider.queuedFat, 0.0);
+      expect(logProvider.queuedCarbs, 0.0);
+      expect(logProvider.queuedFiber, 0.0);
+      expect(logProvider.loggedCalories, 0.0);
+      expect(logProvider.loggedProtein, 0.0);
+      expect(logProvider.loggedFat, 0.0);
+      expect(logProvider.loggedCarbs, 0.0);
+      expect(logProvider.loggedFiber, 0.0);
+    });
+
+    test('single item: all 5 queued macro getters are correct', () {
+      final food = Food(
+        id: 1,
+        name: 'Chicken',
+        calories: 1.65,
+        protein: 0.31,
+        fat: 0.036,
+        carbs: 0.0,
+        fiber: 0.0,
+        source: 'test',
+        servings: [
+          FoodServing(id: 1, foodId: 1, unit: 'g', grams: 1.0, quantity: 1.0),
+        ],
+      );
+      final portion = FoodPortion(food: food, grams: 100, unit: 'g');
+
+      logProvider.addFoodToQueue(portion);
+
+      expect(logProvider.queuedCalories, closeTo(165.0, 0.01));
+      expect(logProvider.queuedProtein, closeTo(31.0, 0.01));
+      expect(logProvider.queuedFat, closeTo(3.6, 0.01));
+      expect(logProvider.queuedCarbs, 0.0);
+      expect(logProvider.queuedFiber, 0.0);
+    });
+
+    test('multiple items: sums are correct', () {
+      final food1 = Food(
+        id: 1,
+        name: 'Apple',
+        calories: 0.52,
+        protein: 0.003,
+        fat: 0.002,
+        carbs: 0.14,
+        fiber: 0.024,
+        source: 'test',
+        servings: [
+          FoodServing(id: 1, foodId: 1, unit: 'g', grams: 1.0, quantity: 1.0),
+        ],
+      );
+      final food2 = Food(
+        id: 2,
+        name: 'Banana',
+        calories: 0.89,
+        protein: 0.011,
+        fat: 0.003,
+        carbs: 0.228,
+        fiber: 0.026,
+        source: 'test',
+        servings: [
+          FoodServing(id: 2, foodId: 2, unit: 'g', grams: 1.0, quantity: 1.0),
+        ],
+      );
+      final food3 = Food(
+        id: 3,
+        name: 'Rice',
+        calories: 1.30,
+        protein: 0.027,
+        fat: 0.003,
+        carbs: 0.28,
+        fiber: 0.004,
+        source: 'test',
+        servings: [
+          FoodServing(id: 3, foodId: 3, unit: 'g', grams: 1.0, quantity: 1.0),
+        ],
+      );
+
+      logProvider.addFoodToQueue(FoodPortion(food: food1, grams: 100, unit: 'g'));
+      logProvider.addFoodToQueue(FoodPortion(food: food2, grams: 120, unit: 'g'));
+      logProvider.addFoodToQueue(FoodPortion(food: food3, grams: 200, unit: 'g'));
+
+      // Apple: 0.52*100=52, Banana: 0.89*120=106.8, Rice: 1.30*200=260
+      expect(logProvider.queuedCalories, closeTo(418.8, 0.01));
+      // Apple: 0.003*100=0.3, Banana: 0.011*120=1.32, Rice: 0.027*200=5.4
+      expect(logProvider.queuedProtein, closeTo(7.02, 0.01));
+    });
+
+    test('add then remove: queued macros return to 0', () {
+      final food = Food(
+        id: 1,
+        name: 'Apple',
+        calories: 0.52,
+        protein: 0.003,
+        fat: 0.002,
+        carbs: 0.14,
+        fiber: 0.0,
+        source: 'test',
+        servings: [
+          FoodServing(id: 1, foodId: 1, unit: 'g', grams: 1.0, quantity: 1.0),
+        ],
+      );
+      final portion = FoodPortion(food: food, grams: 100, unit: 'g');
+
+      logProvider.addFoodToQueue(portion);
+      expect(logProvider.queuedCalories, 52);
+
+      logProvider.removeFoodFromQueue(portion);
+      expect(logProvider.queuedCalories, 0.0);
+      expect(logProvider.queuedProtein, 0.0);
+      expect(logProvider.queuedFat, 0.0);
+      expect(logProvider.queuedCarbs, 0.0);
+      expect(logProvider.queuedFiber, 0.0);
+    });
+
+    test('clear queue: all queued macros return to 0', () {
+      final food = Food(
+        id: 1,
+        name: 'Apple',
+        calories: 0.52,
+        protein: 0.003,
+        fat: 0.002,
+        carbs: 0.14,
+        fiber: 0.0,
+        source: 'test',
+        servings: [
+          FoodServing(id: 1, foodId: 1, unit: 'g', grams: 1.0, quantity: 1.0),
+        ],
+      );
+      logProvider.addFoodToQueue(FoodPortion(food: food, grams: 100, unit: 'g'));
+      logProvider.addFoodToQueue(FoodPortion(food: food, grams: 200, unit: 'g'));
+      expect(logProvider.queuedCalories, closeTo(156.0, 0.01));
+
+      logProvider.clearQueue();
+      expect(logProvider.queuedCalories, 0.0);
+      expect(logProvider.queuedProtein, 0.0);
+    });
+
+    test('update item in queue: macros reflect new grams', () {
+      final food = Food(
+        id: 1,
+        name: 'Apple',
+        calories: 0.52,
+        protein: 0.003,
+        fat: 0.002,
+        carbs: 0.14,
+        fiber: 0.0,
+        source: 'test',
+        servings: [
+          FoodServing(id: 1, foodId: 1, unit: 'g', grams: 1.0, quantity: 1.0),
+        ],
+      );
+      logProvider.addFoodToQueue(FoodPortion(food: food, grams: 100, unit: 'g'));
+      expect(logProvider.queuedCalories, 52.0);
+
+      logProvider.updateFoodInQueue(0, FoodPortion(food: food, grams: 200, unit: 'g'));
+      expect(logProvider.queuedCalories, 104.0);
+    });
+
+    test('total getters = logged + queued', () {
+      final food = Food(
+        id: 1,
+        name: 'Apple',
+        calories: 0.52,
+        protein: 0.003,
+        fat: 0.002,
+        carbs: 0.14,
+        fiber: 0.0,
+        source: 'test',
+        servings: [
+          FoodServing(id: 1, foodId: 1, unit: 'g', grams: 1.0, quantity: 1.0),
+        ],
+      );
+      logProvider.addFoodToQueue(FoodPortion(food: food, grams: 100, unit: 'g'));
+
+      expect(logProvider.totalCalories, logProvider.loggedCalories + logProvider.queuedCalories);
+      expect(logProvider.totalProtein, logProvider.loggedProtein + logProvider.queuedProtein);
+      expect(logProvider.totalFat, logProvider.loggedFat + logProvider.queuedFat);
+      expect(logProvider.totalCarbs, logProvider.loggedCarbs + logProvider.queuedCarbs);
+      expect(logProvider.totalFiber, logProvider.loggedFiber + logProvider.queuedFiber);
+    });
   });
 }

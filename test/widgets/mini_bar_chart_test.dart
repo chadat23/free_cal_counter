@@ -24,7 +24,7 @@ void main() {
       expect(find.byType(CustomPaint), findsOneWidget);
     });
 
-    testWidgets('painter has correct properties when notInverted is true', (
+    testWidgets('painter has correct properties when showConsumed is true', (
       WidgetTester tester,
     ) async {
       const consumed = 50.0;
@@ -39,7 +39,7 @@ void main() {
               consumed: consumed,
               target: target,
               color: color,
-              notInverted: true,
+              showConsumed: true,
             ),
           ),
         ),
@@ -53,7 +53,7 @@ void main() {
       expect(painter.color, color);
     });
 
-    testWidgets('painter has inverted value when notInverted is false', (
+    testWidgets('painter has inverted value when showConsumed is false', (
       WidgetTester tester,
     ) async {
       const consumed = 30.0;
@@ -68,7 +68,7 @@ void main() {
               consumed: consumed,
               target: target,
               color: color,
-              notInverted: false,
+              showConsumed: false,
             ),
           ),
         ),
@@ -121,6 +121,51 @@ void main() {
       final customPaint = tester.widget<CustomPaint>(find.byType(CustomPaint));
       final painter = customPaint.painter as VerticalMiniBarChartPainter;
       expect(painter.value, 110);
+    });
+
+    testWidgets('negative remaining when consumed > target in remaining mode', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: VerticalMiniBarChart(
+              consumed: 150,
+              target: 100,
+              color: Colors.blue,
+              showConsumed: false,
+            ),
+          ),
+        ),
+      );
+
+      final customPaint = tester.widget<CustomPaint>(find.byType(CustomPaint));
+      final painter = customPaint.painter as VerticalMiniBarChartPainter;
+      // Remaining: 100 - 150 = -50
+      expect(painter.value, -50.0);
+    });
+
+    testWidgets('zero target: no crash', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: VerticalMiniBarChart(
+              consumed: 50,
+              target: 0,
+              color: Colors.blue,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(VerticalMiniBarChart), findsOneWidget);
+      final customPaint = tester.widget<CustomPaint>(find.byType(CustomPaint));
+      final painter = customPaint.painter as VerticalMiniBarChartPainter;
+      expect(painter.maxValue, 0);
     });
   });
 }

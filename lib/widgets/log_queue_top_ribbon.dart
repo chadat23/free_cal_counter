@@ -41,23 +41,12 @@ class LogQueueTopRibbon extends StatelessWidget {
       );
     }
 
-    final navProvider = Provider.of<NavigationProvider>(context);
-    final showConsumed = navProvider.showConsumed;
-
-    // Calculate targets based on toggle
-    double targetCal = goals.calories;
-    double targetProt = goals.protein;
-    double targetFat = goals.fat;
-    double targetCarb = goals.carbs;
-    double targetFib = goals.fiber;
-
-    if (!showConsumed) {
-      targetCal = (goals.calories - logProvider.loggedCalories).clamp(0, double.infinity);
-      targetProt = (goals.protein - logProvider.loggedProtein).clamp(0, double.infinity);
-      targetFat = (goals.fat - logProvider.loggedFat).clamp(0, double.infinity);
-      targetCarb = (goals.carbs - logProvider.loggedCarbs).clamp(0, double.infinity);
-      targetFib = (goals.fiber - logProvider.loggedFiber).clamp(0, double.infinity);
-    }
+    // Queue targets are always goals minus what's already logged (no clamp)
+    final double targetCal = goals.calories - logProvider.loggedCalories;
+    final double targetProt = goals.protein - logProvider.loggedProtein;
+    final double targetFat = goals.fat - logProvider.loggedFat;
+    final double targetCarb = goals.carbs - logProvider.loggedCarbs;
+    final double targetFib = goals.fiber - logProvider.loggedFiber;
 
     final projectedTargets = [
       createTarget(
@@ -105,7 +94,7 @@ class LogQueueTopRibbon extends StatelessWidget {
       ),
     ];
 
-    Widget buildChartRow(List<NutritionTarget> targets, String label, {bool forceNotInverted = false}) {
+    Widget buildChartRow(List<NutritionTarget> targets, String label) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -122,7 +111,7 @@ class LogQueueTopRibbon extends StatelessWidget {
           ),
           Consumer<NavigationProvider>(
             builder: (context, navProvider, child) {
-              final notInverted = forceNotInverted || navProvider.showConsumed;
+              final showConsumed = navProvider.showConsumed;
               return Row(
                 children: targets
                     .map(
@@ -135,7 +124,7 @@ class LogQueueTopRibbon extends StatelessWidget {
                             color: target.color,
                             macroLabel: target.macroLabel,
                             unitLabel: target.unitLabel,
-                            notInverted: notInverted,
+                            showConsumed: showConsumed,
                           ),
                         ),
                       ),
@@ -184,7 +173,7 @@ class LogQueueTopRibbon extends StatelessWidget {
         buildChartRow(projectedTargets, "Day's Macros (Projected)"),
         const SizedBox(height: 4.0),
         // Row 3: Queue's Charts
-        buildChartRow(queueOnlyTargets, "Queue's Macros", forceNotInverted: true),
+        buildChartRow(queueOnlyTargets, "Queue's Macros"),
       ],
     );
   }

@@ -77,11 +77,11 @@ void main() {
     when(mockLogProvider.queuedFat).thenReturn(0.0);
     when(mockLogProvider.queuedCarbs).thenReturn(0.0);
     when(mockLogProvider.queuedFiber).thenReturn(0.0);
-    when(mockLogProvider.dailyTargetCalories).thenReturn(2000.0);
-    when(mockLogProvider.dailyTargetProtein).thenReturn(150.0);
-    when(mockLogProvider.dailyTargetFat).thenReturn(70.0);
-    when(mockLogProvider.dailyTargetCarbs).thenReturn(250.0);
-    when(mockLogProvider.dailyTargetFiber).thenReturn(30.0);
+    when(mockLogProvider.loggedCalories).thenReturn(0.0);
+    when(mockLogProvider.loggedProtein).thenReturn(0.0);
+    when(mockLogProvider.loggedFat).thenReturn(0.0);
+    when(mockLogProvider.loggedCarbs).thenReturn(0.0);
+    when(mockLogProvider.loggedFiber).thenReturn(0.0);
 
     // Default mocks for RecipeProvider
     when(mockRecipeProvider.totalCalories).thenReturn(0.0);
@@ -122,7 +122,6 @@ void main() {
     (WidgetTester tester) async {
       when(mockLogProvider.logQueue).thenReturn([]);
       when(mockLogProvider.totalCalories).thenReturn(0.0);
-      when(mockLogProvider.dailyTargetCalories).thenReturn(2000.0);
       when(mockSearchProvider.isLoading).thenReturn(false);
       when(mockSearchProvider.errorMessage).thenReturn('Test Error Message');
 
@@ -137,7 +136,6 @@ void main() {
     (WidgetTester tester) async {
       when(mockLogProvider.logQueue).thenReturn([]);
       when(mockLogProvider.totalCalories).thenReturn(0.0);
-      when(mockLogProvider.dailyTargetCalories).thenReturn(2000.0);
       when(mockSearchProvider.isLoading).thenReturn(true);
 
       await tester.pumpWidget(createTestWidget());
@@ -151,7 +149,6 @@ void main() {
   ) async {
     when(mockLogProvider.logQueue).thenReturn([]);
     when(mockLogProvider.totalCalories).thenReturn(0.0);
-    when(mockLogProvider.dailyTargetCalories).thenReturn(2000.0);
 
     await tester.pumpWidget(createTestWidget());
 
@@ -162,7 +159,6 @@ void main() {
   testWidgets('SearchScreen has a SearchRibbon', (WidgetTester tester) async {
     when(mockLogProvider.logQueue).thenReturn([]);
     when(mockLogProvider.totalCalories).thenReturn(0.0);
-    when(mockLogProvider.dailyTargetCalories).thenReturn(2000.0);
 
     await tester.pumpWidget(createTestWidget());
 
@@ -174,7 +170,6 @@ void main() {
   ) async {
     when(mockLogProvider.logQueue).thenReturn([]);
     when(mockLogProvider.totalCalories).thenReturn(0.0);
-    when(mockLogProvider.dailyTargetCalories).thenReturn(2000.0);
     when(mockNavigationProvider.changeTab(any)).thenReturn(null);
 
     await tester.pumpWidget(createTestWidget());
@@ -201,7 +196,6 @@ void main() {
     final serving = FoodPortion(food: food, grams: 1, unit: 'g');
     when(mockLogProvider.logQueue).thenReturn([serving]);
     when(mockLogProvider.totalCalories).thenReturn(52.0);
-    when(mockLogProvider.dailyTargetCalories).thenReturn(2000.0);
 
     await tester.pumpWidget(createTestWidget());
 
@@ -232,7 +226,6 @@ void main() {
     when(mockSearchProvider.searchResults).thenReturn([food]);
     when(mockLogProvider.logQueue).thenReturn([]);
     when(mockLogProvider.totalCalories).thenReturn(0.0);
-    when(mockLogProvider.dailyTargetCalories).thenReturn(2000.0);
 
     await tester.pumpWidget(createTestWidget());
 
@@ -262,7 +255,6 @@ void main() {
       final serving = FoodPortion(food: food, grams: 1, unit: 'g');
       when(mockLogProvider.logQueue).thenReturn([serving]);
       when(mockLogProvider.totalCalories).thenReturn(52.0);
-      when(mockLogProvider.dailyTargetCalories).thenReturn(2000.0);
 
       await tester.pumpWidget(createTestWidget());
 

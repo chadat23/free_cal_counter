@@ -11,8 +11,26 @@ import 'package:meal_of_record/models/quantity_edit_config.dart';
 import 'package:meal_of_record/screens/quantity_edit_screen.dart';
 import 'package:provider/provider.dart';
 
-class LogQueueScreen extends StatelessWidget {
+class LogQueueScreen extends StatefulWidget {
   const LogQueueScreen({super.key});
+
+  @override
+  State<LogQueueScreen> createState() => _LogQueueScreenState();
+}
+
+class _LogQueueScreenState extends State<LogQueueScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Ensure logged portions are fresh so bar charts show correct values
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Provider.of<LogProvider>(context, listen: false)
+            .loadLoggedPortionsForDate(DateTime.now())
+            .catchError((_) {}); // DB may not be ready in tests
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

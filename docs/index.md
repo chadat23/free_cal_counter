@@ -1,57 +1,25 @@
-# Getting Started with Meal of Record
+# Welcome to Meal of Record
 
-Welcome to Meal of Record! This app is designed to help you achieve your fitness goals by tracking your calories, macros, and weight over time with a focus on speed, flexibility, and data integrity and privacy.
+Meal of Record is a calorie and macro tracker that lives entirely on your phone. It's built to be fast, flexible, and private — no accounts, no subscriptions, no cloud dependency.
 
-## App Overview
+## Why Meal of Record?
 
-Meal of Record is built to be fast, private, and reliable. Your data lives on your device, not on a remote server.
+- **Fast** — Search, tap, log. Barcode scanning, quick-add shortcuts, and a queue system that lets you build a whole meal before committing it.
+- **Private** — Your data stays on your device. Backups go to your own NAS or a file you control, never to someone else's server.
+- **Flexible** — Create your own foods, build recipes, define custom serving sizes, and adjust everything to match how you actually eat.
+- **Accurate** — A built-in versioning system means your past logs always reflect what you actually ate, even if you update a food's nutrition later.
 
-- **Fast Entry**: Quick search and barcode scanning to get your meals logged in seconds.
-- **Flexible Recipes**: Create complex recipes or simple templates you can "dump" and edit.
-- **Smart Goals**: Automatically adjust your calorie targets based on your actual weight and eating trends.
-- **Data Protection**: Automatic backups to your NAS and a versioning system that keeps your history accurate even if you update food or recipe definitions.
+## Where to Start
 
-![[Screenshot: The Overview screen showing the week's macro progress and weight graph]](assets/overview_screen.png)
+**Setting up goals first?** Head to [Goals & Weight Tracking](guides/goals.md) to configure your calorie targets, macros, and weight tracking. This gives you the most useful experience from day one.
 
----
+**Just want to dive in?** Jump to [Your First Meal](first-meal.md) for a quick walkthrough of logging your first food entry.
 
-## Workflow: Logging a Meal
+## How These Docs Are Organized
 
-The most frequent task in Meal of Record is logging what you've eaten. Here’s the standard flow:
-
-### 1. Open Search
-From the **Overview** or **Log** screen, tap the Search bar at the bottom.
-
-![[Screenshot: The Search bar at the bottom of the screen]](assets/search_bar.png)
-
-### 2. Find Your Food
-Type the name of the food. The app searches your local database first.
-- If it's something you've had before, it will appear towards the top in the results with a gray background.
-- If it's something you've never logged before, look in the Standard Foods results which will display below previously logged search results (blue backgrounds being gold standard USDA data, red being historic USDA data)
-- Still can't find it? Tap the **Globe icon** to search the Open Food Facts (OFF) database.
-- *Tip*: Tapping on the images at the side of the OFF search results will expand them.
-
-![[Screenshot: Search results with Live DB items at the top and the Globe icon highlighted]](assets/search_results.png)
-
-### 3. Add to Log Queue
-Tap the **(+) button** on a food item to add one default serving to your **Log Queue**.
-- *Tip:* You can use the dropdown menue to select between common serving sizes.
-- *Tip:* If you need to enter a specific weight (e.g., 150g of chicken) or unit of measure, tap the food item itself instead of the (+) button to open the **Quantity Edit Screen**.
-
-### 4. Review the Log Queue
-As you add items, they appear in the bar at the top of the search screen. Tap the **Down Arrow** to open the **Log Queue Screen**. Think of this a a scratch pad where you can see the combined impact of the meal you're prepping on your daily targets.
-
-![[Screenshot: The Log Queue screen showing a list of pending items and their macro sum]](assets/log_queue.png)
-
-### 5. Log It!
-Once your meal has been completely added to the queue, tap the **Log button** (checkmark or "Log"). This commits all items to your daily log with the current timestamp.
-
----
-
-## Main Screens
-
-- **Overview**: Your dashboard for the week. See macro bars for each day and your weight trend.
-- **Log**: Your daily diary. Move between days to see what you ate and edit past entries.
-- **Search**: The gateway to adding data. Toggles between Text, Barcode, Recipes, and more one off actions.
-- **Weight**: A simple screen to record your weight each day.
-- **Settings**: Where you manage goals, backups, and app preferences.
+| Section | What's Inside |
+|---------|---------------|
+| **Getting Started** | A quick welcome and your first meal walkthrough |
+| **Guides** | Task-focused tutorials — logging food, creating recipes, setting goals, backing up data |
+| **Reference** | Screen-by-screen documentation of every feature and action |
+| **Concepts** | The building blocks — how foods, servings, and recipes fit together |

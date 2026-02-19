@@ -1,21 +1,20 @@
 # About Meal of Record
 
-Meal of Record was built with a simple philosophy: **Your data should be yours, and logging should be fast and space efficient.**
+Meal of Record was built with a simple philosophy: **your data should be yours, and logging should be fast.**
 
 ## The Philosophy
 
-Most nutrition apps are built around cloud-first databases that require constant internet connections, monthly subscriptions, and invasive tracking. Meal of Record takes a different path:
+Most nutrition apps are built around cloud services that require accounts, subscriptions, and constant internet connections. Meal of Record takes a different approach:
 
-- **Local First**: Your data stays on your phone. It's faster to search, faster to log, and works in a basement or on a plane.
-- **Transparent Nutrition**: We prioritize high-quality reference data (like the USDA) and give you the tools to verify and edit every macro.
-- **Privacy by Design**: No accounts to create, no tracking pixels, and no selling your data. Even our cloud backups are stored in your own private NAS.
+- **Local first** — Your data stays on your phone. Searching, logging, and editing all work without an internet connection. It's faster and more reliable.
+- **Transparent nutrition** — The app prioritizes high-quality reference data (primarily from the USDA) and gives you full control to verify and edit every value.
+- **Privacy by design** — No accounts to create, no tracking, no data sold. Backups go to your own NAS or a file you manage yourself.
 
-## Credits & Data Sources
+## Data Sources
 
-- **USDA FoodData Central**: The primary source for our high-quality Reference Database.
-- **Open Food Facts**: A collaborative, free, and open database of food products from around the world.
-- **Material Design**: For the clean, modern interface.
+- **USDA FoodData Central** — The primary source for the built-in food library, providing high-quality nutritional data for common foods.
+- **Open Food Facts** — A collaborative, free, and open database of packaged food products from around the world.
 
 ---
 
-*Meal of Record - Track your journey, own your data.*
+*Meal of Record — Track your journey, own your data.*

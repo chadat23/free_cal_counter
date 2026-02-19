@@ -1,46 +1,50 @@
 # Core Concepts
 
-To use Meal of Record effectively, it's helpful to understand the basic building blocks of how food data is structured.
+A quick guide to the building blocks you'll encounter throughout the app.
 
-## Terminology
+## Food
 
-- **Food**: This is the master record for an item (e.g., "Apple"). It contains the nutritional values (Calories, Protein, Fat, Carbs, Fiber) normalized to 1 gram.
-- **Serving**: A named unit of measurement for a Food. For example, a "Medium Apple" might be defined as weighing 182 grams. A single Food can have many Servings (e.g., "1 cup", "1 piece", "100g").
-- **Quantity** (or **Amount**): The number of units you are referring to. For example, the "1.5" in "1.5 cups".
-- **Portion**: A specific instance of a Food being logged or used in a recipe. A Portion combines a Food, a Serving unit, and a Quantity to calculate total macros, and the date and time of when it was logged.
+A food is any item you can log — an apple, a chicken breast, a protein bar, a tablespoon of olive oil. Each food has a set of nutritional values: calories, protein, fat, carbs, and fiber.
+
+Foods come from three places:
+
+- **Your Foods** — Things you've created, edited, or previously logged. These appear with a gray background in search and always show up first. Think of this as your personal pantry.
+- **Standard Foods (USDA)** — A large, built-in library of common foods with high-quality nutritional data from the USDA. Blue backgrounds in search indicate gold-standard data; red backgrounds indicate older entries. Think of this as a reference cookbook that came with the app.
+- **Open Food Facts** — A massive online database of packaged products from around the world. You search it by tapping the globe icon. Think of this as the nutrition label for everything at the supermarket.
+
+## Serving
+
+A serving is a **named portion size** with a gram weight. For example, an apple might have servings like "1 medium" (182g) and "1 cup sliced" (110g). A food can have as many serving definitions as you like.
+
+Good serving definitions make logging faster — instead of remembering weights, you just pick "1 medium" from a dropdown.
+
+## Quantity
+
+The number of servings you had. If you ate one and a half medium apples, your quantity is `1.5` with the serving set to "1 medium."
+
+## Portion
+
+A portion is what actually gets recorded in your log: a specific food, at a specific serving size, in a specific quantity, on a specific date and time. It's the combination of all the above — "1.5 medium apples, logged at lunch on Tuesday."
 
 ---
 
 ## Where Does Food Data Come From?
 
-Meal of Record balances a massive library of standard foods with your own personal edits and creations. You can think of it as two separate "shelves" in your pantry:
+When you search for something, the app checks three sources in order:
 
-### 1. The Global Library (Standard Foods)
-This can be thought of as ingrediants, that is, stuff that doesn't have a recipe of it's own; carrots, berries, olive oil, etc. This is a huge collection of standard foods (from the USDA) that come built-in with the app. You can't change these master records, which ensures the "baseline" data always stays accurate. Something worth noting about this baseline set of foods is that things that you find in it that do have recipes (cookies, bread, yogert, etc.) are generally generic so while you're obviously welcome to use them, they'll yield less accurate tracking.
+1. **Your Foods** — fast, local, always available
+2. **Standard Foods** — fast, local, always available
+3. **Open Food Facts** — requires internet, triggered by tapping the globe
 
-### 2. Your personal library of logged foods, recipes, and creations
-This is your private space. It contains:
-- **Custom Foods**: Things you've added yourself.
-- **Your Recipes**: Complex meals you've designed.
-- **Your Saved Foods and Versions**: If you find an "Apple" in the Global Library but want to adjust its calories or change its name for your own use, the app creates a personal copy for you, and even if you use the apple as is, that's remembered so in the future, it'll be easier to find that particular food.
-
-### 3. OpenFoodFacts
-This is a third-party database of food products that you can use to search for additional food.
-- **Enormous**: It contains tons of packaged foods. It's a great way to find all the foods that come from "the center of the supermarket" where things tend to have proprietary recipies.
-- **Fallback**: Given that it involved remotely accessing data, it's slower than the other data sources and thus treated as a fallback.
-
-By separating these, the app ensures that your personal tweaks never get overwritten, while still giving you access to thousands of standard items, and seemingly infinite branded foods as well.
-
-![[Screenshot: The Search screen showing color-coded results for different data sources]](assets/search_sources.png)
-Here you can see some search results. The gray ones are from your personal library and always show at the top, the blue and red ones are from the Global Library with the blue being the USDA's gold standard data, and the red ones being the USDA's historic data.
+The color coding in search results tells you which source each result came from, so you always know what you're looking at.
 
 ---
 
-## Protecting Your History
+??? info "Under the Hood: How Your History Stays Accurate"
+    One of the most important things the app does behind the scenes is protect your past logs.
 
-One of the most important things Meal of Record does is protect your past logs. 
+    **The short version:** When you log a food, the app takes a snapshot of its nutritional data at that moment. Even if you later update the food's calories or macros, your past logs still reflect what you actually ate.
 
-If you log a meal today, and then next week you realize a food's calories were slightly wrong and you update it, the app is smart enough to handle it:
+    **How it works:** If you change a food's name or emoji, the update applies everywhere instantly — that's a cosmetic change. But if you change the nutritional values (calories, protein, fat, carbs, or fiber), the app creates a new version of the food. Future logs use the new version; past logs keep the old one. You never have to worry about an edit rewriting your history.
 
-- **Simple Updates**: If you just change a food's name or its emoji, the app updates all your logs instantly.
-- **Nutritional Updates**: If you change the calories or macros of a food or recipe, the app creates a "new version" for future use. This ensures your past logs, your record, stay exactly as they were when you ate the meal, while your future logs will use the new, more accurate data. Note: as a result, if you update the calories or macros of a food that's an ingrediant in a recipe, or a recipe that's an ingrediant in another recipe, the referncing recipe will continue to reference the old version until you edit the recipe and replace the ingrediant with the updated one.
+    **One thing to know about recipes:** If you update the macros of a food that's used as an ingredient in a recipe, the recipe continues using the old version of that ingredient until you manually edit the recipe and swap in the updated food. This is intentional — it keeps your recipe stable until you decide to change it.

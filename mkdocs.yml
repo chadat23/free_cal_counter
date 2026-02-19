@@ -1,12 +1,52 @@
 site_name: Meal of Record
-theme: material
+
+theme:
+  name: material
+  palette:
+    scheme: default
+    primary: teal
+    accent: amber
+  features:
+    - navigation.sections
+    - navigation.expand
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - toc:
+      permalink: true
+
+plugins:
+  - search
 
 nav:
-  - Home: index.md
-  - Concepts: concepts.md
-  - Search & Logging: search_logging.md
-  - Recipes: recipes.md
-  - Goals: goals.md
-  - Data & Storage: data_management.md
+  - Getting Started:
+    - Welcome: index.md
+    - Your First Meal: first-meal.md
+  - Guides:
+    - Logging Food: guides/logging.md
+    - Creating Custom Foods: guides/custom-foods.md
+    - Recipes & Templates: guides/recipes.md
+    - Goals & Weight Tracking: guides/goals.md
+    - Backing Up Your Data: guides/backups.md
+  - Reference:
+    - Overview Screen: reference/overview.md
+    - Log Screen: reference/log.md
+    - Search Screen: reference/search.md
+    - Quantity Edit: reference/quantity-edit.md
+    - Log Queue: reference/log-queue.md
+    - Recipe Edit: reference/recipe-edit.md
+    - Food Edit: reference/food-edit.md
+    - Weight Screen: reference/weight.md
+    - Settings: reference/settings.md
+    - QR Sharing: reference/qr-sharing.md
+  - Concepts:
+    - Core Concepts: concepts.md
   - About: about.md
-  

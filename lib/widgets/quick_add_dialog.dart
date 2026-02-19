@@ -1,80 +1,89 @@
 import 'package:flutter/material.dart';
 import 'package:meal_of_record/models/food_portion.dart';
 import 'package:meal_of_record/services/database_service.dart';
+import 'package:meal_of_record/utils/math_evaluator.dart';
+import 'package:meal_of_record/widgets/math_input_bar.dart';
+import 'package:meal_of_record/widgets/screen_background.dart';
 
-/// A simplified Quick Add dialog that only asks for calories.
-/// Uses a system "Quick Add" food where 1 gram = 1 calorie.
-/// Returns a FoodPortion with grams equal to the entered calories.
-class QuickAddDialog extends StatefulWidget {
-  const QuickAddDialog({super.key});
+class QuickAddScreen extends StatefulWidget {
+  const QuickAddScreen({super.key});
 
   @override
-  State<QuickAddDialog> createState() => _QuickAddDialogState();
+  State<QuickAddScreen> createState() => _QuickAddScreenState();
 }
 
-class _QuickAddDialogState extends State<QuickAddDialog> {
-  final _formKey = GlobalKey<FormState>();
+class _QuickAddScreenState extends State<QuickAddScreen> {
   final _caloriesController = TextEditingController();
+  final _focusNode = FocusNode();
+  bool _hasFocus = false;
   bool _isLoading = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      setState(() => _hasFocus = _focusNode.hasFocus);
+    });
+    _caloriesController.addListener(() => setState(() {}));
+  }
 
   @override
   void dispose() {
     _caloriesController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Quick Add'),
-      content: Form(
-        key: _formKey,
-        child: TextFormField(
-          controller: _caloriesController,
-          decoration: const InputDecoration(
-            labelText: 'Calories',
-            suffixText: 'kcal',
-          ),
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          autofocus: true,
-          validator: (val) {
-            if (val == null || val.isEmpty) return 'Required';
-            final parsed = double.tryParse(val);
-            if (parsed == null || parsed <= 0) return 'Enter a positive number';
-            return null;
-          },
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: _isLoading ? null : _submit,
-          child: _isLoading
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('Add'),
-        ),
-      ],
-    );
+  bool get _hasOperator {
+    final text = _caloriesController.text;
+    // Check for operators that aren't just a leading negative sign
+    final withoutLeadingMinus = text.startsWith('-') ? text.substring(1) : text;
+    return withoutLeadingMinus.contains(RegExp(r'[+\-*/]'));
+  }
+
+  double? get _previewValue {
+    final text = _caloriesController.text.trim();
+    if (text.isEmpty || !_hasOperator) return null;
+    final result = MathEvaluator.evaluate(text);
+    if (result == null || result.isInfinite || result.isNaN) return null;
+    return result;
+  }
+
+  String _formatResult(double val) {
+    if (val == 0) return '0';
+    if (val < 1) return val.toStringAsFixed(1);
+    return val.toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '');
   }
 
   Future<void> _submit() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+    final text = _caloriesController.text.trim();
+    if (text.isEmpty) {
+      setState(() => _error = 'Required');
+      return;
+    }
 
-    setState(() => _isLoading = true);
+    double? calories = double.tryParse(text);
+    calories ??= MathEvaluator.evaluate(text);
+
+    if (calories == null || calories.isInfinite || calories.isNaN) {
+      setState(() => _error = 'Invalid expression');
+      return;
+    }
+    if (calories <= 0) {
+      setState(() => _error = 'Enter a positive number');
+      return;
+    }
+
+    setState(() {
+      _error = null;
+      _isLoading = true;
+    });
 
     try {
-      final calories = double.parse(_caloriesController.text);
       final quickAddFood =
           await DatabaseService.instance.getSystemQuickAddFood();
 
-      // Create portion where grams = calories (since food is 1 cal/gram)
       final portion = FoodPortion(
         food: quickAddFood,
         grams: calories,
@@ -95,5 +104,78 @@ class _QuickAddDialogState extends State<QuickAddDialog> {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final showMathBar = _hasFocus && keyboardHeight > 0;
+    final preview = _previewValue;
+
+    return ScreenBackground(
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(title: const Text('Quick Add')),
+      child: Stack(
+        children: [
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              24,
+              32,
+              24,
+              showMathBar ? 48 + keyboardHeight : keyboardHeight,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  controller: _caloriesController,
+                  focusNode: _focusNode,
+                  decoration: InputDecoration(
+                    labelText: 'Calories',
+                    suffixText: 'kcal',
+                    errorText: _error,
+                  ),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  autofocus: true,
+                  onSubmitted: (_) => _submit(),
+                ),
+                if (_hasOperator && preview != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      '= ${_formatResult(preview)} kcal',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.6),
+                          ),
+                    ),
+                  ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: _isLoading ? null : _submit,
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Add'),
+                ),
+              ],
+            ),
+          ),
+          if (showMathBar)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: keyboardHeight,
+              child: MathInputBar(controller: _caloriesController),
+            ),
+        ],
+      ),
+    );
   }
 }

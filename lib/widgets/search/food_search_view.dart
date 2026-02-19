@@ -42,9 +42,11 @@ class FoodSearchView extends StatelessWidget {
           backgroundColor: Colors.orange,
         ),
         onPressed: () async {
-          final portion = await showDialog<model_portion.FoodPortion>(
-            context: context,
-            builder: (context) => const QuickAddDialog(),
+          final portion = await Navigator.push<model_portion.FoodPortion>(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const QuickAddScreen(),
+            ),
           );
 
           if (portion != null && context.mounted) {

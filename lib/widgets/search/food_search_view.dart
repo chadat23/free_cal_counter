@@ -39,7 +39,6 @@ class FoodSearchView extends StatelessWidget {
         label: const Text('Quick Add', style: TextStyle(fontSize: 18)),
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 20),
-          backgroundColor: Colors.orange,
         ),
         onPressed: () async {
           final portion = await Navigator.push<model_portion.FoodPortion>(

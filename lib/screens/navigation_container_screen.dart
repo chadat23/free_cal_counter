@@ -92,7 +92,7 @@ class NavigationContainerScreen extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'New Calorie Target: ${goalsProvider.currentGoals.calories.toInt()} kcal',
+              'New Calorie Target: ${goalsProvider.currentGoals.calories.toInt()} cal',
             ),
             Text('Protein: ${goalsProvider.currentGoals.protein.toInt()}g'),
             Text('Fat: ${goalsProvider.currentGoals.fat.toInt()}g'),

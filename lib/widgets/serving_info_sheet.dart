@@ -134,7 +134,7 @@ class ServingInfoSheet extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: 12),
-          _buildMacroRow('Calories', _formatMacro(calories), 'kcal'),
+          _buildMacroRow('Calories', _formatMacro(calories), 'cal'),
           _buildMacroRow('Protein', _formatMacro(protein), 'g'),
           _buildMacroRow('Fat', _formatMacro(fat), 'g'),
           _buildMacroRow('Carbs', _formatMacro(carbs), 'g'),

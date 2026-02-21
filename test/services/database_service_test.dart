@@ -9,7 +9,6 @@ import 'package:drift/native.dart';
 import 'package:meal_of_record/models/food.dart' as model;
 import 'package:meal_of_record/models/food_serving.dart' as model_serving;
 import 'package:meal_of_record/models/food_portion.dart' as model_portion;
-import 'package:meal_of_record/models/logged_portion.dart' as model_logged;
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

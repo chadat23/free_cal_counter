@@ -18,7 +18,6 @@ import 'package:provider/provider.dart';
 import 'package:meal_of_record/services/database_service.dart';
 import 'package:meal_of_record/services/live_database.dart' as live_db;
 import 'package:meal_of_record/services/reference_database.dart' as ref_db;
-import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 
 import 'package:meal_of_record/providers/navigation_provider.dart';

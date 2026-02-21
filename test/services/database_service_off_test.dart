@@ -1,4 +1,3 @@
-import 'package:drift/drift.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_test/flutter_test.dart' hide isNotNull;
 import 'package:matcher/matcher.dart' as matcher;

@@ -375,16 +375,16 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
-  /// Calculates the next Monday from a given date.
-  DateTime _getNextMonday(DateTime fromDate) {
-    int daysUntilMonday = (DateTime.monday - fromDate.weekday + 7) % 7;
-    if (daysUntilMonday == 0) {
-      daysUntilMonday = 7; // If today is Monday, next Monday is 7 days away
-    }
-    return DateTime(
-      fromDate.year,
-      fromDate.month,
-      fromDate.day,
-    ).add(Duration(days: daysUntilMonday));
-  }
+  ///// Calculates the next Monday from a given date.
+  //DateTime _getNextMonday(DateTime fromDate) {
+  //  int daysUntilMonday = (DateTime.monday - fromDate.weekday + 7) % 7;
+  //  if (daysUntilMonday == 0) {
+  //    daysUntilMonday = 7; // If today is Monday, next Monday is 7 days away
+  //  }
+  //  return DateTime(
+  //    fromDate.year,
+  //    fromDate.month,
+  //    fromDate.day,
+  //  ).add(Duration(days: daysUntilMonday));
+  //}
 }

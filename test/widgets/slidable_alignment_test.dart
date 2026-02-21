@@ -4,7 +4,6 @@ import 'package:meal_of_record/models/food.dart';
 import 'package:meal_of_record/models/food_serving.dart';
 import 'package:meal_of_record/widgets/search/slidable_recipe_search_result.dart';
 import 'package:meal_of_record/widgets/search/slidable_search_result.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:drift/native.dart';
 import 'package:meal_of_record/services/database_service.dart';
 import 'package:meal_of_record/services/live_database.dart' as live_db;

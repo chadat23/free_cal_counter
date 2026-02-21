@@ -160,7 +160,7 @@ void main() {
           mockLogProvider.addFoodToQueue(
             argThat(
               isA<model_portion.FoodPortion>().having(
-                (p) => (p as model_portion.FoodPortion).grams,
+                (p) => p.grams,
                 'grams',
                 100.0,
               ),

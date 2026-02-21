@@ -173,7 +173,7 @@ void main() {
         final loaded = await databaseService.getRecipeById(id);
 
         expect(loaded, isNotNull);
-        expect(loaded!.emoji, '🍰');
+        expect(loaded.emoji, '🍰');
         expect(loaded.thumbnail, 'local://image123');
       },
     );

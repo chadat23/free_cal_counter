@@ -1,6 +1,5 @@
 import 'package:fuzzywuzzy/fuzzywuzzy.dart' as fuzzy;
 import 'package:meal_of_record/models/food.dart' as model;
-import 'package:meal_of_record/models/recipe.dart' as model;
 import 'package:meal_of_record/services/database_service.dart';
 import 'package:meal_of_record/services/open_food_facts_service.dart';
 import 'package:meal_of_record/services/food_sorting_service.dart';

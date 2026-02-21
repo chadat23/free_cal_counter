@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:meal_of_record/services/background_backup_worker.dart';
 import 'package:meal_of_record/services/backup_config_service.dart';
@@ -13,7 +12,6 @@ import 'package:meal_of_record/services/emoji_service.dart';
 import 'package:meal_of_record/services/open_food_facts_service.dart';
 import 'package:meal_of_record/services/search_service.dart';
 import 'package:meal_of_record/services/food_sorting_service.dart';
-import 'package:meal_of_record/utils/debug_seeder.dart';
 import 'package:provider/provider.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
 

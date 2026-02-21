@@ -7,7 +7,6 @@ import 'package:meal_of_record/models/logged_portion.dart';
 import 'package:meal_of_record/models/meal.dart';
 import 'package:meal_of_record/models/food_serving.dart';
 import 'package:meal_of_record/widgets/meal_widget.dart';
-import 'package:meal_of_record/widgets/portion_widget.dart';
 import 'package:meal_of_record/widgets/slidable_portion_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:mockito/annotations.dart';

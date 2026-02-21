@@ -4,7 +4,6 @@ import 'package:meal_of_record/models/food.dart';
 import 'package:meal_of_record/models/food_serving.dart';
 import 'package:meal_of_record/models/quantity_edit_config.dart';
 import 'package:meal_of_record/models/recipe.dart';
-import 'package:meal_of_record/models/recipe_item.dart';
 import 'package:meal_of_record/providers/log_provider.dart';
 import 'package:meal_of_record/providers/recipe_provider.dart';
 import 'package:meal_of_record/providers/goals_provider.dart';

@@ -2,7 +2,6 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meal_of_record/models/food.dart' as model;
-import 'package:meal_of_record/models/food.dart' as model;
 import 'package:meal_of_record/models/food_serving.dart';
 import 'package:meal_of_record/screens/food_edit_screen.dart';
 import 'package:meal_of_record/services/database_service.dart';

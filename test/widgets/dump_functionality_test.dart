@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meal_of_record/models/food.dart';
 import 'package:meal_of_record/models/food_serving.dart';
-import 'package:meal_of_record/models/recipe.dart';
-import 'package:meal_of_record/models/recipe_item.dart';
 import 'package:meal_of_record/providers/log_provider.dart';
 import 'package:meal_of_record/providers/recipe_provider.dart';
 import 'package:meal_of_record/providers/search_provider.dart';
@@ -37,7 +35,6 @@ void main() {
   late MockRecipeProvider mockRecipeProvider;
   late MockSearchProvider mockSearchProvider;
   late MockNavigationProvider mockNavigationProvider;
-  late MockDatabaseService mockDatabaseService;
 
   final mockFood = Food(
     id: 1,
@@ -51,21 +48,11 @@ void main() {
     servings: [FoodServing(foodId: 1, unit: 'g', grams: 1.0, quantity: 1.0)],
   );
 
-  final mockRecipe = Recipe(
-    id: 1,
-    name: 'Apple Pie',
-    servingsCreated: 1.0,
-    isTemplate: true,
-    createdTimestamp: 0,
-    items: [RecipeItem(id: 1, food: mockFood, grams: 100, unit: 'g')],
-  );
-
   setUp(() {
     mockLogProvider = MockLogProvider();
     mockRecipeProvider = MockRecipeProvider();
     mockSearchProvider = MockSearchProvider();
     mockNavigationProvider = MockNavigationProvider();
-    mockDatabaseService = MockDatabaseService();
 
     // Setup defaults
     when(mockRecipeProvider.name).thenReturn('Apple Pie');

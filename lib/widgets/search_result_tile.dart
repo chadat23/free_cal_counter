@@ -79,6 +79,15 @@ class _SearchResultTileState extends State<SearchResultTile> {
   }
 
   Color _getBackgroundColor(BuildContext context) {
+    // Live foods use default color (logged), except recipes keep their color
+    if (widget.food.database == FoodDatabase.live) {
+      if (widget.food.source == 'recipe') {
+        return AppColors.searchResultRecipe;
+      }
+      return Theme.of(context).canvasColor;
+    }
+
+    // Reference/OFF foods get color-coded by source
     switch (widget.food.source) {
       case 'FOUNDATION':
         return AppColors.searchResultBetter;
@@ -86,10 +95,8 @@ class _SearchResultTileState extends State<SearchResultTile> {
         return AppColors.searchResultGood;
       case 'off':
         return AppColors.searchResultBest;
-      case 'recipe':
-        return AppColors.searchResultRecipe;
       default:
-        return Theme.of(context).canvasColor; // Use default theme color
+        return Theme.of(context).canvasColor;
     }
   }
 

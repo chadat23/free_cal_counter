@@ -132,7 +132,7 @@ class _QuickAddScreenState extends State<QuickAddScreen> {
                   focusNode: _focusNode,
                   decoration: InputDecoration(
                     labelText: 'Calories',
-                    suffixText: 'kcal',
+                    suffixText: 'cal',
                     errorText: _error,
                   ),
                   keyboardType:
@@ -144,7 +144,7 @@ class _QuickAddScreenState extends State<QuickAddScreen> {
                   Padding(
                     padding: const EdgeInsets.only(top: 8),
                     child: Text(
-                      '= ${_formatResult(preview)} kcal',
+                      '= ${_formatResult(preview)} cal',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Theme.of(context)
                                 .colorScheme

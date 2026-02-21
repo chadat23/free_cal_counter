@@ -15,7 +15,7 @@ void main() {
 
       expect(find.text('Quick Add'), findsOneWidget); // AppBar title
       expect(find.text('Calories'), findsOneWidget);
-      expect(find.text('kcal'), findsOneWidget);
+      expect(find.text('cal'), findsOneWidget);
       expect(find.text('Add'), findsOneWidget);
     });
 
@@ -77,7 +77,7 @@ void main() {
       await tester.enterText(find.byType(TextField), '100+50');
       await tester.pump();
 
-      expect(find.text('= 150 kcal'), findsOneWidget);
+      expect(find.text('= 150 cal'), findsOneWidget);
     });
 
     testWidgets('preview updates as expression changes', (tester) async {
@@ -85,11 +85,11 @@ void main() {
 
       await tester.enterText(find.byType(TextField), '100+50');
       await tester.pump();
-      expect(find.text('= 150 kcal'), findsOneWidget);
+      expect(find.text('= 150 cal'), findsOneWidget);
 
       await tester.enterText(find.byType(TextField), '100*3');
       await tester.pump();
-      expect(find.text('= 300 kcal'), findsOneWidget);
+      expect(find.text('= 300 cal'), findsOneWidget);
     });
 
     testWidgets('no preview for incomplete expression', (tester) async {
@@ -108,7 +108,7 @@ void main() {
       await tester.enterText(find.byType(TextField), '10/3');
       await tester.pump();
 
-      expect(find.text('= 3.3 kcal'), findsOneWidget);
+      expect(find.text('= 3.3 cal'), findsOneWidget);
     });
 
     testWidgets('preview handles operator precedence', (tester) async {
@@ -117,7 +117,7 @@ void main() {
       await tester.enterText(find.byType(TextField), '100+50*2');
       await tester.pump();
 
-      expect(find.text('= 200 kcal'), findsOneWidget);
+      expect(find.text('= 200 cal'), findsOneWidget);
     });
 
     testWidgets('MathInputBar renders its operator buttons', (tester) async {

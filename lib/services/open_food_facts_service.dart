@@ -15,7 +15,7 @@ class OffApiService {
       ProductQueryConfiguration(barcode, version: ProductQueryVersion.v3),
     );
 
-    if (productResult.status != ProductResultV3.statusSuccess ||
+    if (productResult.status == ProductResultV3.statusFailure ||
         productResult.product == null) {
       return null;
     }

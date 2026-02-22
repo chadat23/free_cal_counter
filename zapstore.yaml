@@ -1,0 +1,57 @@
+repository: https://github.com/clipclapclop/meal_of_record
+
+name: Meal of Record
+summary: Fast, private, convenient macro tracking — no accounts, no cloud, no subscriptions.
+
+description: |
+  Meal of Record is a calorie and macro tracker that lives entirely on your phone.
+
+  **Fast** — Search, tap, log. Barcode scanning, quick-add shortcuts, and a queue system that lets you build a whole meal before committing it.
+
+  **Smart** — Updates calorie and macro goals besed on weight and eating trends. 
+
+  **Private** — Your data stays on your device. Backups go to your own NAS or a file you control, never to someone else's server.
+
+  **Flexible** — Create your own foods, build recipes, define custom serving sizes, and adjust everything to match how you actually eat.
+
+  **Accurate** — A built-in versioning system means your past logs always reflect what you actually ate, even if you update a food's nutrition later.
+  
+  Features:
+  - Barcode scanning for packaged foods (Open Food Facts)
+  - USDA FoodData Central built-in reference database
+  - Custom foods and recipes with full nutrition editing
+  - Meal queue — stage multiple items before logging
+  - Weekly macro overview with color-coded progress bars
+  - Weight tracking with trend lines
+  - Calorie and macro goal setting with flexible split strategies
+  - Configurable smart updates that can be based on any number of strategies
+  - Manual backups to NAS or local file export
+  - No internet required for core functionality
+
+website: https://clipclapclop.github.io/meal_of_record/
+license: GPL-3.0-only
+
+tags:
+  - health
+  - nutrition
+  - fitness
+  - privacy
+  - offline
+
+images:
+  - ./docs/images/overview-04-full-screen.png
+  - ./docs/images/search-01-color-coded.png
+  - ./docs/images/logging-05-serving-dropdown.png
+  - ./docs/images/logging-06-quantity-edit.png
+  - ./docs/images/food-edit-01-create.png
+  - ./docs/images/logging-04-recipe-tab.png
+  - ./docs/images/recipe-05-edit-screen.png
+  - ./docs/images/logging-08-queue-full-view.png
+  - ./docs/images/log-01-daily-entries.png
+  - ./docs/images/logging-12-multi-select.png
+  - ./docs/images/goals-05-weight-entry.png
+  - ./docs/images/settings-01-overview.png
+  - ./docs/images/goals-01-setup.png
+  - ./docs/images/settings-04-data-management.png
+  - ./docs/images/backup-01-webdav-setup.png
+  - ./docs/images/settings-03-containers.png

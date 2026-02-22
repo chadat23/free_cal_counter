@@ -2,6 +2,11 @@
 
 Fast, private, convenient macro tracking.
 
+## Documentation
+
+You can view the full project documentation here:  
+👉 [Meal of Record Documentation](https://clipclapclop.github.io/meal_of_record/)
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.

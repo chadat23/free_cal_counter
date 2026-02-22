@@ -32,3 +32,5 @@ create a recipe
 thourough explination of units/targets/subtract container/etc from the Quantity Edit screen
 
 Please review the relevant code, and then once reviewed, ask me any questions you have. Come up with a plan (which should include appropreate tests), ask more questions, plan, and continue that cycle untill you're fully happy with your plan and have no questions. The final plan should be maintainable, flexible, and shouldn't be more verbose or convoluted than necessary. Also, if you find that the updates touch or are involved in bad or strangely conviluted code, mention it in case it makes sense to simplify it. 
+
+zsp publish zapstore.yaml --overwrite-release

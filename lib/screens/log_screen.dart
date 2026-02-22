@@ -300,17 +300,6 @@ class _LogScreenState extends State<LogScreen> with RouteAware {
               style: ElevatedButton.styleFrom(foregroundColor: Colors.red),
             ),
           ),
-          const SizedBox(width: 8.0),
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed: () {
-                // TODO: Implement make recipe functionality (1.2.7.6.4)
-                logProvider.clearSelection();
-              },
-              icon: const Icon(Icons.restaurant_menu),
-              label: const Text('Recipe'),
-            ),
-          ),
         ],
       ),
     );

@@ -1317,15 +1317,16 @@
 <li><strong>Your Current Weight</strong> — Used as the starting point for trend tracking.</li>
 <li><strong>Your Mode</strong> — Lose, Gain, or Maintain (explained below).</li>
 </ol>
+<p><img alt="Goals settings screen with starting maintenance, weight, and mode" src="../../images/goals-01-setup.png" /></p>
 <hr />
 <h2 id="the-three-modes">The Three Modes<a class="headerlink" href="#the-three-modes" title="Permanent link">&para;</a></h2>
 <h3 id="lose-mode">Lose Mode<a class="headerlink" href="#lose-mode" title="Permanent link">&para;</a></h3>
 <p>You set a <strong>fixed daily calorie deficit</strong> (for example, -500 calories per day). The app subtracts this from your maintenance calories to calculate your daily target.</p>
-<p>Your maintenance estimate will adjust over time based on your actual results, but the deficit stays constant. Simple and predictable.</p>
+<p>Your maintenance estimate will adjust over time based on your actual results, or you can turn off smart target updates.</p>
 <h3 id="gain-mode">Gain Mode<a class="headerlink" href="#gain-mode" title="Permanent link">&para;</a></h3>
 <p>The mirror of Lose mode. You set a <strong>fixed daily calorie surplus</strong> (for example, +250 calories per day). Good for lean bulking or recovery phases.</p>
 <h3 id="maintain-mode">Maintain Mode<a class="headerlink" href="#maintain-mode" title="Permanent link">&para;</a></h3>
-<p>This is the adaptive mode. You set an <strong>Anchor Weight</strong> — the weight you want to stay at. If your trend drifts above or below it, the app automatically calculates a small correction over a 30-day window to bring you back.</p>
+<p>You set an <strong>Anchor Weight</strong> — the weight you want to stay at. If your trend drifts above or below it, the app automatically calculates a small correction over a 30-day window to bring you back.</p>
 <div class="admonition example">
 <p class="admonition-title">Example</p>
 <p>Your anchor weight is 170 lbs. After the holidays, your trend shows 173 lbs. The app calculates a gentle deficit to bring you back to 170 over the next month, then returns to maintenance.</p>
@@ -1335,14 +1336,16 @@
 <p>Enter your weight once a day on the <strong>Weight</strong> screen. A few things to know:</p>
 <ul>
 <li><strong>One entry per day.</strong> If you enter it twice, the newer value replaces the old one.</li>
-<li><strong>Missing days are fine.</strong> The app ignores gaps — it doesn't assume you weigh zero if you skip a day.</li>
-<li><strong>The trend is what matters.</strong> The Overview screen shows a smoothed trend line that filters out daily fluctuations from water, sodium, and other noise. Focus on the trend, not individual days.</li>
+<li><strong>Missing days are filtered out.</strong> While more datapoints yields more accurate trends, occasional missed days will be ignored.</li>
+<li><strong>The trend is what matters.</strong> The Overview screen shows a smoothed trend line that filters out daily fluctuations from water, sodium, and other noise.</li>
 <li><strong>Tap to inspect.</strong> On the Overview graph, tap any weight point to see the exact date and value.</li>
 </ul>
+<p><img alt="Weight entry screen with daily input" src="../../images/goals-05-weight-entry.png" /></p>
+<p><img alt="Weight trend graph on Overview screen showing smoothed trend line" src="../../images/goals-06-weight-trend.png" /></p>
 <hr />
 <h2 id="weekly-updates">Weekly Updates<a class="headerlink" href="#weekly-updates" title="Permanent link">&para;</a></h2>
 <p>To keep things stable and avoid chasing daily numbers, Meal of Record recalculates your targets <strong>once per week</strong> (every Monday).</p>
-<p>When you open the app on the first day of a new week, you'll see a notification with your updated calorie and macro targets for the coming seven days. This lets you plan your week around consistent numbers rather than shifting targets.</p>
+<p>When you first open the app on Monday, you'll see a notification with your updated calorie and macro targets for the coming seven days. This lets you plan your week around consistent numbers rather than shifting targets.</p>
 <hr />
 <h2 id="macro-splits">Macro Splits<a class="headerlink" href="#macro-splits" title="Permanent link">&para;</a></h2>
 <p>Beyond total calories, you can configure how those calories are divided between protein, fat, and carbs.</p>
@@ -1355,9 +1358,10 @@
 <h3 id="fat-and-carbs">Fat and Carbs<a class="headerlink" href="#fat-and-carbs" title="Permanent link">&para;</a></h3>
 <p>You specify one and the app calculates the other from the remaining calories after protein:</p>
 <ul>
-<li><strong>Specify fat, calculate carbs</strong> — Useful for low-carb approaches. A common starting point is 70–85g of fat per day for men, 50–65g for women, though individual needs vary.</li>
-<li><strong>Specify carbs, calculate fat</strong> — Useful for high-carb approaches or athletic performance fueling.</li>
+<li><strong>Specify fat, calculate carbs</strong> — Useful for ensuring that you have sufficient fat while maximizing carbs. A common starting point is 70–85g of fat per day for men, 50–65g for women, though individual needs vary.</li>
+<li><strong>Specify carbs, calculate fat</strong> — Useful for low carb diets.</li>
 </ul>
+<p><img alt="Macro configuration with protein, fat, and carb settings" src="../../images/goals-08-macro-split.png" /></p>
 <hr />
 <details class="info">
 <summary>Under the Hood: The Calorie Calculation Loop</summary>

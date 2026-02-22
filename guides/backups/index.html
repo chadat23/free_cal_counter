@@ -1266,14 +1266,17 @@
 
 <h1 id="backing-up-your-data">Backing Up Your Data<a class="headerlink" href="#backing-up-your-data" title="Permanent link">&para;</a></h1>
 <p>Your food logs, custom foods, recipes, weight history, goals, and container settings all live on your device. Meal of Record gives you two ways to keep that data safe.</p>
+<p><img alt="Data Management screen location" src="../../images/backup-00-location.png" /></p>
 <h2 id="automatic-backup-nas-webdav">Automatic Backup (NAS / WebDAV)<a class="headerlink" href="#automatic-backup-nas-webdav" title="Permanent link">&para;</a></h2>
 <p>You can configure the app to automatically back up to a personal NAS or any WebDAV-compatible server.</p>
 <h3 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h3>
 <ol>
+<li>Enable WebDAV in your NAS if it's not already enabled.</li>
 <li>Go to <strong>Settings → Data Management → Cloud Backup</strong>.</li>
-<li>Enter your NAS/WebDAV server address.</li>
-<li>The app will back up automatically whenever you've made changes, as long as your device can reach the server (same local network, or via VPN for remote access).</li>
+<li>Enter your NAS info.</li>
+<li>The app will back up automatically every morning assuming you've made changes since the last backup as long as your device can reach the server (same local network, or via VPN for remote access).</li>
 </ol>
+<p><img alt="WebDAV setup screen with server address configuration" src="../../images/backup-01-webdav-setup.png" /></p>
 <h3 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h3>
 <ul>
 <li><strong>Smart backups</strong> — The app only uploads when something has actually changed, saving battery and bandwidth.</li>

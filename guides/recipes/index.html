@@ -1177,21 +1177,29 @@
 <h1 id="recipes-templates">Recipes &amp; Templates<a class="headerlink" href="#recipes-templates" title="Permanent link">&para;</a></h1>
 <p>Recipes in Meal of Record come in two flavors, each designed for a different kind of meal. Understanding the difference will help you pick the right one.</p>
 <h2 id="regular-recipes">Regular Recipes<a class="headerlink" href="#regular-recipes" title="Permanent link">&para;</a></h2>
-<p>A regular recipe is a fixed formula — cookies, chili, protein bars, ice cream. You make it the same way each time, and when you log it, you log it as a single item ("2 cookies" or "1 bowl of chili").</p>
+<p>A regular recipe is what you're used to thinking of recipies as being. It could be pie, bread, cookies, ice cream, etc. where there's a fixed recipe (so not a "whatever's in the fridge" stur-fry) and where the ingrediant split in a serving is representative of the ingrediant ratios in the recipe (so not trail mix where you're selectively picking out what you want)</p>
 <p><strong>Best for:</strong> Baked goods, meal prep, anything you make in a batch and eat in portions.</p>
-<p><strong>How it works when logging:</strong> The recipe appears as one item in your log. You pick how many servings you had, and the app calculates the macros.</p>
+<p><strong>How it works when logging:</strong> The recipe appears as one item in your log. You pick how many servings or grams you had, and the app calculates the macros.</p>
 <div class="admonition example">
 <p class="admonition-title">Example: Chocolate chip cookies</p>
 <p>You create a recipe with flour, butter, sugar, eggs, and chocolate chips. You set the batch to 24 cookies. When you eat 3 cookies, you log "3" servings of the recipe.</p>
 </div>
+<div class="admonition example">
+<p class="admonition-title">Example: Ice cream</p>
+<p>You create a recipe with cream, sugar, and chocolate chips. You set the portion count to 1. When you eat some, you weight it, and then enter the weight in grams.</p>
+</div>
 <h2 id="dump-recipes-templates">Dump Recipes (Templates)<a class="headerlink" href="#dump-recipes-templates" title="Permanent link">&para;</a></h2>
-<p>A dump recipe is a template for meals that vary. A salad, a breakfast burrito, a smoothie — the core ingredients are the same, but you might add extra spinach today or skip the avocado tomorrow.</p>
+<p>A dump recipe is a template for meals that vary. A salad, a breakfast burrito, a smoothie — the core ingredients are the same, but the ratios may change, you might add extra spinach today, or skip the avocado tomorrow.</p>
 <p><strong>Best for:</strong> Meals you build from a flexible set of ingredients.</p>
 <p><strong>How it works when logging:</strong> Instead of logging the recipe as one item, the app "dumps" each ingredient separately into your Log Queue. You can then adjust quantities, remove items, or add extras before logging.</p>
 <div class="admonition example">
 <p class="admonition-title">Example: Lunch salad</p>
 <p>You create a dump recipe with greens, chicken, tomatoes, feta, and dressing. When you use it, each ingredient lands in your queue individually. Today you skipped the feta and added extra chicken — just delete the feta and adjust the chicken weight.</p>
 </div>
+<p><strong>Dumping and adding recipes</strong></p>
+<p>The <strong>(+)</strong> button will dump <strong>Dump Only</strong> recipes, and will otherwise add a portion of the recipe to your Log Queue.</p>
+<p>Tapping the recipe will bring up the Quantity Edit screen for regular ingrediants, does nothing for Dump Only recipes.</p>
+<p>Swiping to the right brings up the abilities to Edit, Copy, or Dump recipies.</p>
 <h2 id="which-type-should-i-use">Which Type Should I Use?<a class="headerlink" href="#which-type-should-i-use" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1222,13 +1230,18 @@
 <hr />
 <h2 id="creating-a-recipe">Creating a Recipe<a class="headerlink" href="#creating-a-recipe" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Open the <strong>Recipe</strong> tab on the Search screen and tap <strong>Create Recipe</strong>.</li>
+<li>Open the <strong>Recipe</strong> tab on the Search screen and tap <strong>New</strong>.</li>
+<li>Add a name</li>
+<li>Set an emoji or add an image, or lot an emoji be automatically set.</li>
+<li>Set a <strong>Portion Count</strong>: convienient if the recipe's pre devided (cookies, pizza slice, meal prep), but can be left as 1 if each serving is just going to be a weighed amount.</li>
+<li>Set a <strong>Portion Unit Name</strong>: Elusidating if <strong>Portion Count</strong> is meaningfully set but somewhat irrelevant if each serving is just a weighed amount (soup, ice cream)</li>
+<li>Enter the <strong>Final Weight</strong> of the finished batch if it's relevant and different from the weight of entered ingrediants; soup where you eyeball adding water and then boil some off, baked goods that aren't pre-portioned where water's being driven off, but maybe not ice cream where it's not pre-portioned and the total weight equals the weight of the ingrediants, or cookies where you typically count the number of cookies, not grams.</li>
+<li>Choose whether or not it's <strong>Dump Only</strong>.</li>
+<li>If desired, add a <strong>Catagory</strong>.</li>
 <li><strong>Add ingredients</strong> by searching for foods (or other recipes — recipes can be nested).</li>
-<li>Set the <strong>number of portions</strong> the batch makes (e.g., 12 cookies, 4 servings of chili).</li>
-<li>Enter the <strong>total weight</strong> of the finished batch if you know it. This improves accuracy when cooking changes the weight (water evaporates from chili, bread rises, etc.).</li>
-<li>Choose whether the recipe is <strong>Regular</strong> or <strong>Dump</strong>.</li>
 <li>Tap <strong>Save</strong>.</li>
 </ol>
+<p><img alt="Recipe Edit screen with ingredients, portions, and type toggle" src="../../images/recipe-05-edit-screen.png" /></p>
 <div class="admonition tip">
 <p class="admonition-title">Nested recipes</p>
 <p>You can add a recipe as an ingredient in another recipe. For example, if you have a "pizza dough" recipe, you can use it as an ingredient in a "pepperoni pizza" recipe.</p>
@@ -1244,8 +1257,8 @@
 <hr />
 <details class="info">
 <summary>Under the Hood: Why Two Recipe Types?</summary>
-<p>The regular vs. dump distinction isn't just a UI convenience — it affects how your data is stored and versioned.</p>
-<p><strong>Regular recipes</strong> are stored as a single entity with a version history. When you log "2 cookies," the app records a reference to that specific version of the recipe. If you later change the recipe (swap butter for oil), your past logs still reflect the original version. The trade-off is that each version takes a small amount of storage.</p>
+<p>The regular vs. dump distinction isn't just a UI convenience — it affects how your data is stored, versioned, and most importantly, how much space it takes.</p>
+<p><strong>Regular recipes</strong> are stored as a single entity with a version history. When you log "2 cookies," the app records a reference to that specific version of the recipe. If you later change the recipe (swap butter for oil), your past logs still reflect the original version, while new logs will reference a new version of the recip. It's imple and intuative to use, but each version takes up some additional space. Note: until you log a Regular recipe, you can make any number of edits without new versions being created (the app inteligently checks how to best handle a change).</p>
 <p><strong>Dump recipes</strong> don't have this versioning overhead because they're not logged as a unit. When you dump a template, the individual ingredients are logged as separate food entries. The template itself is just a convenience for populating your queue quickly. This means dump recipes can be updated freely without accumulating storage, but your log won't show "Lunch Salad" — it will show each ingredient separately.</p>
 </details>
 

@@ -50,3 +50,4 @@ problems-report.html
 *.jks
 key.properties
 site/
+.env

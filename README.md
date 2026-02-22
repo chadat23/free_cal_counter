@@ -1,6 +1,6 @@
 # meal_of_record
 
-A new Flutter project.
+Fast, private, convenient macro tracking.
 
 ## Getting Started
 

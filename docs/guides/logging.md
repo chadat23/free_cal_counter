@@ -36,7 +36,7 @@ Use the dropdown next to the (+) button to pick a different serving before addin
 
 ![Dropdown menu next to plus button showing serving size options](../images/logging-05-serving-dropdown.png)
 
-Want to enter a specific weight or custom amount? Tap the food's name to open the **Quantity Edit** screen. See the [Quanity Edit](references/quantity-edit.md) screen instructions for additional ways to practically enter amounts.
+Want to enter a specific weight or custom amount? Tap the food's name to open the **Quantity Edit** screen. See the [Quanity Edit](../reference/quantity-edit.md) screen instructions for additional ways to practically enter amounts.
 
 ![Quantity Edit screen with weight and serving options](../images/logging-06-quantity-edit.png)
 

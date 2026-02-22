@@ -2,7 +2,7 @@
 
 Your food logs, custom foods, recipes, weight history, goals, and container settings all live on your device. Meal of Record gives you two ways to keep that data safe.
 
-![Data Management screen location](images/backup-00-location.png)
+![Data Management screen location](../images/backup-00-location.png)
 
 ## Automatic Backup (NAS / WebDAV)
 

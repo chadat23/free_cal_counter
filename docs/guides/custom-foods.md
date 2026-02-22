@@ -1,6 +1,6 @@
 # Creating Custom Foods
 
-Sometimes the food you're eating isn't in any database — it's a homemade recipe from a friend, a local bakery item, or something with a nutrition label the barcode scanner doesn't recognize. That's when you create a custom food.
+Sometimes the food you're eating can't practically be found in a database. If it's a homemade recipe from a friend, a local bakery item, or or you don't have internet access, that's when you create a custom food.
 
 ## When to Create a Custom Food
 
@@ -14,6 +14,10 @@ Sometimes the food you're eating isn't in any database — it's a homemade recip
 
 From the Search screen, tap the **Create Food** button to open a blank Food Edit screen.
 
+![Create Food button on Search screen](../images/food-create-01-button.png)
+
+![Food Creation Screen](../images/food-create-02-screen.png)
+
 ### 2. Name Your Food
 
 Give it a name you'll recognize when searching later. The app will **auto-suggest an emoji** based on the name — a fun touch that also makes foods easier to spot in lists.
@@ -26,14 +30,11 @@ You have two ways to enter macros:
 
     Enter the nutrition values for **one serving** of the food. This is the most common approach when you're reading a nutrition label.
 
-    For example, if a protein bar's label says 210 calories, 20g protein, 8g fat, 15g carbs per bar — enter those values and define a serving called "1 bar" at 65g.
+    For example, if a protein bar's label says 210 calories, 20g protein, 8g fat, 15g carbs per bar — enter those values and define a serving called "1 bar" at 65g. Similarly, if a package of cookies has a serving size of "3 cookies", then the Qty could be 3, the unit could be "cookie", and so on.
 
 === "Per 100g"
 
     Enter the nutrition values for **100 grams** of the food. This works well for bulk ingredients you'll always weigh on a scale, like chicken breast or rice.
-
-!!! tip "When to use which"
-    **Per serving** is great when you eat the food in standard units (a bar, a slice, a scoop). **Per 100g** is great when you always weigh the food. Either way, you can log by any serving size or gram weight later.
 
 ### 4. Define Serving Sizes
 

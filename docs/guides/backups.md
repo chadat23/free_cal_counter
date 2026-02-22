@@ -2,15 +2,20 @@
 
 Your food logs, custom foods, recipes, weight history, goals, and container settings all live on your device. Meal of Record gives you two ways to keep that data safe.
 
+![Data Management screen location](images/backup-00-location.png)
+
 ## Automatic Backup (NAS / WebDAV)
 
 You can configure the app to automatically back up to a personal NAS or any WebDAV-compatible server.
 
 ### Setup
 
-1. Go to **Settings → Data Management → Cloud Backup**.
-2. Enter your NAS/WebDAV server address.
-3. The app will back up automatically whenever you've made changes, as long as your device can reach the server (same local network, or via VPN for remote access).
+1. Enable WebDAV in your NAS if it's not already enabled.
+2. Go to **Settings → Data Management → Cloud Backup**.
+3. Enter your NAS info.
+4. The app will back up automatically every morning assuming you've made changes since the last backup as long as your device can reach the server (same local network, or via VPN for remote access).
+
+![WebDAV setup screen with server address configuration](../images/backup-01-webdav-setup.png)
 
 ### How It Works
 

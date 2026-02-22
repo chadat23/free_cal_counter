@@ -10,6 +10,8 @@ When you first configure goals in **Settings → Goals**, you'll provide:
 2. **Your Current Weight** — Used as the starting point for trend tracking.
 3. **Your Mode** — Lose, Gain, or Maintain (explained below).
 
+![Goals settings screen with starting maintenance, weight, and mode](../images/goals-01-setup.png)
+
 ---
 
 ## The Three Modes
@@ -18,7 +20,7 @@ When you first configure goals in **Settings → Goals**, you'll provide:
 
 You set a **fixed daily calorie deficit** (for example, -500 calories per day). The app subtracts this from your maintenance calories to calculate your daily target.
 
-Your maintenance estimate will adjust over time based on your actual results, but the deficit stays constant. Simple and predictable.
+Your maintenance estimate will adjust over time based on your actual results, or you can turn off smart target updates.
 
 ### Gain Mode
 
@@ -26,7 +28,7 @@ The mirror of Lose mode. You set a **fixed daily calorie surplus** (for example,
 
 ### Maintain Mode
 
-This is the adaptive mode. You set an **Anchor Weight** — the weight you want to stay at. If your trend drifts above or below it, the app automatically calculates a small correction over a 30-day window to bring you back.
+You set an **Anchor Weight** — the weight you want to stay at. If your trend drifts above or below it, the app automatically calculates a small correction over a 30-day window to bring you back.
 
 !!! example "Example"
     Your anchor weight is 170 lbs. After the holidays, your trend shows 173 lbs. The app calculates a gentle deficit to bring you back to 170 over the next month, then returns to maintenance.
@@ -34,13 +36,16 @@ This is the adaptive mode. You set an **Anchor Weight** — the weight you want 
 ---
 
 ## Weight Tracking
-
 Enter your weight once a day on the **Weight** screen. A few things to know:
 
 - **One entry per day.** If you enter it twice, the newer value replaces the old one.
-- **Missing days are fine.** The app ignores gaps — it doesn't assume you weigh zero if you skip a day.
-- **The trend is what matters.** The Overview screen shows a smoothed trend line that filters out daily fluctuations from water, sodium, and other noise. Focus on the trend, not individual days.
+- **Missing days are filtered out.** While more datapoints yields more accurate trends, occasional missed days will be ignored.
+- **The trend is what matters.** The Overview screen shows a smoothed trend line that filters out daily fluctuations from water, sodium, and other noise.
 - **Tap to inspect.** On the Overview graph, tap any weight point to see the exact date and value.
+
+![Weight entry screen with daily input](../images/goals-05-weight-entry.png)
+
+![Weight trend graph on Overview screen showing smoothed trend line](../images/goals-06-weight-trend.png)
 
 ---
 
@@ -48,7 +53,7 @@ Enter your weight once a day on the **Weight** screen. A few things to know:
 
 To keep things stable and avoid chasing daily numbers, Meal of Record recalculates your targets **once per week** (every Monday).
 
-When you open the app on the first day of a new week, you'll see a notification with your updated calorie and macro targets for the coming seven days. This lets you plan your week around consistent numbers rather than shifting targets.
+When you first open the app on Monday, you'll see a notification with your updated calorie and macro targets for the coming seven days. This lets you plan your week around consistent numbers rather than shifting targets.
 
 ---
 
@@ -67,8 +72,10 @@ Choose one of two approaches:
 
 You specify one and the app calculates the other from the remaining calories after protein:
 
-- **Specify fat, calculate carbs** — Useful for low-carb approaches. A common starting point is 70–85g of fat per day for men, 50–65g for women, though individual needs vary.
-- **Specify carbs, calculate fat** — Useful for high-carb approaches or athletic performance fueling.
+- **Specify fat, calculate carbs** — Useful for ensuring that you have sufficient fat while maximizing carbs. A common starting point is 70–85g of fat per day for men, 50–65g for women, though individual needs vary.
+- **Specify carbs, calculate fat** — Useful for low carb diets.
+
+![Macro configuration with protein, fat, and carb settings](../images/goals-08-macro-split.png)
 
 ---
 

@@ -1,6 +1,6 @@
 # Quantity Edit
 
-The precision screen. Control exactly how much of a food you're logging.
+The precision screen. Control the exact amount and unit of a food to log.
 
 ## How to Get Here
 
@@ -10,19 +10,21 @@ Tap a food's **name** (not the + button) from Search results, the Log Queue, or 
 
 ### Unit Selector
 
-A dropdown showing all available serving sizes for the food (e.g., "1 cup", "1 piece", "100g", or custom servings). Pick the unit that matches how you're measuring.
+A set of buttons showing all available serving sizes for the specific food (e.g., "cup", "piece", "g", or custom servings). Pick the unit that matches how you're measuring.
+
+![Unit selector dropdown showing available serving sizes](../images/quantity-edit-01-unit-selector.png)
 
 ### Quantity Field
 
 Enter the number of units. For example, if you picked "1 cup" and ate a cup and a half, enter `1.5`.
 
+![Quantity field with numeric input](../images/quantity-edit-02-quantity-field.png)
+
 ### Live Macro Preview
 
-As you adjust the quantity, the calorie and macro totals update in real time so you can see exactly what you'll be logging.
+As you adjust the quantity, the calorie and macro totals update in real time so you can see exactly what you'll be logging. For example, if you enter that you want 20g of protein via protein powder, this will show how much protein powder to weigh out.
 
-### Per-Serving Toggle (Recipes)
-
-For regular recipes, you can toggle between logging by serving count and logging by weight.
+![Live macro preview updating in real time](../images/quantity-edit-03-live-preview.png)
 
 ## Special Entry Modes
 
@@ -36,19 +38,20 @@ Instead of entering a weight or serving count, you can switch the entry mode to 
 
 This is the basis of the **Fill to Target** feature: figure out how much of a food you need to hit a specific number.
 
+![Macro target mode showing calories, protein, fat, carbs, fiber options](../images/quantity-edit-05-macro-mode.png)
+
 ### Minus Container
 
 If you're weighing food in a container, tap **Minus Container** and select a saved container. The app subtracts the container's tare weight from whatever number you enter.
+
+![Minus Container with saved container selection](../images/quantity-edit-06-container.png)
 
 ## Actions
 
 | Action | What It Does |
 |--------|--------------|
 | Change unit | Switch between serving sizes |
-| Enter quantity | Set the amount (supports math expressions) |
+| Enter amount | Set the amount (supports math expressions) |
 | Switch to macro mode | Enter a target calorie/protein/fat/carbs/fiber amount |
 | Minus Container | Subtract a container's weight automatically |
 | Confirm | Add the item to the queue or update the logged entry |
-
-!!! tip "Math expressions"
-    Type expressions like `2.5 * 28`, `450 / 3`, or `120 + 85` directly in the quantity field. The app evaluates them for you.

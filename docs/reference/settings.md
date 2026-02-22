@@ -4,7 +4,9 @@ App configuration, goals, containers, and data management.
 
 ## How to Get Here
 
-Tap the **Settings** tab or gear icon in the bottom navigation.
+Tap the **Settings** tab, the gear icon, in the bottom navigation.
+
+![Settings screen with sections overview](../images/settings-01-overview.png)
 
 ## Sections
 
@@ -19,6 +21,8 @@ Configure your calorie and macro targets. See [Goals & Weight Tracking](../guide
 - Protein strategy (fixed or weight multiplier)
 - Fat / Carb split
 
+![Goals configuration section with calorie and macro settings](../images/settings-02-goals.png)
+
 ### Containers
 
 Manage containers for tare-weight subtraction when weighing food on a scale.
@@ -32,6 +36,8 @@ Manage containers for tare-weight subtraction when weighing food on a scale.
 !!! tip "What's a tare weight?"
     It's the weight of the empty container. If your bowl weighs 320g and you put food in it reading 450g on the scale, the app subtracts 320g and logs 130g of food. Add your common bowls, plates, and containers here so you never have to do that math yourself.
 
+    ![Containers management with name and tare weight](../images/settings-03-containers.png)
+
 ### Data Management
 
 Access backup and restore features. See [Backing Up Your Data](../guides/backups.md) for details.
@@ -40,3 +46,5 @@ Access backup and restore features. See [Backing Up Your Data](../guides/backups
 - Manual export
 - Manual import
 - Backup retention settings
+
+![Data management section with backup and restore options](../images/settings-04-data-management.png)

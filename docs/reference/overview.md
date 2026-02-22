@@ -8,9 +8,11 @@ This is the default screen when you open the app. Tap the **Overview** tab in th
 
 ## What You See
 
+![Overview screen showing macro bars, weight chart, and search bar](../images/overview-04-full-screen.png)
+
 ### Macro Bars
 
-A row of bars for each day of the week showing your calorie, protein, fat, and carb intake against your targets. At a glance, you can see which days you're on track and which you're over or under.
+A row of bars for each day of the week showing your calorie, protein, fat, and carb intake against your targets. At a glance, you can see which days you're on track and which you're over or under. Tapping on a day's bars will display it's macros in the text to the right.
 
 ### Weight Trend Chart
 

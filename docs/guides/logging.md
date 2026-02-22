@@ -14,25 +14,39 @@ The **Text** tab searches your personal foods first, then the built-in USDA libr
 - **Blue** — USDA gold-standard reference data
 - **Red** — Older USDA data
 
+![Search results with gray, blue, and red color coding](../images/logging-01-color-coded-results.png)
+
 If you can't find what you need locally, tap the **globe icon** to search **Open Food Facts**, a massive database of packaged foods from around the world.
 
+![Globe icon to access Open Food Facts search](../images/logging-02-globe-icon.png)
+
 !!! tip "Barcode scanning"
-    Switch to the **Barcode** tab to scan a product's barcode. The app checks your local foods first, then Open Food Facts.
+    Switch to the **Barcode** tab to scan a product's barcode. The app checks your local foods, and then if it's not found locally, you can cancel, rescan, create a new food, or do an Open Food Facts search.
 
 !!! tip "Recipe tab"
     The **Recipe** tab shows your saved recipes and templates. See [Recipes & Templates](recipes.md) for details.
+
+    ![Recipe tab showing saved recipes list](../images/logging-04-recipe-tab.png)
 
 ### 2. Add to the Log Queue
 
 Tap the **(+)** button on any search result to add one default serving to your **Log Queue**.
 
-Use the dropdown next to the (+) button to pick a different serving size before adding.
+Use the dropdown next to the (+) button to pick a different serving before adding.
 
-Want to enter a specific weight or custom amount? Tap the food's name to open the **Quantity Edit** screen.
+![Dropdown menu next to plus button showing serving size options](../images/logging-05-serving-dropdown.png)
+
+Want to enter a specific weight or custom amount? Tap the food's name to open the **Quantity Edit** screen. See the [Quanity Edit](references/quantity-edit.md) screen instructions for additional ways to practically enter amounts.
+
+![Quantity Edit screen with weight and serving options](../images/logging-06-quantity-edit.png)
 
 ### 3. Review Your Queue
 
 As you add items, their images appear in the bar at the top of the search screen. Tap the **down arrow** to open the full Log Queue, where you can see every pending item and their combined macro totals.
+
+![Image preview bar at top of search screen](../images/logging-07-queue-preview-bar.png)
+
+![Full Log Queue view with items and macro totals](../images/logging-08-queue-full-view.png)
 
 ### 4. Log It
 
@@ -42,9 +56,9 @@ Tap **Log** to commit everything in the queue to your daily diary with the curre
 
 ## Quick Add
 
-Sometimes you already know the calories for what you ate — maybe you checked the package, or you're estimating a meal at a restaurant. **Quick Add** lets you type in calories (and optionally protein, fat, carbs, and fiber) directly without searching for a specific food.
+Sometimes you can't pracically accurately log a food or meal; maybe you're estimating a meal at a restaurant or friend's house. **Quick Add** lets you type in calories directly without searching for a specific food.
 
-You'll find Quick Add on the Search screen. It's handy for:
+You'll find Quick Add on the Foods tab of the Search screen. It's handy for:
 
 - Eating out when you've looked up the restaurant's nutrition info
 - Snacks where you just know the rough calorie count
@@ -59,6 +73,8 @@ You'll find Quick Add on the Search screen. It's handy for:
 
 If you're intermittent fasting or simply didn't eat on a particular day, you can mark the day as **Fasted**. This tells the app that the zero-calorie day was intentional, not a day you forgot to log. Fasted days are accounted for properly in your weekly and trend calculations.
 
+![Fasted day button on Food tab of Search screen](../images/logging-10-fasted-day.png)
+
 ---
 
 ## Working with the Log Screen
@@ -67,7 +83,9 @@ The **Log** screen is your daily diary. It shows everything you've logged for th
 
 ### Navigating Days
 
-Swipe left and right or use the date controls to move between days and review past entries.
+Use the arrow buttons on either side of the day at the top to move between days and review past entries.
+
+![Log screen showing daily entries organized by meal](../images/logging-11-log-screen.png)
 
 ### Selecting and Managing Items
 
@@ -76,6 +94,8 @@ Swipe left and right or use the date controls to move between days and review pa
 - **Copy** them to a different day
 - **Move** them to a different day
 - **Delete** them
+
+![Multi-select mode with items selected and action buttons](../images/logging-12-multi-select.png)
 
 You can also **swipe an item left** to quickly delete it.
 
@@ -100,7 +120,7 @@ This is one of the app's most powerful features. When you're on the Quantity Edi
 The app calculates how much of that food you'd need to eat to reach that target.
 
 !!! example "Example: Hitting your protein goal"
-    You've logged everything for the day except a chicken breast, and you need 40 more grams of protein. Open the chicken breast in Quantity Edit, switch to **Protein** mode, type `40`, and the app calculates the exact gram weight for you.
+    You've logged everything for the day except a chicken breast, and you need 40 more grams of protein. Open the chicken breast in Quantity Edit, switch to **Protein** mode, type `40`, and the app calculates the exact gram weight of chicken breast that you need to hit your day's target.
 
 ---
 
@@ -115,4 +135,4 @@ If you weigh your food in a bowl or container, the **Containers** feature saves 
 3. The app subtracts the container's weight automatically, so you can just plop your food in, read the scale, and type the total number.
 
 !!! example "Example"
-    Your bowl weighs 320g. You put oatmeal in it and the scale reads 410g. Select the bowl as your container and enter `410` — the app logs 90g of oatmeal.
+    You want to finish the yogert that's in a container without extra steps, assuming you've pre-measured and saved the weight of a previous equivolent empty container, you can enter the total weight of the yogert and container, then select **Minus Container**, and then the particular yogert container.

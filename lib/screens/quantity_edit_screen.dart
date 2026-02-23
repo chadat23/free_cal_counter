@@ -240,12 +240,13 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
         Map<String, double> portionTargets = dailyGoals;
 
         if (!showConsumed && !isRecipe) {
+          final og = widget.config.originalGrams;
           portionTargets = {
-            'Calories': (dailyGoals['Calories']! - logProvider.loggedCalories).clamp(0, double.infinity),
-            'Protein': (dailyGoals['Protein']! - logProvider.loggedProtein).clamp(0, double.infinity),
-            'Fat': (dailyGoals['Fat']! - logProvider.loggedFat).clamp(0, double.infinity),
-            'Carbs': (dailyGoals['Carbs']! - logProvider.loggedCarbs).clamp(0, double.infinity),
-            'Fiber': (dailyGoals['Fiber']! - logProvider.loggedFiber).clamp(0, double.infinity),
+            'Calories': (dailyGoals['Calories']! - logProvider.totalCalories + food.calories * og).clamp(0, double.infinity),
+            'Protein': (dailyGoals['Protein']! - logProvider.totalProtein + food.protein * og).clamp(0, double.infinity),
+            'Fat': (dailyGoals['Fat']! - logProvider.totalFat + food.fat * og).clamp(0, double.infinity),
+            'Carbs': (dailyGoals['Carbs']! - logProvider.totalCarbs + food.carbs * og).clamp(0, double.infinity),
+            'Fiber': (dailyGoals['Fiber']! - logProvider.totalFiber + food.fiber * og).clamp(0, double.infinity),
           };
         }
 
@@ -588,10 +589,11 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
     final goalsProvider = Provider.of<GoalsProvider>(context, listen: false);
     final logProvider = Provider.of<LogProvider>(context, listen: false);
 
-    // Calculate remaining
+    // Calculate remaining (subtract original contribution when editing)
     final goal = _getGoalForTarget(goalsProvider, _selectedTargetIndex);
     final total = _getTotalForTarget(logProvider, _selectedTargetIndex);
-    final remaining = goal - total;
+    final originalContribution = _getFoodMacroPerGram(_food, _selectedTargetIndex) * widget.config.originalGrams;
+    final remaining = goal - total + originalContribution;
 
     // Check if already at/over target
     if (remaining <= 0) {

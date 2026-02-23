@@ -20,6 +20,15 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
+Bugs
+v0.1.0
+- OFF Log Queue replacing each other
+- Fill to Target not working if queue isn't empty
+v0.1.1
+- various little bugs.
+v0.1.0
+- initial release
+
 ## Install to phone
 # 1. Build the release APK
 flutter build apk --release

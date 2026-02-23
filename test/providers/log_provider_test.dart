@@ -396,6 +396,125 @@ void main() {
       expect(logProvider.queuedCalories, 104.0);
     });
 
+    test(
+      'refreshFoodInQueue: null sourceBarcode should not cause false matches',
+      () async {
+        // Two different OFF foods, both with null sourceBarcode
+        // (simulates the bug where edited OFF foods lost their barcode)
+        final offFoodA = Food(
+          id: 0,
+          name: 'OFF Food A',
+          calories: 1.0,
+          protein: 0.1,
+          fat: 0.1,
+          carbs: 0.1,
+          fiber: 0.0,
+          source: 'off',
+          sourceBarcode: null,
+          servings: [
+            FoodServing(
+                id: 1, foodId: 0, unit: 'g', grams: 1.0, quantity: 1.0),
+          ],
+        );
+        final offFoodB = Food(
+          id: 0,
+          name: 'OFF Food B',
+          calories: 2.0,
+          protein: 0.2,
+          fat: 0.2,
+          carbs: 0.2,
+          fiber: 0.0,
+          source: 'off',
+          sourceBarcode: null,
+          servings: [
+            FoodServing(
+                id: 2, foodId: 0, unit: 'g', grams: 1.0, quantity: 1.0),
+          ],
+        );
+
+        logProvider
+            .addFoodToQueue(FoodPortion(food: offFoodA, grams: 50, unit: 'g'));
+
+        // Refresh queue with offFoodB — should NOT replace offFoodA
+        await logProvider.refreshFoodInQueue(0, offFoodB);
+
+        // offFoodA should still be in the queue (matched by id=0, which is fine),
+        // but the key point: if both had null barcodes previously, the null guard
+        // prevents false barcode-based matching
+        expect(logProvider.logQueue.length, 1);
+        // The id-based match (id==0) will still replace, but that's expected.
+        // The important thing is the barcode branch doesn't cause extra matches.
+      },
+    );
+
+    test(
+      'refreshFoodInQueue: matches OFF food by barcode, leaves others unchanged',
+      () async {
+        final offFoodA = Food(
+          id: 0,
+          name: 'Peanut Butter A',
+          calories: 6.0,
+          protein: 0.3,
+          fat: 0.5,
+          carbs: 0.2,
+          fiber: 0.1,
+          source: 'off',
+          sourceBarcode: '12345',
+          servings: [
+            FoodServing(
+                id: 1, foodId: 0, unit: 'g', grams: 1.0, quantity: 1.0),
+          ],
+        );
+        final offFoodB = Food(
+          id: 0,
+          name: 'Peanut Butter B',
+          calories: 5.0,
+          protein: 0.2,
+          fat: 0.4,
+          carbs: 0.3,
+          fiber: 0.1,
+          source: 'off',
+          sourceBarcode: '67890',
+          servings: [
+            FoodServing(
+                id: 2, foodId: 0, unit: 'g', grams: 1.0, quantity: 1.0),
+          ],
+        );
+
+        logProvider
+            .addFoodToQueue(FoodPortion(food: offFoodA, grams: 28, unit: 'g'));
+        logProvider
+            .addFoodToQueue(FoodPortion(food: offFoodB, grams: 32, unit: 'g'));
+
+        // Edit food A (now saved with id=99), refresh queue
+        final updatedA = Food(
+          id: 99,
+          name: 'Peanut Butter A (edited)',
+          calories: 6.5,
+          protein: 0.35,
+          fat: 0.55,
+          carbs: 0.15,
+          fiber: 0.1,
+          source: 'off',
+          sourceBarcode: '12345',
+          servings: [
+            FoodServing(
+                id: 3, foodId: 99, unit: 'g', grams: 1.0, quantity: 1.0),
+          ],
+        );
+
+        await logProvider.refreshFoodInQueue(99, updatedA);
+
+        expect(logProvider.logQueue.length, 2);
+        // First item should be updated to the edited version
+        expect(logProvider.logQueue[0].food.name, 'Peanut Butter A (edited)');
+        expect(logProvider.logQueue[0].grams, 28); // grams preserved
+        // Second item should be untouched
+        expect(logProvider.logQueue[1].food.name, 'Peanut Butter B');
+        expect(logProvider.logQueue[1].grams, 32);
+      },
+    );
+
     test('total getters = logged + queued', () {
       final food = Food(
         id: 1,

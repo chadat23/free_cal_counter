@@ -143,6 +143,7 @@ class LogProvider extends ChangeNotifier {
       // Match by food ID or by barcode (for OFF foods)
       if (portion.food.id == foodId ||
           (portion.food.source == 'off' &&
+              portion.food.sourceBarcode != null &&
               portion.food.sourceBarcode == updatedFood.sourceBarcode)) {
         // Update the portion with the new food reference
         _logQueue[i] = model.FoodPortion(

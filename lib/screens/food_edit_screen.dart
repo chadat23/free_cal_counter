@@ -180,6 +180,15 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
       }
     }
 
+    // Pick up sourceBarcode from the food object (e.g., OFF foods not yet in DB)
+    if (widget.originalFood?.sourceBarcode != null &&
+        widget.originalFood!.sourceBarcode!.isNotEmpty &&
+        !_barcodes.contains(widget.originalFood!.sourceBarcode)) {
+      setState(() {
+        _barcodes.add(widget.originalFood!.sourceBarcode!);
+      });
+    }
+
     // Handle initial barcode from scan (for new food)
     if (widget.initialBarcode != null) {
       if (mounted) {
@@ -365,6 +374,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
       carbs: _parse(_carbsController.text) * factor,
       fiber: _parse(_fiberController.text) * factor,
       source: widget.originalFood?.source ?? 'user',
+      sourceBarcode: widget.originalFood?.sourceBarcode,
       servings: _servings,
       database: widget.originalFood?.database ?? FoodDatabase.live,
     );

@@ -67,8 +67,10 @@ class NavigationContainerScreen extends StatelessWidget {
               unselectedItemColor: Colors.grey,
               onTap: (index) {
                 if (index != 1 && selectedIndex == 1) {
-                  // Navigating away from Log tab: Clear the queue
-                  Provider.of<LogProvider>(context, listen: false).clearQueue();
+                  // Navigating away from Log tab: Clear the queue and selection
+                  final logProvider = Provider.of<LogProvider>(context, listen: false);
+                  logProvider.clearQueue();
+                  logProvider.clearSelection();
                 }
                 navigationProvider.changeTab(index);
               },

@@ -60,6 +60,7 @@ class _LogScreenState extends State<LogScreen> with RouteAware {
       _selectedDate = newDate;
     });
     final logProvider = Provider.of<LogProvider>(context, listen: false);
+    logProvider.clearSelection();
     logProvider.loadLoggedPortionsForDate(newDate);
   }
 

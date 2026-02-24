@@ -267,7 +267,7 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
           final stat = statsMap[key];
           dailyIntakes.add(stat?.calories ?? 0.0);
           intakeIsValid.add(stat != null && stat.logCount > 0);
-          current = current.add(const Duration(days: 1));
+          current = DateTime(current.year, current.month, current.day + 1);
         }
 
         // 5. Run Kalman filter

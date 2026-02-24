@@ -148,7 +148,7 @@ class _WeightTrendChartState extends State<WeightTrendChart> {
           isToday: current.isAtSameMomentAs(todayDate),
         ),
       );
-      current = current.add(const Duration(days: 1));
+      current = DateTime(current.year, current.month, current.day + 1);
     }
 
     // Sort strictly for trend calculation (using only real data)
@@ -392,7 +392,7 @@ class _WeightLinePainter extends CustomPainter {
       mainPath.moveTo(getX(current), getYMain(maintenanceHistory[0]));
 
       for (var i = 1; i < maintenanceHistory.length; i++) {
-        current = current.add(const Duration(days: 1));
+        current = DateTime(current.year, current.month, current.day + 1);
         mainPath.lineTo(getX(current), getYMain(maintenanceHistory[i]));
       }
 

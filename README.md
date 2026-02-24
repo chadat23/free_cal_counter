@@ -21,11 +21,13 @@ For help getting started with Flutter development, view the
 samples, guidance on mobile development, and a full API reference.
 
 Bugs
-v0.1.0
+v0.1.2
+- Log multiselect wasn't properly unselecting in screen change
+- 6 months weight graph didn't show data points
 - OFF Log Queue replacing each other
 - Fill to Target not working if queue isn't empty
 v0.1.1
-- various little bugs.
+- various little bugs
 v0.1.0
 - initial release
 

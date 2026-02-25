@@ -1,6 +1,13 @@
 import 'dart:math';
 import 'package:meal_of_record/models/weight.dart';
 
+class KalmanEstimate {
+  final double tdee;
+  final double weight;
+
+  const KalmanEstimate({required this.tdee, required this.weight});
+}
+
 class GoalLogicService {
   static const int kTdeeWindowDays = 14;
   static const int kMinWeightDays = 10;
@@ -105,7 +112,7 @@ class GoalLogicService {
 
   /// Estimates TDEE using a Kalman Filter approach.
   /// x = [Weight, TDEE]
-  static List<double> calculateKalmanTDEE({
+  static List<KalmanEstimate> calculateKalmanTDEE({
     required List<double> weights, // Daily weights (0.0 if missing)
     required List<double> intakes, // Daily caloric intakes
     required double initialTDEE,
@@ -133,7 +140,7 @@ class GoalLogicService {
     const double qTT = 400.0; // TDEE can drift (std dev ~20 cal)
     const double rW = 1.0; // Weight scale noise
 
-    final List<double> estimates = [];
+    final List<KalmanEstimate> estimates = [];
 
     for (int i = 0; i < weights.length; i++) {
       final double observedWeight = weights[i];
@@ -178,7 +185,7 @@ class GoalLogicService {
         pTT = pTT - kT * oldPWT;
       }
 
-      estimates.add(xTdee);
+      estimates.add(KalmanEstimate(tdee: xTdee, weight: xWeight));
     }
 
     return estimates;

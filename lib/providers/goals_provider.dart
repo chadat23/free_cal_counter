@@ -285,7 +285,8 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
         );
 
         if (estimates.isNotEmpty) {
-          final kalmanTDEE = estimates.last.clamp(800.0, 6000.0);
+          final kalmanTDEE = estimates.last.tdee.clamp(800.0, 6000.0);
+          final kalmanWeight = estimates.last.weight;
 
           // Update maintenance baseline with Kalman result
           _settings = _settings.copyWith(
@@ -294,7 +295,14 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
 
           // Apply mode
           if (_settings.mode == GoalMode.maintain) {
-            targetCalories = kalmanTDEE;
+            // Drift correction: adjust calories to steer weight back to anchor
+            final double C = _settings.useMetric
+                ? GoalLogicService.kCalPerKg
+                : GoalLogicService.kCalPerLb;
+            final drift = kalmanWeight - _settings.anchorWeight;
+            final correctionCals = drift * C /
+                _settings.correctionWindowDays;
+            targetCalories = kalmanTDEE + correctionCals;
           } else {
             double delta = _settings.fixedDelta;
             if (_settings.mode == GoalMode.lose) {

@@ -25,6 +25,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
   List<DateTime> _nutritionDates = [];
   List<Weight> _weightHistory = [];
   List<double> _maintenanceHistory = [];
+  List<double> _kalmanWeightHistory = [];
   bool _isLoading = true;
   int _weightRangeDays = 7;
   String _weightRangeLabel = '1 wk';
@@ -132,9 +133,14 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
       // Extract the portion corresponding to the displayed range
       final int displayCount = _weightRangeDays + 1;
-      final displayMaintenance = maintenanceTrend.length >= displayCount
-          ? maintenanceTrend.sublist(maintenanceTrend.length - displayCount)
-          : maintenanceTrend;
+      final maintenanceTdees = maintenanceTrend.map((e) => e.tdee).toList();
+      final kalmanWeights = maintenanceTrend.map((e) => e.weight).toList();
+      final displayMaintenance = maintenanceTdees.length >= displayCount
+          ? maintenanceTdees.sublist(maintenanceTdees.length - displayCount)
+          : maintenanceTdees;
+      final displayKalmanWeights = kalmanWeights.length >= displayCount
+          ? kalmanWeights.sublist(kalmanWeights.length - displayCount)
+          : kalmanWeights;
 
       // Process stats into NutritionTargets
       if (mounted) {
@@ -146,6 +152,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
             return !d.isBefore(rangeStart);
           }).toList();
           _maintenanceHistory = displayMaintenance;
+          _kalmanWeightHistory = displayKalmanWeights;
           _weightRangeStart = rangeStart;
           _weightRangeEnd = today;
           _isLoading = false;
@@ -330,6 +337,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
                             WeightTrendChart(
                               weightHistory: _weightHistory,
                               maintenanceHistory: _maintenanceHistory,
+                              kalmanWeightHistory: _kalmanWeightHistory,
                               timeframeLabel: _weightRangeLabel,
                               startDate: _weightRangeStart,
                               endDate: _weightRangeEnd,

@@ -104,7 +104,7 @@ void main() {
       );
 
       expect(results.length, 30);
-      expect(results.last, closeTo(2000.0, 10.0));
+      expect(results.last.tdee, closeTo(2000.0, 10.0));
     });
 
     test('gaining weight -> TDEE < intake', () {
@@ -122,7 +122,7 @@ void main() {
         initialWeight: 100.0,
       );
 
-      expect(results.last, closeTo(2150.0, 100.0));
+      expect(results.last.tdee, closeTo(2150.0, 100.0));
     });
 
     test('losing weight -> TDEE > intake', () {
@@ -140,7 +140,7 @@ void main() {
         initialWeight: 200.0,
       );
 
-      expect(results.last, closeTo(2150.0, 100.0));
+      expect(results.last.tdee, closeTo(2150.0, 100.0));
     });
 
     test('missing weight data -> still converges', () {
@@ -154,7 +154,7 @@ void main() {
       );
 
       expect(results.length, 30);
-      expect(results.last, closeTo(2000.0, 50.0));
+      expect(results.last.tdee, closeTo(2000.0, 50.0));
     });
 
     test('missing intake (intakeIsValid=false) -> TDEE stays near initial',
@@ -174,7 +174,7 @@ void main() {
       expect(results.length, 30);
       // With all intake invalid, filter substitutes xTdee for intake,
       // so predict step has (xTdee - xTdee) = 0 surplus. TDEE should stay near initial.
-      expect(results.last, closeTo(2000.0, 50.0));
+      expect(results.last.tdee, closeTo(2000.0, 50.0));
     });
 
     test('mixed missing intake + weight -> reasonable estimate', () {
@@ -197,7 +197,7 @@ void main() {
       );
 
       expect(results.length, 30);
-      expect(results.last, closeTo(2000.0, 100.0));
+      expect(results.last.tdee, closeTo(2000.0, 100.0));
     });
 
     test('all intake missing -> TDEE ~ initialTDEE', () {
@@ -213,7 +213,7 @@ void main() {
         intakeIsValid: intakeIsValid,
       );
 
-      expect(results.last, closeTo(2500.0, 50.0));
+      expect(results.last.tdee, closeTo(2500.0, 50.0));
     });
 
     test('metric vs imperial -> different due to C constant', () {
@@ -239,7 +239,7 @@ void main() {
       // With metric (kCalPerKg = 7716), the same weight change implies a
       // larger caloric surplus/deficit than imperial (kCalPerLb = 3500).
       // So the TDEE estimates should differ.
-      expect(resultsImperial.last != resultsMetric.last, isTrue);
+      expect(resultsImperial.last.tdee != resultsMetric.last.tdee, isTrue);
     });
 
     test('large surplus -> correct weight gain model', () {
@@ -256,7 +256,7 @@ void main() {
       );
 
       // TDEE should converge toward 2000 (intake 3000 - surplus 1000)
-      expect(results.last, closeTo(2000.0, 200.0));
+      expect(results.last.tdee, closeTo(2000.0, 200.0));
     });
 
     test('large deficit -> correct weight loss model', () {
@@ -273,7 +273,7 @@ void main() {
       );
 
       // TDEE should converge toward 2500 (intake 1500 + deficit 1000)
-      expect(results.last, closeTo(2500.0, 200.0));
+      expect(results.last.tdee, closeTo(2500.0, 200.0));
     });
 
     test('covariance update correctness: 2-step hand-verified example', () {
@@ -289,8 +289,8 @@ void main() {
 
       expect(results.length, 2);
       // With stable weight and matching intake, TDEE should stay at ~2000
-      expect(results[0], closeTo(2000.0, 5.0));
-      expect(results[1], closeTo(2000.0, 5.0));
+      expect(results[0].tdee, closeTo(2000.0, 5.0));
+      expect(results[1].tdee, closeTo(2000.0, 5.0));
 
       // Now verify the old bug would have given different results
       // by running with a scenario where covariance matters more:
@@ -303,7 +303,7 @@ void main() {
       );
 
       // The TDEE should adjust downward (weight gain implies TDEE < intake)
-      expect(resultsDiscrepant[1], lessThan(2000.0));
+      expect(resultsDiscrepant[1].tdee, lessThan(2000.0));
     });
 
     test('empty inputs -> empty results', () {

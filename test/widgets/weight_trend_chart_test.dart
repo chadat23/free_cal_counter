@@ -9,6 +9,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: WeightTrendChart(
+            kalmanWeightHistory: [],
             weightHistory: [],
             maintenanceHistory: [],
             timeframeLabel: '30d',
@@ -32,6 +33,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: WeightTrendChart(
+            kalmanWeightHistory: [],
             weightHistory: history,
             maintenanceHistory: List.generate(31, (_) => 2000.0),
             timeframeLabel: '1 mo',
@@ -66,6 +68,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: WeightTrendChart(
+            kalmanWeightHistory: [],
             weightHistory: history,
             maintenanceHistory: List.generate(3, (_) => 2000.0),
             timeframeLabel: '1 wk',
@@ -95,6 +98,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: WeightTrendChart(
+            kalmanWeightHistory: [],
             weightHistory: history,
             maintenanceHistory: List.generate(31, (_) => 2000.0),
             timeframeLabel: '1 mo',
@@ -119,6 +123,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: WeightTrendChart(
+            kalmanWeightHistory: [],
             weightHistory: history,
             maintenanceHistory: List.generate(31, (_) => 2000.0),
             timeframeLabel: '1 mo',

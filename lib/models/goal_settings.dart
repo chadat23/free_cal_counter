@@ -26,6 +26,7 @@ class GoalSettings {
   final bool useMetric;
   final bool isSet;
   final bool enableSmartTargets;
+  final int correctionWindowDays;
 
   GoalSettings({
     required this.anchorWeight,
@@ -43,6 +44,7 @@ class GoalSettings {
     this.useMetric = false,
     this.isSet = true,
     this.enableSmartTargets = true,
+    this.correctionWindowDays = 30,
   });
 
   factory GoalSettings.fromJson(Map<String, dynamic> json) {
@@ -74,6 +76,7 @@ class GoalSettings {
       useMetric: json['useMetric'] as bool? ?? false,
       isSet: json['isSet'] as bool? ?? true,
       enableSmartTargets: json['enableSmartTargets'] as bool? ?? true,
+      correctionWindowDays: json['correctionWindowDays'] as int? ?? 30,
     );
   }
 
@@ -94,6 +97,7 @@ class GoalSettings {
       'useMetric': useMetric,
       'isSet': isSet,
       'enableSmartTargets': enableSmartTargets,
+      'correctionWindowDays': correctionWindowDays,
     };
   }
 
@@ -115,6 +119,7 @@ class GoalSettings {
       useMetric: false,
       isSet: false,
       enableSmartTargets: true,
+      correctionWindowDays: 30,
     );
   }
 
@@ -135,6 +140,7 @@ class GoalSettings {
     bool? useMetric,
     bool? isSet,
     bool? enableSmartTargets,
+    int? correctionWindowDays,
   }) {
     return GoalSettings(
       anchorWeight: anchorWeight ?? this.anchorWeight,
@@ -153,6 +159,7 @@ class GoalSettings {
       useMetric: useMetric ?? this.useMetric,
       isSet: isSet ?? this.isSet,
       enableSmartTargets: enableSmartTargets ?? this.enableSmartTargets,
+      correctionWindowDays: correctionWindowDays ?? this.correctionWindowDays,
     );
   }
 }

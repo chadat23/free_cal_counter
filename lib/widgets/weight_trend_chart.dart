@@ -61,6 +61,7 @@ int? findNearestRealPoint({
 class WeightTrendChart extends StatefulWidget {
   final List<Weight> weightHistory;
   final List<double> maintenanceHistory;
+  final List<double> kalmanWeightHistory;
   final String timeframeLabel;
   final DateTime startDate;
   final DateTime endDate;
@@ -69,6 +70,7 @@ class WeightTrendChart extends StatefulWidget {
     super.key,
     required this.weightHistory,
     required this.maintenanceHistory,
+    required this.kalmanWeightHistory,
     required this.timeframeLabel,
     required this.startDate,
     required this.endDate,
@@ -151,10 +153,29 @@ class _WeightTrendChartState extends State<WeightTrendChart> {
       current = DateTime(current.year, current.month, current.day + 1);
     }
 
-    // Sort strictly for trend calculation (using only real data)
+    // Sort real data for display
     final sortedReal = List<Weight>.from(widget.weightHistory)
       ..sort((a, b) => a.date.compareTo(b.date));
-    final trends = GoalLogicService.calculateTrendHistory(sortedReal);
+
+    // Use Kalman weight history for trend line (falls back to EMA if empty)
+    final List<double> trends;
+    if (widget.kalmanWeightHistory.isNotEmpty) {
+      // kalmanWeightHistory maps 1:1 to daily points between startDate and endDate.
+      // Build a date->weight map, then look up each real data point's date.
+      final kalmanByDate = <DateTime, double>{};
+      var kDate = DateTime(widget.startDate.year, widget.startDate.month, widget.startDate.day);
+      for (var i = 0; i < widget.kalmanWeightHistory.length; i++) {
+        kalmanByDate[kDate] = widget.kalmanWeightHistory[i];
+        kDate = DateTime(kDate.year, kDate.month, kDate.day + 1);
+      }
+      // For each real weight point, find the nearest Kalman estimate
+      trends = sortedReal.map((w) {
+        final dateOnly = DateTime(w.date.year, w.date.month, w.date.day);
+        return kalmanByDate[dateOnly] ?? w.weight;
+      }).toList();
+    } else {
+      trends = GoalLogicService.calculateTrendHistory(sortedReal);
+    }
 
     return Container(
       height: 250,

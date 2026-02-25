@@ -22,6 +22,9 @@ samples, guidance on mobile development, and a full API reference.
 
 Bugs
 v0.1.2
+Features:
+- Better weight smoothing/estimating
+Bugs:
 - Log multiselect wasn't properly unselecting in screen change
 - 6 months weight graph didn't show data points
 - OFF Log Queue replacing each other

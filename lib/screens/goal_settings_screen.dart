@@ -24,6 +24,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
   late TextEditingController _fiberController;
   late TextEditingController _fixedDeltaController;
   late TextEditingController _proteinMultiplierController;
+  late TextEditingController _correctionWindowController;
   late GoalMode _mode;
   late MacroCalculationMode _calcMode;
   late ProteinTargetMode _proteinTargetMode;
@@ -61,6 +62,9 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
     _proteinMultiplierController = TextEditingController(
       text: settings.proteinMultiplier.toString(),
     );
+    _correctionWindowController = TextEditingController(
+      text: settings.correctionWindowDays.toString(),
+    );
     _mode = settings.mode;
     _calcMode = settings.calculationMode;
     _proteinTargetMode = settings.proteinTargetMode;
@@ -79,6 +83,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
     _fiberController.dispose();
     _fixedDeltaController.dispose();
     _proteinMultiplierController.dispose();
+    _correctionWindowController.dispose();
     super.dispose();
   }
 
@@ -179,6 +184,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
       useMetric: _useMetric,
       isSet: true,
       enableSmartTargets: _enableSmartTargets,
+      correctionWindowDays: int.tryParse(_correctionWindowController.text) ?? 30,
     );
 
     await goalsProvider.saveSettings(
@@ -217,7 +223,9 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
         carbs != _initialSettings.carbTarget ||
         fiber != _initialSettings.fiberTarget ||
         anchorWeight != _initialSettings.anchorWeight ||
-        (_mode != GoalMode.maintain && delta != _initialSettings.fixedDelta);
+        (_mode != GoalMode.maintain && delta != _initialSettings.fixedDelta) ||
+        (int.tryParse(_correctionWindowController.text) ?? 30) !=
+            _initialSettings.correctionWindowDays;
   }
 
   Future<void> _showDiscardChangesDialog() async {
@@ -316,6 +324,13 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
               controller: _fixedDeltaController,
               label: _mode == GoalMode.gain ? 'Serplus' : 'Deficit',
               hint: 'e.g. 500',
+              keyboardType: TextInputType.number,
+            ),
+          if (_mode == GoalMode.maintain)
+            _buildTextField(
+              controller: _correctionWindowController,
+              label: 'Correction Window (days)',
+              hint: 'e.g. 30',
               keyboardType: TextInputType.number,
             ),
           const Divider(height: 40),

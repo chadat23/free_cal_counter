@@ -197,6 +197,7 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
     }
 
     double targetCalories = _settings.maintenanceCaloriesStart;
+    double? kalmanWeightEstimate;
 
     // Use initial setup logic (manual calories) if requested OR if smart targets are disabled
     final useManualLogic = isInitialSetup || !_settings.enableSmartTargets;
@@ -287,6 +288,7 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
         if (estimates.isNotEmpty) {
           final kalmanTDEE = estimates.last.tdee.clamp(800.0, 6000.0);
           final kalmanWeight = estimates.last.weight;
+          kalmanWeightEstimate = kalmanWeight;
 
           // Update maintenance baseline with Kalman result
           _settings = _settings.copyWith(
@@ -321,22 +323,16 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
     // --- Dynamic Protein Calculation ---
     if (_settings.proteinTargetMode == ProteinTargetMode.percentageOfWeight) {
       double referenceWeight = 0.0;
-      
-      // 1. Try Trend Weight
-      final trend = GoalLogicService.calculateTrendWeight(weights);
-      if (trend > 0) {
-        referenceWeight = trend;
+
+      // 1. Try Kalman weight estimate (smart mode, warm boot)
+      if (kalmanWeightEstimate != null && kalmanWeightEstimate > 0) {
+        referenceWeight = kalmanWeightEstimate;
       } else if (weights.isNotEmpty) {
-        // 2. Try Latest Weight
-        referenceWeight = weights.last.weight; // weights are sorted by date in Service query? Usually yes but ensure handling.
-        // Actually Service returns them sorted ASC by date usually. 
-        // Let's safe guard:
-        if (weights.length > 1) {
-           weights.sort((a, b) => a.date.compareTo(b.date));
-           referenceWeight = weights.last.weight;
-        }
+        // 2. Fallback to latest raw weight
+        weights.sort((a, b) => a.date.compareTo(b.date));
+        referenceWeight = weights.last.weight;
       } else {
-        // 3. Fallback to Anchor Weight
+        // 3. Fallback to anchor weight
         referenceWeight = _settings.anchorWeight;
       }
 

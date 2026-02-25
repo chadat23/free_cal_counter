@@ -4,7 +4,7 @@ import 'package:meal_of_record/models/goal_settings.dart';
 import 'package:meal_of_record/providers/goals_provider.dart';
 import 'package:meal_of_record/providers/navigation_provider.dart';
 import 'package:meal_of_record/providers/weight_provider.dart';
-import 'package:meal_of_record/services/goal_logic_service.dart';
+import 'package:meal_of_record/models/weight.dart';
 import 'package:meal_of_record/widgets/screen_background.dart';
 import 'package:meal_of_record/utils/ui_utils.dart';
 
@@ -460,16 +460,17 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
       onSelectionChanged: (newSelection) {
         final newMode = newSelection.first;
         if (newMode == GoalMode.maintain && _mode != GoalMode.maintain) {
-          // Switching TO maintain mode - set to trend weight
+          // Switching TO maintain mode - set to latest raw weight
           final weightProvider = Provider.of<WeightProvider>(
             context,
             listen: false,
           );
-          final trend = GoalLogicService.calculateTrendWeight(
-            weightProvider.weights,
-          );
-          if (trend > 0) {
-            _anchorWeightController.text = trend.toStringAsFixed(1);
+          final weights = weightProvider.weights;
+          if (weights.isNotEmpty) {
+            final sorted = List<Weight>.from(weights)
+              ..sort((a, b) => a.date.compareTo(b.date));
+            _anchorWeightController.text =
+                sorted.last.weight.toStringAsFixed(1);
           }
         }
         setState(() {

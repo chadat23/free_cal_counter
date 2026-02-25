@@ -77,7 +77,7 @@ void main() {
       expect(provider.currentGoals.protein, 200.0);
     });
 
-    test('Multiplier mode: uses Trend Weight if available', () async {
+    test('Multiplier mode: uses latest weight when Kalman unavailable', () async {
       final settings = GoalSettings(
         anchorWeight: 150.0,
         maintenanceCaloriesStart: 2000,
@@ -93,7 +93,7 @@ void main() {
         lastTargetUpdate: now,
       );
 
-      // Trend of 200 and 200 -> 200.
+      // Two weights of 200 — Kalman won't run (not enough data), falls back to latest raw weight
       final weights = [
         Weight(date: now.subtract(const Duration(days: 1)), weight: 200.0),
         Weight(date: now, weight: 200.0),
@@ -107,12 +107,12 @@ void main() {
 
       await provider.recalculateTargets();
 
-      // Trend is 200. Multiplier 1.0 -> 200g protein.
+      // Latest weight is 200. Multiplier 1.0 -> 200g protein.
       expect(provider.settings.proteinTarget, 200.0);
       expect(provider.currentGoals.protein, 200.0);
     });
 
-    test('Multiplier mode: falls back to Latest Weight if trend not established', () async {
+    test('Multiplier mode: falls back to latest weight if single weight entry', () async {
       final settings = GoalSettings(
         anchorWeight: 150.0,
         maintenanceCaloriesStart: 2000,
@@ -128,9 +128,7 @@ void main() {
         lastTargetUpdate: now,
       );
 
-      // Only one weight, trend algo might return it or 0 depending on implementation.
-      // GoalLogicService.calculateTrendWeight returns 0 if empty, first if single?
-      // Let's verify standard behavior.
+      // Only one weight — Kalman won't run, falls back to latest raw weight.
       final weights = [
          Weight(date: now, weight: 180.0),
       ];
@@ -143,8 +141,7 @@ void main() {
 
       await provider.recalculateTargets();
 
-      // If single weight, trend likely matches it. 
-      // 180 * 1.5 = 270.
+      // Latest weight is 180. 180 * 1.5 = 270.
       expect(provider.settings.proteinTarget, 270.0);
     });
 

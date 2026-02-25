@@ -186,20 +186,16 @@ void main() {
   });
 
   testWidgets(
-    'Switching to Maintain mode sets target weight to trend weight',
+    'Switching to Maintain mode sets target weight to latest raw weight',
     (tester) async {
-      // Setup some weight history for trend calculation
+      // Setup some weight history
       final weights = [
         Weight(id: 1, weight: 160.0, date: DateTime(2024, 1, 1)),
         Weight(id: 2, weight: 158.0, date: DateTime(2024, 1, 2)),
         Weight(id: 3, weight: 159.0, date: DateTime(2024, 1, 3)),
       ];
       when(mockWeightProvider.weights).thenReturn(weights);
-      // Trend for [160, 158, 159] with alpha 0.15:
-      // EMA1 = 160
-      // EMA2 = 0.15 * 158 + 0.85 * 160 = 23.7 + 136 = 159.7
-      // EMA3 = 0.15 * 159 + 0.85 * 159.7 = 23.85 + 135.745 = 159.595 -> 159.6
-      
+
       // Load screen in Lose mode
       final settings = GoalSettings.defaultSettings().copyWith(
         mode: GoalMode.lose,
@@ -227,10 +223,9 @@ void main() {
       await tester.tap(find.text('Maintain'));
       await tester.pumpAndSettle();
 
-      // Should now show Target Weight and updated value
+      // Should now show Target Weight with latest raw weight (159.0)
       expect(find.text('Target Weight (lb)'), findsOneWidget);
-      // Based on calculation above, trend should be approx 159.6
-      expect(find.text('159.6'), findsOneWidget);
+      expect(find.text('159.0'), findsOneWidget);
     },
   );
 

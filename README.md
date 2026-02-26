@@ -21,10 +21,12 @@ For help getting started with Flutter development, view the
 samples, guidance on mobile development, and a full API reference.
 
 Updates:
-v0.1.2
+v0.2.0
  Features:
- - Better weight smoothing/estimating
+ - Added portion sharing
+ - Added Dumpable Recipe portioning
  - Added Recipe links
+ - Better weight smoothing/estimating
  Bugs:
  - Log multiselect wasn't properly unselecting in screen change
  - 6 months weight graph didn't show data points

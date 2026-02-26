@@ -30,6 +30,7 @@ The current date is displayed at the top. Swipe left and right or tap the date c
 
 | Action | What It Does |
 |--------|--------------|
+| Tap a meal's **time/macro header** | Open the [Meal Portion](meal-portion.md) screen to re-portion or share the meal |
 | Swipe an item left | Delete that entry |
 | Tap an item's Edit button | Open it in Quantity Edit to adjust the amount |
 | Tap an item | Enter multi-select mode |

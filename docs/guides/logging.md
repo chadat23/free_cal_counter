@@ -87,6 +87,12 @@ Use the arrow buttons on either side of the day at the top to move between days 
 
 ![Log screen showing daily entries organized by meal](../images/logging-11-log-screen.png)
 
+### Re-portioning and Sharing a Meal
+
+Tap the **time and macro row** at the top of a meal card to open the [Meal Portion](../reference/meal-portion.md) screen. From there you can enter a different total weight — all ingredients scale proportionally in real time — and either add the scaled ingredients to your queue or share them with someone via QR.
+
+This is handy for splitting a meal with a partner: log the full meal for yourself, tap the header, enter their portion size, and share it to their phone.
+
 ### Selecting and Managing Items
 
 **Long-press** an item to enter multi-select mode, then tap additional items to select them. With items selected, you can:

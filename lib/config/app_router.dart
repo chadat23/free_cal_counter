@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:meal_of_record/screens/goal_settings_screen.dart';
 import 'package:meal_of_record/screens/qr_sharing_screen.dart';
+import 'package:meal_of_record/screens/qr_portion_sharing_screen.dart';
+import 'package:meal_of_record/screens/meal_portion_screen.dart';
+import 'package:meal_of_record/models/food_portion.dart';
+import 'package:meal_of_record/models/meal.dart';
 import 'package:meal_of_record/screens/data_management_screen.dart';
 import 'package:meal_of_record/screens/search_screen.dart';
 import 'package:meal_of_record/models/recipe.dart';
@@ -25,6 +29,8 @@ class AppRouter {
   static const String qrSharingRoute = '/qr_sharing';
   static const String goalSettingsRoute = '/goal_settings';
   static const String containerSettingsRoute = '/container_settings';
+  static const String qrPortionSharingRoute = '/qr_portion_sharing';
+  static const String mealPortionRoute = '/meal_portion';
 
   final DatabaseService databaseService;
   final OffApiService offApiService;
@@ -75,6 +81,16 @@ class AppRouter {
       case containerSettingsRoute:
         return MaterialPageRoute(
           builder: (_) => const ContainerSettingsScreen(),
+        );
+      case qrPortionSharingRoute:
+        final portions = settings.arguments as List<FoodPortion>?;
+        return MaterialPageRoute(
+          builder: (_) => QrPortionSharingScreen(portions: portions),
+        );
+      case mealPortionRoute:
+        final meal = settings.arguments as Meal;
+        return MaterialPageRoute(
+          builder: (_) => MealPortionScreen(meal: meal),
         );
       default:
         return MaterialPageRoute(

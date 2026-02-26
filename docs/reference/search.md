@@ -32,7 +32,7 @@ Switch to this tab to scan a barcode. The app checks your local foods first, the
 
 ### Recipe Search
 
-Browse and search your saved recipes and templates. Tap to add a regular recipe or dump a template's ingredients into your queue.
+Browse and search your saved recipes and templates. Tap any recipe to open the Quantity Edit screen — for dump-only recipes, the ingredients are scaled proportionally and dumped into your queue at the amount you enter.
 
 ![Recipe tab showing saved recipes and templates](../images/search-04-recipes.png)
 

@@ -276,24 +276,41 @@ class _RecipeSearchViewState extends State<RecipeSearchView> {
                         },
                         onTap: (selectedUnit) async {
                           if (recipe == null) return;
+
+                          // Dump-only recipes: open QuantityEditScreen with the recipe's food
                           if (recipe.isTemplate && context.mounted) {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text('Only Dumpable'),
-                                content: Text(
-                                  '${recipe.name} is marked as "Only Dumpable". '
-                                  'It can only be added as individual ingredients. '
-                                  'Use the Dump action or click the + button to dump ingredients.',
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: const Text('OK'),
+                            final recipeFood = recipe.toFood();
+                            final result = await Navigator.push<model_portion.FoodPortion>(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => QuantityEditScreen(
+                                  config: QuantityEditConfig(
+                                    context: widget.config.context,
+                                    food: recipeFood,
+                                    initialUnit: 'g',
+                                    initialQuantity: recipe.totalGrams,
+                                    canShare: true,
+                                    sourceRecipe: recipe,
                                   ),
-                                ],
+                                ),
                               ),
                             );
+                            if (result != null && context.mounted) {
+                              final logProvider = Provider.of<LogProvider>(
+                                context,
+                                listen: false,
+                              );
+                              final quantity = result.grams / recipe.gramsPerPortion;
+                              logProvider.dumpRecipeToQueue(recipe, quantity: quantity);
+                              searchProvider.clearSearch();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Dumped ${recipe.name} (${result.grams.toStringAsFixed(0)}g) into Log Queue',
+                                  ),
+                                ),
+                              );
+                            }
                             return;
                           }
 
@@ -342,6 +359,8 @@ class _RecipeSearchViewState extends State<RecipeSearchView> {
                                     initialUnit: initialUnit,
                                     initialQuantity: initialQuantity,
                                     originalGrams: originalGrams,
+                                    canShare: true,
+                                    sourceRecipe: recipe,
                                   ),
                                 ),
                               ),

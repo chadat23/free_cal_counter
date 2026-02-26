@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:meal_of_record/models/recipe.dart';
 import 'package:meal_of_record/providers/recipe_provider.dart';
+import 'package:meal_of_record/screens/qr_portion_sharing_screen.dart';
 import 'package:meal_of_record/widgets/screen_background.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
@@ -162,7 +164,7 @@ class _QrSharingScreenState extends State<QrSharingScreen>
   Future<void> _finishScanning() async {
     setState(() {
       _isScanning = false;
-      _statusMessage = 'Processing recipe...';
+      _statusMessage = 'Processing...';
     });
 
     // Reassemble
@@ -171,6 +173,24 @@ class _QrSharingScreenState extends State<QrSharingScreen>
       sb.write(_receivedChunks[i] ?? '');
     }
     final fullJson = sb.toString();
+
+    // Detect portions format and redirect
+    try {
+      final decoded = jsonDecode(fullJson) as Map<String, dynamic>;
+      if (decoded['type'] == 'portions') {
+        if (!mounted) return;
+        // Navigate to the portions import screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const QrPortionSharingScreen(),
+          ),
+        );
+        return;
+      }
+    } catch (_) {
+      // Not valid JSON or not portions format — continue with recipe import
+    }
 
     final recipeProvider = Provider.of<RecipeProvider>(context, listen: false);
     final newId = await recipeProvider.importRecipe(fullJson);

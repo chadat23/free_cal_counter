@@ -4,6 +4,7 @@ import 'package:meal_of_record/models/food.dart';
 import 'package:meal_of_record/widgets/slidable_portion_widget.dart';
 import 'package:meal_of_record/models/quantity_edit_config.dart';
 import 'package:meal_of_record/screens/quantity_edit_screen.dart';
+import 'package:meal_of_record/screens/meal_portion_screen.dart';
 import 'package:meal_of_record/models/logged_portion.dart';
 import 'package:meal_of_record/models/food_portion.dart';
 import 'package:intl/intl.dart';
@@ -38,29 +39,39 @@ class MealWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    DateFormat.jm().format(meal.timestamp),
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MealPortionScreen(meal: meal),
                     ),
-                  ),
-                  Wrap(
-                    spacing: 8.0,
-                    runSpacing: 4.0,
-                    alignment: WrapAlignment.end,
-                    children: [
-                      Text('🔥${meal.totalCalories.toInt()}'),
-                      Text('P: ${meal.totalProtein.toStringAsFixed(0)}'),
-                      Text('F: ${meal.totalFat.toStringAsFixed(0)}'),
-                      Text('C: ${meal.totalCarbs.toStringAsFixed(0)}'),
-                      Text('Fb: ${meal.totalFiber.toStringAsFixed(0)}'),
-                    ],
-                  ),
-                ],
+                  );
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      DateFormat.jm().format(meal.timestamp),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Wrap(
+                      spacing: 8.0,
+                      runSpacing: 4.0,
+                      alignment: WrapAlignment.end,
+                      children: [
+                        Text('🔥${meal.totalCalories.toInt()}'),
+                        Text('P: ${meal.totalProtein.toStringAsFixed(0)}'),
+                        Text('F: ${meal.totalFat.toStringAsFixed(0)}'),
+                        Text('C: ${meal.totalCarbs.toStringAsFixed(0)}'),
+                        Text('Fb: ${meal.totalFiber.toStringAsFixed(0)}'),
+                      ],
+                    ),
+                  ],
+                ),
               ),
               const Divider(),
               ...meal.loggedPortion.asMap().entries.map((entry) {

@@ -248,6 +248,21 @@ class MockLogProvider extends _i1.Mock implements _i9.LogProvider {
       );
 
   @override
+  List<_i10.FoodPortion> dumpRecipePortionsAsList(
+    _i7.Recipe? recipe, {
+    double? quantity = 1.0,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #dumpRecipePortionsAsList,
+              [recipe],
+              {#quantity: quantity},
+            ),
+            returnValue: <_i10.FoodPortion>[],
+          )
+          as List<_i10.FoodPortion>);
+
+  @override
   void updateFoodInQueue(int? index, _i10.FoodPortion? newPortion) =>
       super.noSuchMethod(
         Invocation.method(#updateFoodInQueue, [index, newPortion]),

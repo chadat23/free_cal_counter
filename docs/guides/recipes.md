@@ -29,9 +29,9 @@ A dump recipe is a template for meals that vary. A salad, a breakfast burrito, a
 
 **Dumping and adding recipes**
 
-The **(+)** button will dump **Dump Only** recipes, and will otherwise add a portion of the recipe to your Log Queue.
+The **(+)** button will dump **Dump Only** recipes at full quantity, and will otherwise add a portion of the recipe to your Log Queue.
 
-Tapping the recipe will bring up the Quantity Edit screen for regular ingrediants, does nothing for Dump Only recipes.
+Tapping the recipe will bring up the Quantity Edit screen for both regular and dump-only recipes. For dump-only recipes, you enter a total gram amount and the app scales each ingredient proportionally before dumping them into your queue. You can also tap **Share** from Quantity Edit to send the scaled ingredients to another device via QR.
 
 Swiping to the right brings up the abilities to Edit, Copy, or Dump recipies.
 

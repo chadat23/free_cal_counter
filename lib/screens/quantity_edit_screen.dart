@@ -18,6 +18,7 @@ import 'package:meal_of_record/models/food_container.dart';
 import 'package:meal_of_record/widgets/serving_info_sheet.dart';
 import 'package:meal_of_record/widgets/math_input_bar.dart';
 import 'package:meal_of_record/config/app_router.dart';
+import 'package:meal_of_record/screens/qr_portion_sharing_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class QuantityEditScreen extends StatefulWidget {
@@ -434,7 +435,17 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
             child: const Text('Cancel'),
           ),
         ),
-        const SizedBox(width: 16),
+        if (widget.config.canShare) ...[
+          const SizedBox(width: 8),
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: _handleShare,
+              icon: const Icon(Icons.share, size: 18),
+              label: const Text('Share'),
+            ),
+          ),
+        ],
+        const SizedBox(width: 8),
         Expanded(
           child: ElevatedButton(
             onPressed: _handleSave,
@@ -604,6 +615,39 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
         const SnackBar(content: Text('Please enter a valid amount')),
       );
     }
+  }
+
+  void _handleShare() {
+    final grams = _calculateCurrentGrams();
+    if (grams <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid amount')),
+      );
+      return;
+    }
+
+    final recipe = widget.config.sourceRecipe;
+    List<FoodPortion> portions;
+
+    if (recipe != null && recipe.isTemplate) {
+      // Dump-only recipe: compute proportionally-scaled ingredient list
+      final quantity = grams / recipe.gramsPerPortion;
+      final logProvider = Provider.of<LogProvider>(context, listen: false);
+      portions = logProvider.dumpRecipePortionsAsList(recipe, quantity: quantity);
+    } else if (recipe != null) {
+      // Normal recipe: share the single portion
+      portions = [FoodPortion(food: _food, grams: grams, unit: _selectedUnit)];
+    } else {
+      // Plain food
+      portions = [FoodPortion(food: _food, grams: grams, unit: _selectedUnit)];
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => QrPortionSharingScreen(portions: portions),
+      ),
+    );
   }
 
   void _handleFillToTarget() {

@@ -86,17 +86,37 @@ class LogProvider extends ChangeNotifier {
   }
 
   void dumpRecipeToQueue(model.Recipe recipe, {double quantity = 1.0}) {
-    // Force decomposition: Add all items recursively
+    final portions = dumpRecipePortionsAsList(recipe, quantity: quantity);
+    for (final portion in portions) {
+      addFoodToQueue(portion);
+    }
+  }
+
+  /// Returns the flattened list of FoodPortions for a recipe dump without
+  /// adding them to the queue. Useful for sharing and meal portioning.
+  List<model.FoodPortion> dumpRecipePortionsAsList(
+    model.Recipe recipe, {
+    double quantity = 1.0,
+  }) {
+    final result = <model.FoodPortion>[];
+    _collectRecipePortions(recipe, quantity, result);
+    return result;
+  }
+
+  void _collectRecipePortions(
+    model.Recipe recipe,
+    double quantity,
+    List<model.FoodPortion> result,
+  ) {
     for (final item in recipe.items) {
       if (item.isFood) {
         final food = item.food!;
-        // Ensure emoji is set if missing
         final enrichedFood = food.copyWith(
           emoji: (food.emoji == null || food.emoji == '🍴' || food.emoji == '')
               ? emojiForFoodName(food.name)
               : food.emoji,
         );
-        addFoodToQueue(
+        result.add(
           model.FoodPortion(
             food: enrichedFood,
             grams: item.grams * quantity,
@@ -104,10 +124,10 @@ class LogProvider extends ChangeNotifier {
           ),
         );
       } else if (item.isRecipe) {
-        // Recursive decomposition
-        dumpRecipeToQueue(
+        _collectRecipePortions(
           item.recipe!,
-          quantity: (item.grams / item.recipe!.gramsPerPortion) * quantity,
+          (item.grams / item.recipe!.gramsPerPortion) * quantity,
+          result,
         );
       }
     }

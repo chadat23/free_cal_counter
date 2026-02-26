@@ -32,7 +32,6 @@ A summary row showing the proportionally-scaled calories, protein, fat, carbs, a
 
 | Action | What It Does |
 |--------|--------------|
-| **Add to Queue** | Adds every scaled ingredient to your Log Queue as individual items |
 | **Share** | Opens the Portion Sharing QR screen so you can send the scaled ingredients to another device |
 | **Cancel** | Returns to the Log screen |
 

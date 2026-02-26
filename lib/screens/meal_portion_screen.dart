@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:meal_of_record/models/food_portion.dart';
 import 'package:meal_of_record/models/meal.dart';
-import 'package:meal_of_record/providers/log_provider.dart';
 import 'package:meal_of_record/screens/qr_portion_sharing_screen.dart';
 import 'package:meal_of_record/utils/math_evaluator.dart';
-import 'package:provider/provider.dart';
 
 class MealPortionScreen extends StatefulWidget {
   final Meal meal;
@@ -56,27 +54,6 @@ class _MealPortionScreenState extends State<MealPortionScreen> {
   void dispose() {
     _gramsController.dispose();
     super.dispose();
-  }
-
-  void _addToQueue() {
-    if (_scaleFactor <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid amount')),
-      );
-      return;
-    }
-    final logProvider = Provider.of<LogProvider>(context, listen: false);
-    for (final portion in _scaledPortions) {
-      logProvider.addFoodToQueue(portion);
-    }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Added ${_scaledPortions.length} items to queue',
-        ),
-      ),
-    );
-    Navigator.pop(context);
   }
 
   void _share() {
@@ -191,17 +168,10 @@ class _MealPortionScreenState extends State<MealPortionScreen> {
         ),
         const SizedBox(width: 8),
         Expanded(
-          child: OutlinedButton.icon(
+          child: ElevatedButton.icon(
             onPressed: _share,
             icon: const Icon(Icons.share, size: 18),
             label: const Text('Share'),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: ElevatedButton(
-            onPressed: _addToQueue,
-            child: const Text('Add to Queue'),
           ),
         ),
       ],

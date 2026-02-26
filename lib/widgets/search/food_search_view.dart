@@ -5,6 +5,7 @@ import 'package:meal_of_record/models/search_config.dart';
 import 'package:meal_of_record/providers/log_provider.dart';
 import 'package:meal_of_record/screens/food_edit_screen.dart';
 import 'package:meal_of_record/screens/quantity_edit_screen.dart';
+import 'package:meal_of_record/screens/qr_portion_sharing_screen.dart';
 import 'package:meal_of_record/services/database_service.dart';
 import 'package:meal_of_record/widgets/quick_add_dialog.dart';
 import 'package:meal_of_record/providers/navigation_provider.dart';
@@ -24,6 +25,10 @@ class FoodSearchView extends StatelessWidget {
           _buildQuickAddButton(context),
           const SizedBox(height: 16),
           _buildCreateFoodButton(context),
+          if (config.onSaveOverride == null) ...[
+            const SizedBox(height: 16),
+            _buildScanPortionsButton(context),
+          ],
           const SizedBox(height: 16),
           _buildFastedDayButton(context),
         ],
@@ -121,6 +126,27 @@ class FoodSearchView extends StatelessWidget {
               }
             }
           }
+        },
+      ),
+    );
+  }
+
+  Widget _buildScanPortionsButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        icon: const Icon(Icons.qr_code_scanner, size: 32),
+        label: const Text('Scan Portions', style: TextStyle(fontSize: 18)),
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+        ),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const QrPortionSharingScreen(),
+            ),
+          );
         },
       ),
     );

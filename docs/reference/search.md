@@ -52,6 +52,7 @@ Browse and search your saved recipes and templates. Tap any recipe to open the Q
 
 - **Quick Add** — Enter calories and macros directly without searching for a food
 - **Create Food** — Open the Food Edit screen to add a new custom food
+- **Scan Portions** — Scan a portions QR code from another device (see [QR Sharing](qr-sharing.md))
 - **Fasted** — Mark the current day as a fasted day
 
 !!! tip "The Log Queue preview"

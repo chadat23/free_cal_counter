@@ -5,17 +5,9 @@ import 'package:meal_of_record/models/food_portion.dart';
 import 'package:meal_of_record/models/food_serving.dart';
 import 'package:meal_of_record/models/logged_portion.dart';
 import 'package:meal_of_record/models/meal.dart';
-import 'package:meal_of_record/providers/log_provider.dart';
 import 'package:meal_of_record/screens/meal_portion_screen.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
-import 'package:provider/provider.dart';
 
-import 'meal_portion_screen_test.mocks.dart';
-
-@GenerateMocks([LogProvider])
 void main() {
-  late MockLogProvider mockLogProvider;
   late Meal testMeal;
 
   final food1 = Food(
@@ -42,9 +34,6 @@ void main() {
   );
 
   setUp(() {
-    mockLogProvider = MockLogProvider();
-    when(mockLogProvider.logQueue).thenReturn([]);
-
     testMeal = Meal(
       timestamp: DateTime(2026, 2, 26, 12, 0),
       loggedPortion: [
@@ -63,13 +52,8 @@ void main() {
   });
 
   Widget buildWidget() {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<LogProvider>.value(value: mockLogProvider),
-      ],
-      child: MaterialApp(
-        home: MealPortionScreen(meal: testMeal),
-      ),
+    return MaterialApp(
+      home: MealPortionScreen(meal: testMeal),
     );
   }
 
@@ -94,36 +78,27 @@ void main() {
     expect(find.textContaining('150g'), findsOneWidget);
   });
 
-  testWidgets('Add to Queue button adds scaled portions to log queue', (tester) async {
+  testWidgets('Share button is present', (tester) async {
     await tester.pumpWidget(buildWidget());
 
-    // Enter 250g (half of 500)
-    await tester.enterText(find.byType(TextField), '250');
-    await tester.pump();
-
-    await tester.tap(find.text('Add to Queue'));
-    await tester.pumpAndSettle();
-
-    // Should call addFoodToQueue twice (once per ingredient)
-    verify(mockLogProvider.addFoodToQueue(any)).called(2);
+    expect(find.text('Share'), findsOneWidget);
   });
 
-  testWidgets('zero input shows error on Add to Queue', (tester) async {
+  testWidgets('does not show Add to Queue button', (tester) async {
+    await tester.pumpWidget(buildWidget());
+
+    expect(find.text('Add to Queue'), findsNothing);
+  });
+
+  testWidgets('zero input shows error on Share', (tester) async {
     await tester.pumpWidget(buildWidget());
 
     await tester.enterText(find.byType(TextField), '0');
     await tester.pump();
 
-    await tester.tap(find.text('Add to Queue'));
+    await tester.tap(find.text('Share'));
     await tester.pumpAndSettle();
 
     expect(find.text('Please enter a valid amount'), findsOneWidget);
-    verifyNever(mockLogProvider.addFoodToQueue(any));
-  });
-
-  testWidgets('Share button is present', (tester) async {
-    await tester.pumpWidget(buildWidget());
-
-    expect(find.text('Share'), findsOneWidget);
   });
 }

@@ -55,7 +55,4 @@ If you're weighing food in a container, tap **Minus Container** and select a sav
 | Switch to macro mode | Enter a target calorie/protein/fat/carbs/fiber amount |
 | Minus Container | Subtract a container's weight automatically |
 | **Add** / **Update** | Add the item to the queue or update the logged entry |
-| **Share** | Send the portion to another device via QR (see [QR Sharing](qr-sharing.md)). For dump-only recipes, the ingredients are scaled proportionally and shared individually. |
-
-!!! tip "Share button availability"
-    The Share button appears when you open Quantity Edit from a recipe search result. It's not shown when editing a previously logged entry or adding ingredients inside the recipe editor.
+| **Share** (app bar) | Send the portion to another device via QR (see [QR Sharing](qr-sharing.md)). For dump-only recipes, the ingredients are scaled proportionally and shared individually. Appears in the app bar to the left of the Edit button when available. |

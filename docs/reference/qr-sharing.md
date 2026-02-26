@@ -53,10 +53,12 @@ The toggle remembers your last choice.
 
 ### Receiving Portions
 
-1. Open the portion scanner (or the recipe scanner — it detects the format automatically).
+1. Go to the **Food** tab on the Search screen and tap **Scan Portions**.
 2. Point your camera at the sender's screen.
 3. The app imports the food definitions, saves any embedded images, and adds all portions to your Log Queue.
 4. A confirmation tells you how many items were added.
+
+The recipe scanner also detects the portions format automatically, so either scanner works.
 
 ---
 

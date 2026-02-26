@@ -152,6 +152,12 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
           widget.config.isUpdate ? 'Update Quantity' : 'Add Quantity',
         ),
         actions: [
+          if (widget.config.canShare)
+            IconButton(
+              icon: const Icon(Icons.share),
+              tooltip: 'Share',
+              onPressed: _handleShare,
+            ),
           IconButton(
             icon: const Icon(Icons.edit),
             tooltip: 'Edit Definition',
@@ -435,17 +441,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
             child: const Text('Cancel'),
           ),
         ),
-        if (widget.config.canShare) ...[
-          const SizedBox(width: 8),
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: _handleShare,
-              icon: const Icon(Icons.share, size: 18),
-              label: const Text('Share'),
-            ),
-          ),
-        ],
-        const SizedBox(width: 8),
+        const SizedBox(width: 16),
         Expanded(
           child: ElevatedButton(
             onPressed: _handleSave,

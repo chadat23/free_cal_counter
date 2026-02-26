@@ -10,6 +10,7 @@ class Recipe {
   final double? finalWeightGrams;
   final String portionName;
   final String? notes;
+  final String? link;
   final bool isTemplate;
   final bool hidden;
   final int? parentId;
@@ -26,6 +27,7 @@ class Recipe {
     this.finalWeightGrams,
     this.portionName = 'portion',
     this.notes,
+    this.link,
     this.isTemplate = false,
     this.hidden = false,
     this.parentId,
@@ -97,6 +99,7 @@ class Recipe {
       finalWeightGrams: (json['finalWeightGrams'] as num?)?.toDouble(),
       portionName: json['portionName'] as String,
       notes: json['notes'] as String?,
+      link: json['link'] as String?,
       isTemplate: json['isTemplate'] as bool? ?? false,
       hidden: json['hidden'] as bool? ?? false,
       parentId: json['parentId'] as int?,
@@ -124,6 +127,7 @@ class Recipe {
       'finalWeightGrams': finalWeightGrams,
       'portionName': portionName,
       'notes': notes,
+      'link': link,
       'isTemplate': isTemplate,
       'hidden': hidden,
       'parentId': parentId,

@@ -26,7 +26,7 @@ class LiveDatabase extends _$LiveDatabase {
   LiveDatabase({required QueryExecutor connection}) : super(connection);
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration {
@@ -123,6 +123,10 @@ class LiveDatabase extends _$LiveDatabase {
             WHERE parentId IS NOT NULL
               AND parentId NOT IN (SELECT id FROM foods)
           ''');
+        }
+
+        if (from < 14) {
+          await m.addColumn(recipes, recipes.link);
         }
 
       },

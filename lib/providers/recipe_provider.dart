@@ -16,6 +16,7 @@ class RecipeProvider extends ChangeNotifier {
   double? _finalWeightGrams;
   String _portionName = 'serving';
   String _notes = '';
+  String _link = '';
   bool _isTemplate = false;
   String _emoji = '🍴';
   String? _thumbnail;
@@ -36,6 +37,7 @@ class RecipeProvider extends ChangeNotifier {
   double? get finalWeightGrams => _finalWeightGrams;
   String get portionName => _portionName;
   String get notes => _notes;
+  String get link => _link;
   bool get isTemplate => _isTemplate;
   String get emoji => _emoji;
   String? get thumbnail => _thumbnail;
@@ -69,6 +71,11 @@ class RecipeProvider extends ChangeNotifier {
 
   void setNotes(String val) {
     _notes = val;
+    notifyListeners();
+  }
+
+  void setLink(String val) {
+    _link = val;
     notifyListeners();
   }
 
@@ -153,6 +160,7 @@ class RecipeProvider extends ChangeNotifier {
     _finalWeightGrams = recipe.finalWeightGrams;
     _portionName = recipe.portionName;
     _notes = recipe.notes ?? '';
+    _link = recipe.link ?? '';
     _isTemplate = recipe.isTemplate;
     _emoji = recipe.emoji ?? '🍴';
     _thumbnail = recipe.thumbnail;
@@ -203,6 +211,7 @@ class RecipeProvider extends ChangeNotifier {
         finalWeightGrams: _finalWeightGrams,
         portionName: _portionName,
         notes: _notes,
+        link: _link.isEmpty ? null : _link,
         isTemplate: _isTemplate,
         hidden: false,
         parentId: _parentId,
@@ -236,6 +245,7 @@ class RecipeProvider extends ChangeNotifier {
     _finalWeightGrams = null;
     _portionName = 'serving';
     _notes = '';
+    _link = '';
     _isTemplate = false;
     _emoji = '🍴';
     _thumbnail = null;
@@ -353,6 +363,7 @@ class RecipeProvider extends ChangeNotifier {
       finalWeightGrams: recipe.finalWeightGrams,
       portionName: recipe.portionName,
       notes: recipe.notes,
+      link: recipe.link,
       isTemplate: recipe.isTemplate,
       hidden: false,
       parentId: null,

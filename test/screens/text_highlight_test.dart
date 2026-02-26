@@ -69,6 +69,7 @@ void main() {
     when(mockRecipeProvider.portionName).thenReturn('Portion');
     when(mockRecipeProvider.finalWeightGrams).thenReturn(null);
     when(mockRecipeProvider.notes).thenReturn('');
+    when(mockRecipeProvider.link).thenReturn('');
     when(mockRecipeProvider.isTemplate).thenReturn(false);
     when(mockRecipeProvider.caloriesPerPortion).thenReturn(0.0);
     when(mockRecipeProvider.emoji).thenReturn('🍴');

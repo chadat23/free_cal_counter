@@ -1520,6 +1520,12 @@ class MockGoalsProvider extends _i1.Mock implements _i25.GoalsProvider {
   );
 
   @override
+  void handleStatusBarTap() => super.noSuchMethod(
+    Invocation.method(#handleStatusBarTap, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
   _i14.Future<bool> didPushRoute(String? route) =>
       (super.noSuchMethod(
             Invocation.method(#didPushRoute, [route]),

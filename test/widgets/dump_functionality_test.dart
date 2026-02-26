@@ -62,6 +62,7 @@ void main() {
     when(mockRecipeProvider.finalWeightGrams).thenReturn(null);
     when(mockRecipeProvider.portionName).thenReturn('portion');
     when(mockRecipeProvider.notes).thenReturn('');
+    when(mockRecipeProvider.link).thenReturn('');
     when(mockRecipeProvider.isTemplate).thenReturn(true);
     when(mockRecipeProvider.items).thenReturn([]);
     when(mockRecipeProvider.selectedCategories).thenReturn([]);

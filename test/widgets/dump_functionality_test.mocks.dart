@@ -498,6 +498,17 @@ class MockRecipeProvider extends _i1.Mock implements _i14.RecipeProvider {
           as String);
 
   @override
+  String get link =>
+      (super.noSuchMethod(
+            Invocation.getter(#link),
+            returnValue: _i15.dummyValue<String>(
+              this,
+              Invocation.getter(#link),
+            ),
+          )
+          as String);
+
+  @override
   bool get isTemplate =>
       (super.noSuchMethod(Invocation.getter(#isTemplate), returnValue: false)
           as bool);
@@ -607,6 +618,12 @@ class MockRecipeProvider extends _i1.Mock implements _i14.RecipeProvider {
   @override
   void setNotes(String? val) => super.noSuchMethod(
     Invocation.method(#setNotes, [val]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void setLink(String? val) => super.noSuchMethod(
+    Invocation.method(#setLink, [val]),
     returnValueForMissingStub: null,
   );
 

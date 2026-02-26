@@ -20,15 +20,16 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
-Bugs
+Updates:
 v0.1.2
-Features:
-- Better weight smoothing/estimating
-Bugs:
-- Log multiselect wasn't properly unselecting in screen change
-- 6 months weight graph didn't show data points
-- OFF Log Queue replacing each other
-- Fill to Target not working if queue isn't empty
+ Features:
+ - Better weight smoothing/estimating
+ - Added Recipe links
+ Bugs:
+ - Log multiselect wasn't properly unselecting in screen change
+ - 6 months weight graph didn't show data points
+ - OFF Log Queue replacing each other
+ - Fill to Target not working if queue isn't empty
 v0.1.1
 - various little bugs
 v0.1.0

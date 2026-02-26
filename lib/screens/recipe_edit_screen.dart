@@ -42,6 +42,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
   late TextEditingController _portionNameController;
   late TextEditingController _weightController;
   late TextEditingController _notesController;
+  late TextEditingController _linkController;
   late TextEditingController _emojiController;
   List<model_cat.Category> _allCategories = [];
   List<String> _availableUnits = [];
@@ -59,6 +60,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
       text: provider.finalWeightGrams?.toString() ?? '',
     );
     _notesController = TextEditingController(text: provider.notes);
+    _linkController = TextEditingController(text: provider.link);
     _emojiController = TextEditingController(text: provider.emoji);
     _loadCategories();
     _loadAvailableUnits();
@@ -89,6 +91,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
     _portionNameController.dispose();
     _weightController.dispose();
     _notesController.dispose();
+    _linkController.dispose();
     _emojiController.dispose();
     super.dispose();
   }
@@ -149,6 +152,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
                       _weightController.text =
                           newRecipe.finalWeightGrams?.toString() ?? '';
                       _notesController.text = newRecipe.notes ?? '';
+                      _linkController.text = newRecipe.link ?? '';
                       // Refresh categories
                       setState(() {});
                     }
@@ -168,6 +172,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
                       finalWeightGrams: provider.finalWeightGrams,
                       portionName: provider.portionName,
                       notes: provider.notes,
+                      link: provider.link.isEmpty ? null : provider.link,
                       isTemplate: provider.isTemplate,
                       hidden: false,
                       parentId: provider.parentId,
@@ -258,6 +263,17 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
                   const Divider(),
                   _buildIngredientList(provider),
                   const SizedBox(height: 24),
+                  TextField(
+                    controller: _linkController,
+                    keyboardType: TextInputType.url,
+                    decoration: const InputDecoration(
+                      labelText: 'Link',
+                      hintText: 'https://...',
+                      prefixIcon: Icon(Icons.link),
+                    ),
+                    onChanged: provider.setLink,
+                  ),
+                  const SizedBox(height: 16),
                   TextField(
                     controller: _notesController,
                     maxLines: 3,

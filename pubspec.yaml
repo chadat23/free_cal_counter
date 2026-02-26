@@ -65,6 +65,9 @@ dependencies:
   qr_flutter: ^4.1.0
   mobile_scanner: ^6.0.4
 
+  # URL launching
+  url_launcher: ^6.2.0
+
   # Permissions
   permission_handler: ^11.3.0
 

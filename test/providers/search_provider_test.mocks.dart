@@ -376,6 +376,15 @@ class MockDatabaseService extends _i1.Mock implements _i5.DatabaseService {
           as _i9.Future<bool>);
 
   @override
+  _i9.Future<void> logFasted(DateTime? date) =>
+      (super.noSuchMethod(
+            Invocation.method(#logFasted, [date]),
+            returnValue: _i9.Future<void>.value(),
+            returnValueForMissingStub: _i9.Future<void>.value(),
+          )
+          as _i9.Future<void>);
+
+  @override
   _i9.Future<void> toggleFasted(DateTime? date) =>
       (super.noSuchMethod(
             Invocation.method(#toggleFasted, [date]),

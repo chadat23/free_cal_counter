@@ -1313,6 +1313,15 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, Recipe> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _linkMeta = const VerificationMeta('link');
+  @override
+  late final GeneratedColumn<String> link = GeneratedColumn<String>(
+    'link',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _isTemplateMeta = const VerificationMeta(
     'isTemplate',
   );
@@ -1376,6 +1385,7 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, Recipe> {
     finalWeightGrams,
     portionName,
     notes,
+    link,
     isTemplate,
     hidden,
     parentId,
@@ -1449,6 +1459,12 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, Recipe> {
         notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
       );
     }
+    if (data.containsKey('link')) {
+      context.handle(
+        _linkMeta,
+        link.isAcceptableOrUnknown(data['link']!, _linkMeta),
+      );
+    }
     if (data.containsKey('is_template')) {
       context.handle(
         _isTemplateMeta,
@@ -1519,6 +1535,10 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, Recipe> {
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
       ),
+      link: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}link'],
+      ),
       isTemplate: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_template'],
@@ -1553,6 +1573,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
   final double? finalWeightGrams;
   final String portionName;
   final String? notes;
+  final String? link;
   final bool isTemplate;
   final bool hidden;
   final int? parentId;
@@ -1566,6 +1587,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
     this.finalWeightGrams,
     required this.portionName,
     this.notes,
+    this.link,
     required this.isTemplate,
     required this.hidden,
     this.parentId,
@@ -1589,6 +1611,9 @@ class Recipe extends DataClass implements Insertable<Recipe> {
     map['portion_name'] = Variable<String>(portionName);
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
+    }
+    if (!nullToAbsent || link != null) {
+      map['link'] = Variable<String>(link);
     }
     map['is_template'] = Variable<bool>(isTemplate);
     map['hidden'] = Variable<bool>(hidden);
@@ -1617,6 +1642,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
+      link: link == null && nullToAbsent ? const Value.absent() : Value(link),
       isTemplate: Value(isTemplate),
       hidden: Value(hidden),
       parentId: parentId == null && nullToAbsent
@@ -1640,6 +1666,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
       finalWeightGrams: serializer.fromJson<double?>(json['finalWeightGrams']),
       portionName: serializer.fromJson<String>(json['portionName']),
       notes: serializer.fromJson<String?>(json['notes']),
+      link: serializer.fromJson<String?>(json['link']),
       isTemplate: serializer.fromJson<bool>(json['isTemplate']),
       hidden: serializer.fromJson<bool>(json['hidden']),
       parentId: serializer.fromJson<int?>(json['parentId']),
@@ -1658,6 +1685,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
       'finalWeightGrams': serializer.toJson<double?>(finalWeightGrams),
       'portionName': serializer.toJson<String>(portionName),
       'notes': serializer.toJson<String?>(notes),
+      'link': serializer.toJson<String?>(link),
       'isTemplate': serializer.toJson<bool>(isTemplate),
       'hidden': serializer.toJson<bool>(hidden),
       'parentId': serializer.toJson<int?>(parentId),
@@ -1674,6 +1702,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
     Value<double?> finalWeightGrams = const Value.absent(),
     String? portionName,
     Value<String?> notes = const Value.absent(),
+    Value<String?> link = const Value.absent(),
     bool? isTemplate,
     bool? hidden,
     Value<int?> parentId = const Value.absent(),
@@ -1689,6 +1718,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
         : this.finalWeightGrams,
     portionName: portionName ?? this.portionName,
     notes: notes.present ? notes.value : this.notes,
+    link: link.present ? link.value : this.link,
     isTemplate: isTemplate ?? this.isTemplate,
     hidden: hidden ?? this.hidden,
     parentId: parentId.present ? parentId.value : this.parentId,
@@ -1710,6 +1740,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
           ? data.portionName.value
           : this.portionName,
       notes: data.notes.present ? data.notes.value : this.notes,
+      link: data.link.present ? data.link.value : this.link,
       isTemplate: data.isTemplate.present
           ? data.isTemplate.value
           : this.isTemplate,
@@ -1732,6 +1763,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
           ..write('finalWeightGrams: $finalWeightGrams, ')
           ..write('portionName: $portionName, ')
           ..write('notes: $notes, ')
+          ..write('link: $link, ')
           ..write('isTemplate: $isTemplate, ')
           ..write('hidden: $hidden, ')
           ..write('parentId: $parentId, ')
@@ -1750,6 +1782,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
     finalWeightGrams,
     portionName,
     notes,
+    link,
     isTemplate,
     hidden,
     parentId,
@@ -1767,6 +1800,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
           other.finalWeightGrams == this.finalWeightGrams &&
           other.portionName == this.portionName &&
           other.notes == this.notes &&
+          other.link == this.link &&
           other.isTemplate == this.isTemplate &&
           other.hidden == this.hidden &&
           other.parentId == this.parentId &&
@@ -1782,6 +1816,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
   final Value<double?> finalWeightGrams;
   final Value<String> portionName;
   final Value<String?> notes;
+  final Value<String?> link;
   final Value<bool> isTemplate;
   final Value<bool> hidden;
   final Value<int?> parentId;
@@ -1795,6 +1830,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
     this.finalWeightGrams = const Value.absent(),
     this.portionName = const Value.absent(),
     this.notes = const Value.absent(),
+    this.link = const Value.absent(),
     this.isTemplate = const Value.absent(),
     this.hidden = const Value.absent(),
     this.parentId = const Value.absent(),
@@ -1809,6 +1845,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
     this.finalWeightGrams = const Value.absent(),
     this.portionName = const Value.absent(),
     this.notes = const Value.absent(),
+    this.link = const Value.absent(),
     this.isTemplate = const Value.absent(),
     this.hidden = const Value.absent(),
     this.parentId = const Value.absent(),
@@ -1824,6 +1861,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
     Expression<double>? finalWeightGrams,
     Expression<String>? portionName,
     Expression<String>? notes,
+    Expression<String>? link,
     Expression<bool>? isTemplate,
     Expression<bool>? hidden,
     Expression<int>? parentId,
@@ -1838,6 +1876,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
       if (finalWeightGrams != null) 'final_weight_grams': finalWeightGrams,
       if (portionName != null) 'portion_name': portionName,
       if (notes != null) 'notes': notes,
+      if (link != null) 'link': link,
       if (isTemplate != null) 'is_template': isTemplate,
       if (hidden != null) 'hidden': hidden,
       if (parentId != null) 'parent_id': parentId,
@@ -1854,6 +1893,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
     Value<double?>? finalWeightGrams,
     Value<String>? portionName,
     Value<String?>? notes,
+    Value<String?>? link,
     Value<bool>? isTemplate,
     Value<bool>? hidden,
     Value<int?>? parentId,
@@ -1868,6 +1908,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
       finalWeightGrams: finalWeightGrams ?? this.finalWeightGrams,
       portionName: portionName ?? this.portionName,
       notes: notes ?? this.notes,
+      link: link ?? this.link,
       isTemplate: isTemplate ?? this.isTemplate,
       hidden: hidden ?? this.hidden,
       parentId: parentId ?? this.parentId,
@@ -1902,6 +1943,9 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
+    if (link.present) {
+      map['link'] = Variable<String>(link.value);
+    }
     if (isTemplate.present) {
       map['is_template'] = Variable<bool>(isTemplate.value);
     }
@@ -1928,6 +1972,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
           ..write('finalWeightGrams: $finalWeightGrams, ')
           ..write('portionName: $portionName, ')
           ..write('notes: $notes, ')
+          ..write('link: $link, ')
           ..write('isTemplate: $isTemplate, ')
           ..write('hidden: $hidden, ')
           ..write('parentId: $parentId, ')
@@ -5432,6 +5477,7 @@ typedef $$RecipesTableCreateCompanionBuilder =
       Value<double?> finalWeightGrams,
       Value<String> portionName,
       Value<String?> notes,
+      Value<String?> link,
       Value<bool> isTemplate,
       Value<bool> hidden,
       Value<int?> parentId,
@@ -5447,6 +5493,7 @@ typedef $$RecipesTableUpdateCompanionBuilder =
       Value<double?> finalWeightGrams,
       Value<String> portionName,
       Value<String?> notes,
+      Value<String?> link,
       Value<bool> isTemplate,
       Value<bool> hidden,
       Value<int?> parentId,
@@ -5605,6 +5652,11 @@ class $$RecipesTableFilterComposer
 
   ColumnFilters<String> get notes => $composableBuilder(
     column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get link => $composableBuilder(
+    column: $table.link,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5796,6 +5848,11 @@ class $$RecipesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get link => $composableBuilder(
+    column: $table.link,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isTemplate => $composableBuilder(
     column: $table.isTemplate,
     builder: (column) => ColumnOrderings(column),
@@ -5873,6 +5930,9 @@ class $$RecipesTableAnnotationComposer
 
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<String> get link =>
+      $composableBuilder(column: $table.link, builder: (column) => column);
 
   GeneratedColumn<bool> get isTemplate => $composableBuilder(
     column: $table.isTemplate,
@@ -6054,6 +6114,7 @@ class $$RecipesTableTableManager
                 Value<double?> finalWeightGrams = const Value.absent(),
                 Value<String> portionName = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
+                Value<String?> link = const Value.absent(),
                 Value<bool> isTemplate = const Value.absent(),
                 Value<bool> hidden = const Value.absent(),
                 Value<int?> parentId = const Value.absent(),
@@ -6067,6 +6128,7 @@ class $$RecipesTableTableManager
                 finalWeightGrams: finalWeightGrams,
                 portionName: portionName,
                 notes: notes,
+                link: link,
                 isTemplate: isTemplate,
                 hidden: hidden,
                 parentId: parentId,
@@ -6082,6 +6144,7 @@ class $$RecipesTableTableManager
                 Value<double?> finalWeightGrams = const Value.absent(),
                 Value<String> portionName = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
+                Value<String?> link = const Value.absent(),
                 Value<bool> isTemplate = const Value.absent(),
                 Value<bool> hidden = const Value.absent(),
                 Value<int?> parentId = const Value.absent(),
@@ -6095,6 +6158,7 @@ class $$RecipesTableTableManager
                 finalWeightGrams: finalWeightGrams,
                 portionName: portionName,
                 notes: notes,
+                link: link,
                 isTemplate: isTemplate,
                 hidden: hidden,
                 parentId: parentId,

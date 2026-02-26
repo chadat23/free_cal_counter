@@ -407,6 +407,12 @@ class MockGoalsProvider extends _i1.Mock implements _i11.GoalsProvider {
   );
 
   @override
+  void handleStatusBarTap() => super.noSuchMethod(
+    Invocation.method(#handleStatusBarTap, []),
+    returnValueForMissingStub: null,
+  );
+
+  @override
   _i8.Future<bool> didPushRoute(String? route) =>
       (super.noSuchMethod(
             Invocation.method(#didPushRoute, [route]),
@@ -533,6 +539,17 @@ class MockRecipeProvider extends _i1.Mock implements _i15.RecipeProvider {
           as String);
 
   @override
+  String get link =>
+      (super.noSuchMethod(
+            Invocation.getter(#link),
+            returnValue: _i10.dummyValue<String>(
+              this,
+              Invocation.getter(#link),
+            ),
+          )
+          as String);
+
+  @override
   bool get isTemplate =>
       (super.noSuchMethod(Invocation.getter(#isTemplate), returnValue: false)
           as bool);
@@ -642,6 +659,12 @@ class MockRecipeProvider extends _i1.Mock implements _i15.RecipeProvider {
   @override
   void setNotes(String? val) => super.noSuchMethod(
     Invocation.method(#setNotes, [val]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void setLink(String? val) => super.noSuchMethod(
+    Invocation.method(#setLink, [val]),
     returnValueForMissingStub: null,
   );
 

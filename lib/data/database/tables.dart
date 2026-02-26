@@ -39,6 +39,7 @@ class Recipes extends Table {
   RealColumn get finalWeightGrams => real().nullable()();
   TextColumn get portionName => text().withDefault(const Constant('portion'))();
   TextColumn get notes => text().nullable()();
+  TextColumn get link => text().nullable()();
   BoolColumn get isTemplate =>
       boolean().withDefault(const Constant(false))(); // "Decompose Only" mode
   BoolColumn get hidden => boolean().withDefault(const Constant(false))();

@@ -18,6 +18,7 @@ import 'package:meal_of_record/models/food_container.dart';
 import 'package:meal_of_record/widgets/serving_info_sheet.dart';
 import 'package:meal_of_record/widgets/math_input_bar.dart';
 import 'package:meal_of_record/config/app_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class QuantityEditScreen extends StatefulWidget {
   final QuantityEditConfig config;
@@ -36,11 +37,13 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
   int _selectedTargetIndex = 0; // 0: Unit, 1: Cal, 2: Protein, 3: Fat, 4: Carbs
   bool _isPerServing = false;
   late Food _food;
+  String? _recipeLink;
 
   @override
   void initState() {
     super.initState();
     _food = widget.config.food;
+    _loadRecipeLink();
     _quantityController.text = widget.config.initialQuantity.toString();
     _selectedUnit = widget.config.initialUnit;
     _quantityFocusNode.addListener(_onQuantityFocusChange);
@@ -52,6 +55,18 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
         extentOffset: _quantityController.text.length,
       );
     });
+  }
+
+  Future<void> _loadRecipeLink() async {
+    if (_food.source != 'recipe') return;
+    try {
+      final recipe = await DatabaseService.instance.getRecipeById(_food.id);
+      if (mounted && recipe.link != null && recipe.link!.isNotEmpty) {
+        setState(() {
+          _recipeLink = recipe.link;
+        });
+      }
+    } catch (_) {}
   }
 
   @override
@@ -168,6 +183,21 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
                 const SizedBox(height: 24),
                 _buildTargetSelection(),
                 const SizedBox(height: 32),
+                if (_recipeLink != null)
+                  Center(
+                    child: TextButton.icon(
+                      onPressed: () {
+                        launchUrl(Uri.parse(_recipeLink!), mode: LaunchMode.externalApplication);
+                      },
+                      icon: const Icon(Icons.link, size: 18),
+                      label: Text(
+                        _recipeLink!.length > 40
+                            ? '${_recipeLink!.substring(0, 40)}...'
+                            : _recipeLink!,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
                 Center(
                   child: TextButton.icon(
                     onPressed: () => showServingInfoSheet(context, _food),

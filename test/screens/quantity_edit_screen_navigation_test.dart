@@ -156,6 +156,7 @@ void main() {
     when(mockRecipeProvider.portionName).thenReturn('serving');
     when(mockRecipeProvider.finalWeightGrams).thenReturn(null);
     when(mockRecipeProvider.notes).thenReturn('');
+    when(mockRecipeProvider.link).thenReturn('');
     when(mockRecipeProvider.emoji).thenReturn('🍴');
     when(mockRecipeProvider.items).thenReturn([]);
     when(mockRecipeProvider.selectedCategories).thenReturn([]);

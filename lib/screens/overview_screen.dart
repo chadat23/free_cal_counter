@@ -76,12 +76,8 @@ class _OverviewScreenState extends State<OverviewScreen> {
       final goals = goalsProvider.currentGoals;
 
       final rangeStart = today.subtract(Duration(days: _weightRangeDays));
-      // Use the larger of the display range or the user's TDEE setting,
-      // so small ranges (1wk) still have enough data for Kalman tiers
       final userWindow = goalsProvider.settings.tdeeWindowDays;
-      final chartWindow = _weightRangeDays < userWindow ? userWindow : _weightRangeDays;
-      // Load data for the full range: earliest possible Kalman window start to today
-      final analysisStart = rangeStart.subtract(Duration(days: chartWindow));
+      final analysisStart = rangeStart.subtract(Duration(days: userWindow));
 
       final analysisStats = await logProvider.getDailyMacroStats(
         analysisStart,
@@ -112,7 +108,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
       var day = rangeStart;
       while (!day.isAfter(today)) {
         final estimate = GoalLogicService.computeTdeeAtDate(
-          tdeeWindow: chartWindow,
+          tdeeWindow: userWindow,
           tdeeDate: day,
           weightMap: weightMap,
           statsMap: statsMap,

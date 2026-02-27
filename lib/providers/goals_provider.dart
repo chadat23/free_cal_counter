@@ -268,7 +268,7 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
         }
         _settings = _settings.copyWith(lastTargetUpdate: _clock());
       } else {
-        final kalmanTDEE = estimate.tdee.clamp(800.0, 6000.0);
+        final kalmanTDEE = estimate.tdee.clamp(800.0, 6000.0).roundToDouble();
         final kalmanWeight = estimate.weight;
         kalmanWeightEstimate = kalmanWeight;
 

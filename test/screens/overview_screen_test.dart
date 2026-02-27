@@ -77,6 +77,8 @@ void main() {
     // Stub NavigationProvider
     when(mockNavigationProvider.changeTab(any)).thenAnswer((_) {});
     when(mockNavigationProvider.showConsumed).thenReturn(true);
+    when(mockNavigationProvider.weightRangeDays).thenReturn(7);
+    when(mockNavigationProvider.weightRangeLabel).thenReturn('1 wk');
 
     // Stub SearchProvider
     when(mockSearchProvider.errorMessage).thenReturn(null);

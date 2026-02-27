@@ -15,6 +15,7 @@ import 'package:meal_of_record/providers/goals_provider.dart' as _i8;
 import 'package:meal_of_record/providers/navigation_provider.dart' as _i11;
 import 'package:meal_of_record/providers/weight_provider.dart' as _i4;
 import 'package:mockito/mockito.dart' as _i1;
+import 'package:mockito/src/dummies.dart' as _i12;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -432,6 +433,22 @@ class MockNavigationProvider extends _i1.Mock
           as bool);
 
   @override
+  int get weightRangeDays =>
+      (super.noSuchMethod(Invocation.getter(#weightRangeDays), returnValue: 0)
+          as int);
+
+  @override
+  String get weightRangeLabel =>
+      (super.noSuchMethod(
+            Invocation.getter(#weightRangeLabel),
+            returnValue: _i12.dummyValue<String>(
+              this,
+              Invocation.getter(#weightRangeLabel),
+            ),
+          )
+          as String);
+
+  @override
   bool get hasListeners =>
       (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
           as bool);
@@ -439,6 +456,12 @@ class MockNavigationProvider extends _i1.Mock
   @override
   void setShowConsumed(bool? value) => super.noSuchMethod(
     Invocation.method(#setShowConsumed, [value]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void setWeightRange(String? label, int? days) => super.noSuchMethod(
+    Invocation.method(#setWeightRange, [label, days]),
     returnValueForMissingStub: null,
   );
 

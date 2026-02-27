@@ -33,6 +33,8 @@ void main() {
     when(mockNavigationProvider.selectedIndex).thenReturn(0);
     when(mockNavigationProvider.changeTab(any)).thenReturn(null);
     when(mockNavigationProvider.showConsumed).thenReturn(true);
+    when(mockNavigationProvider.weightRangeDays).thenReturn(7);
+    when(mockNavigationProvider.weightRangeLabel).thenReturn('1 wk');
 
     when(mockGoalsProvider.showUpdateNotification).thenReturn(false);
     when(mockGoalsProvider.isGoalsSet).thenReturn(true);

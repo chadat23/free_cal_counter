@@ -4,6 +4,7 @@ import 'package:meal_of_record/widgets/screen_background.dart';
 import 'package:meal_of_record/widgets/search_ribbon.dart';
 import 'package:meal_of_record/models/nutrition_target.dart';
 import 'package:provider/provider.dart';
+import 'package:meal_of_record/providers/navigation_provider.dart';
 import 'package:meal_of_record/providers/log_provider.dart';
 import 'package:meal_of_record/providers/goals_provider.dart';
 import 'package:meal_of_record/models/daily_macro_stats.dart';
@@ -27,8 +28,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
   List<double> _maintenanceHistory = [];
   List<double> _kalmanWeightHistory = [];
   bool _isLoading = true;
-  int _weightRangeDays = 7;
-  String _weightRangeLabel = '1 wk';
   DateTime _weightRangeStart = DateTime.now();
   DateTime _weightRangeEnd = DateTime.now();
   bool _needsReload = false;
@@ -75,7 +74,11 @@ class _OverviewScreenState extends State<OverviewScreen> {
       final stats = await logProvider.getDailyMacroStats(start, today);
       final goals = goalsProvider.currentGoals;
 
-      final rangeStart = today.subtract(Duration(days: _weightRangeDays));
+      final navProvider = Provider.of<NavigationProvider>(
+        context,
+        listen: false,
+      );
+      final rangeStart = today.subtract(Duration(days: navProvider.weightRangeDays));
       final userWindow = goalsProvider.settings.tdeeWindowDays;
       final analysisStart = rangeStart.subtract(Duration(days: userWindow));
 
@@ -247,6 +250,10 @@ class _OverviewScreenState extends State<OverviewScreen> {
   }
 
   Widget _buildRangeSelector() {
+    final navProvider = Provider.of<NavigationProvider>(
+      context,
+      listen: false,
+    );
     final ranges = {
       '1 wk': 7,
       '1 mo': 30,
@@ -258,14 +265,13 @@ class _OverviewScreenState extends State<OverviewScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: ranges.entries.map((entry) {
-        final isSelected = _weightRangeLabel == entry.key;
+        final isSelected = navProvider.weightRangeLabel == entry.key;
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4.0),
           child: TextButton(
             onPressed: () {
+              navProvider.setWeightRange(entry.key, entry.value);
               setState(() {
-                _weightRangeLabel = entry.key;
-                _weightRangeDays = entry.value;
                 _isLoading = true;
               });
               _loadData();
@@ -317,7 +323,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
                               weightHistory: _weightHistory,
                               maintenanceHistory: _maintenanceHistory,
                               kalmanWeightHistory: _kalmanWeightHistory,
-                              timeframeLabel: _weightRangeLabel,
+                              timeframeLabel: Provider.of<NavigationProvider>(context, listen: false).weightRangeLabel,
                               startDate: _weightRangeStart,
                               endDate: _weightRangeEnd,
                             ),

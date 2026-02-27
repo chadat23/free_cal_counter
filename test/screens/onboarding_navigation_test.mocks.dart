@@ -9,18 +9,19 @@ import 'dart:ui' as _i6;
 import 'package:flutter/material.dart' as _i9;
 import 'package:flutter/services.dart' as _i8;
 import 'package:meal_of_record/models/daily_macro_stats.dart' as _i4;
-import 'package:meal_of_record/models/food.dart' as _i17;
-import 'package:meal_of_record/models/food_portion.dart' as _i14;
+import 'package:meal_of_record/models/food.dart' as _i18;
+import 'package:meal_of_record/models/food_portion.dart' as _i15;
 import 'package:meal_of_record/models/goal_settings.dart' as _i2;
-import 'package:meal_of_record/models/logged_portion.dart' as _i15;
+import 'package:meal_of_record/models/logged_portion.dart' as _i16;
 import 'package:meal_of_record/models/macro_goals.dart' as _i3;
-import 'package:meal_of_record/models/recipe.dart' as _i16;
-import 'package:meal_of_record/models/weight.dart' as _i12;
+import 'package:meal_of_record/models/recipe.dart' as _i17;
+import 'package:meal_of_record/models/weight.dart' as _i13;
 import 'package:meal_of_record/providers/goals_provider.dart' as _i5;
-import 'package:meal_of_record/providers/log_provider.dart' as _i13;
+import 'package:meal_of_record/providers/log_provider.dart' as _i14;
 import 'package:meal_of_record/providers/navigation_provider.dart' as _i10;
-import 'package:meal_of_record/providers/weight_provider.dart' as _i11;
+import 'package:meal_of_record/providers/weight_provider.dart' as _i12;
 import 'package:mockito/mockito.dart' as _i1;
+import 'package:mockito/src/dummies.dart' as _i11;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -350,6 +351,22 @@ class MockNavigationProvider extends _i1.Mock
           as bool);
 
   @override
+  int get weightRangeDays =>
+      (super.noSuchMethod(Invocation.getter(#weightRangeDays), returnValue: 0)
+          as int);
+
+  @override
+  String get weightRangeLabel =>
+      (super.noSuchMethod(
+            Invocation.getter(#weightRangeLabel),
+            returnValue: _i11.dummyValue<String>(
+              this,
+              Invocation.getter(#weightRangeLabel),
+            ),
+          )
+          as String);
+
+  @override
   bool get hasListeners =>
       (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
           as bool);
@@ -357,6 +374,12 @@ class MockNavigationProvider extends _i1.Mock
   @override
   void setShowConsumed(bool? value) => super.noSuchMethod(
     Invocation.method(#setShowConsumed, [value]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void setWeightRange(String? label, int? days) => super.noSuchMethod(
+    Invocation.method(#setWeightRange, [label, days]),
     returnValueForMissingStub: null,
   );
 
@@ -418,26 +441,26 @@ class MockNavigationProvider extends _i1.Mock
 /// A class which mocks [WeightProvider].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockWeightProvider extends _i1.Mock implements _i11.WeightProvider {
+class MockWeightProvider extends _i1.Mock implements _i12.WeightProvider {
   MockWeightProvider() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  List<_i12.Weight> get weights =>
+  List<_i13.Weight> get weights =>
       (super.noSuchMethod(
             Invocation.getter(#weights),
-            returnValue: <_i12.Weight>[],
+            returnValue: <_i13.Weight>[],
           )
-          as List<_i12.Weight>);
+          as List<_i13.Weight>);
 
   @override
-  List<_i12.Weight> get recentWeights =>
+  List<_i13.Weight> get recentWeights =>
       (super.noSuchMethod(
             Invocation.getter(#recentWeights),
-            returnValue: <_i12.Weight>[],
+            returnValue: <_i13.Weight>[],
           )
-          as List<_i12.Weight>);
+          as List<_i13.Weight>);
 
   @override
   bool get isLoading =>
@@ -458,9 +481,9 @@ class MockWeightProvider extends _i1.Mock implements _i11.WeightProvider {
           as bool);
 
   @override
-  _i12.Weight? getWeightForDate(DateTime? date) =>
+  _i13.Weight? getWeightForDate(DateTime? date) =>
       (super.noSuchMethod(Invocation.method(#getWeightForDate, [date]))
-          as _i12.Weight?);
+          as _i13.Weight?);
 
   @override
   _i7.Future<void> loadWeights(DateTime? start, DateTime? end) =>
@@ -517,7 +540,7 @@ class MockWeightProvider extends _i1.Mock implements _i11.WeightProvider {
 /// A class which mocks [LogProvider].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockLogProvider extends _i1.Mock implements _i13.LogProvider {
+class MockLogProvider extends _i1.Mock implements _i14.LogProvider {
   MockLogProvider() {
     _i1.throwOnMissingStub(this);
   }
@@ -598,20 +621,20 @@ class MockLogProvider extends _i1.Mock implements _i13.LogProvider {
           as double);
 
   @override
-  List<_i14.FoodPortion> get logQueue =>
+  List<_i15.FoodPortion> get logQueue =>
       (super.noSuchMethod(
             Invocation.getter(#logQueue),
-            returnValue: <_i14.FoodPortion>[],
+            returnValue: <_i15.FoodPortion>[],
           )
-          as List<_i14.FoodPortion>);
+          as List<_i15.FoodPortion>);
 
   @override
-  List<_i15.LoggedPortion> get loggedPortion =>
+  List<_i16.LoggedPortion> get loggedPortion =>
       (super.noSuchMethod(
             Invocation.getter(#loggedPortion),
-            returnValue: <_i15.LoggedPortion>[],
+            returnValue: <_i16.LoggedPortion>[],
           )
-          as List<_i15.LoggedPortion>);
+          as List<_i16.LoggedPortion>);
 
   @override
   bool get isFasted =>
@@ -656,28 +679,28 @@ class MockLogProvider extends _i1.Mock implements _i13.LogProvider {
           as bool);
 
   @override
-  void addFoodToQueue(_i14.FoodPortion? serving) => super.noSuchMethod(
+  void addFoodToQueue(_i15.FoodPortion? serving) => super.noSuchMethod(
     Invocation.method(#addFoodToQueue, [serving]),
     returnValueForMissingStub: null,
   );
 
   @override
-  void addRecipeToQueue(_i16.Recipe? recipe, {double? quantity = 1.0}) =>
+  void addRecipeToQueue(_i17.Recipe? recipe, {double? quantity = 1.0}) =>
       super.noSuchMethod(
         Invocation.method(#addRecipeToQueue, [recipe], {#quantity: quantity}),
         returnValueForMissingStub: null,
       );
 
   @override
-  void dumpRecipeToQueue(_i16.Recipe? recipe, {double? quantity = 1.0}) =>
+  void dumpRecipeToQueue(_i17.Recipe? recipe, {double? quantity = 1.0}) =>
       super.noSuchMethod(
         Invocation.method(#dumpRecipeToQueue, [recipe], {#quantity: quantity}),
         returnValueForMissingStub: null,
       );
 
   @override
-  List<_i14.FoodPortion> dumpRecipePortionsAsList(
-    _i16.Recipe? recipe, {
+  List<_i15.FoodPortion> dumpRecipePortionsAsList(
+    _i17.Recipe? recipe, {
     double? quantity = 1.0,
   }) =>
       (super.noSuchMethod(
@@ -686,19 +709,19 @@ class MockLogProvider extends _i1.Mock implements _i13.LogProvider {
               [recipe],
               {#quantity: quantity},
             ),
-            returnValue: <_i14.FoodPortion>[],
+            returnValue: <_i15.FoodPortion>[],
           )
-          as List<_i14.FoodPortion>);
+          as List<_i15.FoodPortion>);
 
   @override
-  void updateFoodInQueue(int? index, _i14.FoodPortion? newPortion) =>
+  void updateFoodInQueue(int? index, _i15.FoodPortion? newPortion) =>
       super.noSuchMethod(
         Invocation.method(#updateFoodInQueue, [index, newPortion]),
         returnValueForMissingStub: null,
       );
 
   @override
-  void removeFoodFromQueue(_i14.FoodPortion? serving) => super.noSuchMethod(
+  void removeFoodFromQueue(_i15.FoodPortion? serving) => super.noSuchMethod(
     Invocation.method(#removeFoodFromQueue, [serving]),
     returnValueForMissingStub: null,
   );
@@ -710,7 +733,7 @@ class MockLogProvider extends _i1.Mock implements _i13.LogProvider {
   );
 
   @override
-  _i7.Future<void> refreshFoodInQueue(int? foodId, _i17.Food? updatedFood) =>
+  _i7.Future<void> refreshFoodInQueue(int? foodId, _i18.Food? updatedFood) =>
       (super.noSuchMethod(
             Invocation.method(#refreshFoodInQueue, [foodId, updatedFood]),
             returnValue: _i7.Future<void>.value(),
@@ -755,7 +778,7 @@ class MockLogProvider extends _i1.Mock implements _i13.LogProvider {
           as _i7.Future<void>);
 
   @override
-  _i7.Future<void> deleteLoggedPortion(_i15.LoggedPortion? food) =>
+  _i7.Future<void> deleteLoggedPortion(_i16.LoggedPortion? food) =>
       (super.noSuchMethod(
             Invocation.method(#deleteLoggedPortion, [food]),
             returnValue: _i7.Future<void>.value(),
@@ -765,8 +788,8 @@ class MockLogProvider extends _i1.Mock implements _i13.LogProvider {
 
   @override
   _i7.Future<void> updateLoggedPortion(
-    _i15.LoggedPortion? oldLoggedPortion,
-    _i14.FoodPortion? newPortion,
+    _i16.LoggedPortion? oldLoggedPortion,
+    _i15.FoodPortion? newPortion,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#updateLoggedPortion, [

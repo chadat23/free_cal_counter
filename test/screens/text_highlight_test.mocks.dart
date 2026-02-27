@@ -1136,6 +1136,22 @@ class MockNavigationProvider extends _i1.Mock
           as bool);
 
   @override
+  int get weightRangeDays =>
+      (super.noSuchMethod(Invocation.getter(#weightRangeDays), returnValue: 0)
+          as int);
+
+  @override
+  String get weightRangeLabel =>
+      (super.noSuchMethod(
+            Invocation.getter(#weightRangeLabel),
+            returnValue: _i13.dummyValue<String>(
+              this,
+              Invocation.getter(#weightRangeLabel),
+            ),
+          )
+          as String);
+
+  @override
   bool get hasListeners =>
       (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
           as bool);
@@ -1143,6 +1159,12 @@ class MockNavigationProvider extends _i1.Mock
   @override
   void setShowConsumed(bool? value) => super.noSuchMethod(
     Invocation.method(#setShowConsumed, [value]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void setWeightRange(String? label, int? days) => super.noSuchMethod(
+    Invocation.method(#setWeightRange, [label, days]),
     returnValueForMissingStub: null,
   );
 

@@ -59,7 +59,7 @@ void main() {
     return provider;
   }
 
-  /// Helper: builds weight entries for N of the last 14 days.
+  /// Helper: builds weight entries for N recent days.
   List<Weight> buildRecentWeights(DateTime now, int count,
       {double weight = 100.0}) {
     return List.generate(
@@ -137,8 +137,10 @@ void main() {
       expect(provider.currentGoals.calories, 2000.0);
     });
 
-    test('9 weight entries in 14 days -> still manual', () async {
+    test('insufficient weight entries -> still manual', () async {
       final now = DateTime(2024, 1, 15, 10); // Monday
+      // 9 weights in last 28 days. Needs 70% of 14 (smallest tier) = 10.
+      // But only 9 days of data span, so effectiveWindow returns 0.
       final weights = buildRecentWeights(now, 9);
 
       when(mockDatabaseService.getWeightsForRange(any, any))
@@ -164,8 +166,45 @@ void main() {
       final provider =
           await createProvider(clock: () => now, initialSettings: settings);
 
-      // Cold boot: only 9 weights, needs 10. Falls back to manual.
+      // Cold boot: not enough data for any tier. Falls back to manual.
       expect(provider.currentGoals.calories, 2200.0);
+    });
+
+    test('20 days of data with 60d setting -> falls back to 14d tier', () async {
+      final now = DateTime(2024, 1, 15, 10); // Monday
+      // 20 days of data: effectiveWindow(60, 20) = 14
+      // 70% of 14 = 10. We have enough within 14-day window.
+      final weights = buildRecentWeights(now, 15);
+
+      when(mockDatabaseService.getWeightsForRange(any, any))
+          .thenAnswer((_) async => weights);
+      when(mockDatabaseService.getLoggedMacrosForDateRange(any, any))
+          .thenAnswer((_) async => []);
+
+      final settings = GoalSettings(
+        anchorWeight: 100.0,
+        maintenanceCaloriesStart: 2200,
+        proteinTarget: 150,
+        fatTarget: 70,
+        carbTarget: 200,
+        mode: GoalMode.maintain,
+        calculationMode: MacroCalculationMode.proteinCarbs,
+        proteinTargetMode: ProteinTargetMode.fixed,
+        proteinMultiplier: 1.0,
+        fixedDelta: 0,
+        lastTargetUpdate: DateTime(2024, 1, 1),
+        useMetric: false,
+        fiberTarget: 37.0,
+        enableSmartTargets: true,
+        tdeeWindowDays: 60,
+      );
+
+      final provider =
+          await createProvider(clock: () => now, initialSettings: settings);
+
+      // Should use Kalman (fell back to 14d tier), not manual 2200.
+      // With all-invalid intake, TDEE stays near initial 2200.
+      expect(provider.currentGoals.calories, closeTo(2200.0, 100.0));
     });
   });
 
@@ -174,7 +213,7 @@ void main() {
     Future<GoalsProvider> createWarmProvider({
       required DateTime Function() clock,
       required GoalSettings settings,
-      int weightCount = 14,
+      int weightCount = 20,
       double weightValue = 100.0,
       List<LoggedMacroDTO>? dtos,
     }) async {
@@ -236,7 +275,7 @@ void main() {
       final provider = await createWarmProvider(
         clock: () => now,
         settings: baseSettings(),
-        weightCount: 14,
+        weightCount: 20,
         weightValue: 100.0,
         dtos: dtos,
       );
@@ -298,7 +337,7 @@ void main() {
   group('GoalsProvider smart targets toggle', () {
     test('smart targets off -> always manual regardless of data', () async {
       final now = DateTime(2024, 1, 15, 10);
-      final weights = buildRecentWeights(now, 14);
+      final weights = buildRecentWeights(now, 20);
 
       when(mockDatabaseService.getWeightsForRange(any, any))
           .thenAnswer((_) async => weights);
@@ -454,7 +493,7 @@ void main() {
     test('day with 0 cal + logCount > 0 -> included as valid (fasted day)',
         () async {
       final now = DateTime(2024, 1, 15, 10); // Monday
-      final weights = buildRecentWeights(now, 14);
+      final weights = buildRecentWeights(now, 20);
 
       when(mockDatabaseService.getWeightsForRange(any, any))
           .thenAnswer((_) async => weights);
@@ -504,7 +543,7 @@ void main() {
       final now = DateTime(2024, 1, 15, 14); // Monday 2pm
       final today = DateTime(now.year, now.month, now.day);
       final yesterday = today.subtract(const Duration(days: 1));
-      final weights = buildRecentWeights(now, 14);
+      final weights = buildRecentWeights(now, 20);
 
       when(mockDatabaseService.getWeightsForRange(any, any))
           .thenAnswer((_) async => weights);
@@ -568,7 +607,7 @@ void main() {
 
     test('day with 0 cal + logCount == 0 -> excluded from Kalman', () async {
       final now = DateTime(2024, 1, 15, 10);
-      final weights = buildRecentWeights(now, 14);
+      final weights = buildRecentWeights(now, 20);
 
       when(mockDatabaseService.getWeightsForRange(any, any))
           .thenAnswer((_) async => weights);
@@ -655,14 +694,14 @@ void main() {
       // Create weights that would cause Kalman to produce extreme TDEE
       // Rapidly losing weight with very high intake -> extreme TDEE
       final today = DateTime(now.year, now.month, now.day);
-      final analysisStart = today.subtract(const Duration(days: 90));
+      final analysisStart = today.subtract(const Duration(days: 28));
 
       final weights = <Weight>[];
       var d = analysisStart;
       var i = 0;
       while (!d.isAfter(today)) {
-        // Only add weight entries for last 14 days
-        if (d.isAfter(today.subtract(const Duration(days: 14)))) {
+        // Only add weight entries for last 20 days
+        if (d.isAfter(today.subtract(const Duration(days: 20)))) {
           weights
               .add(Weight(weight: 200.0 - (i * 2.0), date: d)); // extreme loss
         }

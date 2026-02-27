@@ -165,7 +165,9 @@ class _WeightTrendChartState extends State<WeightTrendChart> {
       final kalmanByDate = <DateTime, double>{};
       var kDate = DateTime(widget.startDate.year, widget.startDate.month, widget.startDate.day);
       for (var i = 0; i < widget.kalmanWeightHistory.length; i++) {
-        kalmanByDate[kDate] = widget.kalmanWeightHistory[i];
+        if (widget.kalmanWeightHistory[i] != 0.0) {
+          kalmanByDate[kDate] = widget.kalmanWeightHistory[i];
+        }
         kDate = DateTime(kDate.year, kDate.month, kDate.day + 1);
       }
       // For each real weight point, find the nearest Kalman estimate
@@ -410,11 +412,19 @@ class _WeightLinePainter extends CustomPainter {
       final mainPath = Path();
       // maintenanceHistory maps 1:1 to daily points between startDate and endDate
       var current = DateTime(startDate.year, startDate.month, startDate.day);
-      mainPath.moveTo(getX(current), getYMain(maintenanceHistory[0]));
+      bool firstValid = true;
 
-      for (var i = 1; i < maintenanceHistory.length; i++) {
-        current = DateTime(current.year, current.month, current.day + 1);
-        mainPath.lineTo(getX(current), getYMain(maintenanceHistory[i]));
+      for (var i = 0; i < maintenanceHistory.length; i++) {
+        if (i > 0) {
+          current = DateTime(current.year, current.month, current.day + 1);
+        }
+        if (maintenanceHistory[i] == 0.0) continue;
+        if (firstValid) {
+          mainPath.moveTo(getX(current), getYMain(maintenanceHistory[i]));
+          firstValid = false;
+        } else {
+          mainPath.lineTo(getX(current), getYMain(maintenanceHistory[i]));
+        }
       }
 
       // Draw dashed line

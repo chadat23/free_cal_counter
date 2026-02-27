@@ -75,46 +75,30 @@ class _OverviewScreenState extends State<OverviewScreen> {
       final stats = await logProvider.getDailyMacroStats(start, today);
       final goals = goalsProvider.currentGoals;
 
-      final yesterday = today.subtract(const Duration(days: 1));
       final rangeStart = today.subtract(Duration(days: _weightRangeDays));
-      final window = GoalLogicService.kTdeeWindowDays;
-      final analysisStart = rangeStart.subtract(Duration(days: window));
+      // Use the larger of the display range or the user's TDEE setting,
+      // so small ranges (1wk) still have enough data for Kalman tiers
+      final userWindow = goalsProvider.settings.tdeeWindowDays;
+      final chartWindow = _weightRangeDays < userWindow ? userWindow : _weightRangeDays;
+      // Load data for the full range: earliest possible Kalman window start to today
+      final analysisStart = rangeStart.subtract(Duration(days: chartWindow));
 
       final analysisStats = await logProvider.getDailyMacroStats(
         analysisStart,
-        yesterday,
+        today.subtract(const Duration(days: 1)),
       );
-      // Ensure weights are loaded for the full analysis window (today's weight still counts)
       await weightProvider.loadWeights(analysisStart, today);
       final analysisWeights = weightProvider.weights;
 
-      // Map data for Kalman
+      // Build maps once for all per-day Kalman calls
       final weightMap = {
         for (var w in analysisWeights)
           DateTime(w.date.year, w.date.month, w.date.day): w.weight,
       };
-
-      final List<double> dailyWeights = [];
-      final List<double> dailyIntakes = [];
-      final List<bool> intakeIsValid = [];
-
-      // Build a stats map for O(1) lookup
       final statsMap = {
         for (var s in analysisStats)
           DateTime(s.date.year, s.date.month, s.date.day): s,
       };
-
-      var current = analysisStart;
-      while (!current.isAfter(yesterday)) {
-        final dateOnly = DateTime(current.year, current.month, current.day);
-        dailyWeights.add(weightMap[dateOnly] ?? 0.0);
-
-        final stat = statsMap[dateOnly];
-        dailyIntakes.add(stat?.calories ?? 0.0);
-        intakeIsValid.add(stat != null && stat.logCount > 0);
-
-        current = DateTime(current.year, current.month, current.day + 1);
-      }
 
       final initialWeight = goalsProvider.settings.anchorWeight > 0
           ? goalsProvider.settings.anchorWeight
@@ -122,25 +106,24 @@ class _OverviewScreenState extends State<OverviewScreen> {
                 ? analysisWeights.first.weight
                 : 0.0);
 
-      final maintenanceTrend = GoalLogicService.calculateKalmanTDEE(
-        weights: dailyWeights,
-        intakes: dailyIntakes,
-        initialTDEE: goalsProvider.settings.maintenanceCaloriesStart,
-        initialWeight: initialWeight,
-        isMetric: goalsProvider.settings.useMetric,
-        intakeIsValid: intakeIsValid,
-      );
-
-      // Extract the portion corresponding to the displayed range
-      final int displayCount = _weightRangeDays + 1;
-      final maintenanceTdees = maintenanceTrend.map((e) => e.tdee).toList();
-      final kalmanWeights = maintenanceTrend.map((e) => e.weight).toList();
-      final displayMaintenance = maintenanceTdees.length >= displayCount
-          ? maintenanceTdees.sublist(maintenanceTdees.length - displayCount)
-          : maintenanceTdees;
-      final displayKalmanWeights = kalmanWeights.length >= displayCount
-          ? kalmanWeights.sublist(kalmanWeights.length - displayCount)
-          : kalmanWeights;
+      // Compute TDEE per displayed day using the shared function
+      final List<double> displayMaintenance = [];
+      final List<double> displayKalmanWeights = [];
+      var day = rangeStart;
+      while (!day.isAfter(today)) {
+        final estimate = GoalLogicService.computeTdeeAtDate(
+          tdeeWindow: chartWindow,
+          tdeeDate: day,
+          weightMap: weightMap,
+          statsMap: statsMap,
+          initialTDEE: goalsProvider.settings.maintenanceCaloriesStart,
+          initialWeight: initialWeight,
+          isMetric: goalsProvider.settings.useMetric,
+        );
+        displayMaintenance.add(estimate?.tdee ?? 0.0);
+        displayKalmanWeights.add(estimate?.weight ?? 0.0);
+        day = DateTime(day.year, day.month, day.day + 1);
+      }
 
       // Process stats into NutritionTargets
       if (mounted) {

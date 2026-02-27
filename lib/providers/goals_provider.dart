@@ -179,8 +179,9 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
     final now = _clock();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
+    final userWindow = _settings.tdeeWindowDays;
     // Use DateTime(y, m, d) to ensure midnight and avoid DST issues
-    final rawAnalysisStart = today.subtract(const Duration(days: 91));
+    final rawAnalysisStart = today.subtract(Duration(days: userWindow));
     final analysisStart = DateTime(rawAnalysisStart.year, rawAnalysisStart.month, rawAnalysisStart.day);
 
     // Fetch weights if needed for Smart TDEE OR Dynamic Protein
@@ -220,9 +221,39 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
         lastTargetUpdate: _clock(),
       );
     } else {
-      // Smart mode: use Kalman TDEE
-      // 2. Cold boot check
-      if (!GoalLogicService.hasEnoughWeightData(weights, now: now)) {
+      // Smart mode: use Kalman TDEE via shared function
+      // Fetch intake data for the full window
+      final dtos = await _databaseService.getLoggedMacrosForDateRange(
+        analysisStart,
+        now,
+      );
+      final dailyStats = DailyMacroStats.fromDTOS(dtos, analysisStart, yesterday);
+
+      // Build maps for computeTdeeAtDate
+      final Map<DateTime, double> weightMap = {
+        for (var w in weights)
+          DateTime(w.date.year, w.date.month, w.date.day): w.weight,
+      };
+      final Map<DateTime, DailyMacroStats> statsMap = {
+        for (var s in dailyStats)
+          DateTime(s.date.year, s.date.month, s.date.day): s,
+      };
+
+      final initialWeight = _settings.anchorWeight > 0
+          ? _settings.anchorWeight
+          : (weights.isNotEmpty ? weights.first.weight : 70.0);
+
+      final estimate = GoalLogicService.computeTdeeAtDate(
+        tdeeWindow: userWindow,
+        tdeeDate: today,
+        weightMap: weightMap,
+        statsMap: statsMap,
+        initialTDEE: _settings.maintenanceCaloriesStart,
+        initialWeight: initialWeight,
+        isMetric: _settings.useMetric,
+      );
+
+      if (estimate == null) {
         // Fall back to manual mode
         if (_settings.mode == GoalMode.maintain) {
           targetCalories = _settings.maintenanceCaloriesStart;
@@ -237,83 +268,33 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
         }
         _settings = _settings.copyWith(lastTargetUpdate: _clock());
       } else {
-        // 3. Fetch intake data
-        final dtos = await _databaseService.getLoggedMacrosForDateRange(
-          analysisStart,
-          now,
-        );
-        final dailyStats = DailyMacroStats.fromDTOS(dtos, analysisStart, yesterday);
+        final kalmanTDEE = estimate.tdee.clamp(800.0, 6000.0);
+        final kalmanWeight = estimate.weight;
+        kalmanWeightEstimate = kalmanWeight;
 
-        // 4. Build parallel arrays for the 90-day range
-        final Map<int, DailyMacroStats> statsMap = {
-          for (var s in dailyStats)
-            DateTime(s.date.year, s.date.month, s.date.day)
-                .millisecondsSinceEpoch: s,
-        };
-        final Map<int, double> weightMap = {
-          for (var w in weights)
-            DateTime(w.date.year, w.date.month, w.date.day)
-                .millisecondsSinceEpoch: w.weight,
-        };
-
-        final List<double> dailyWeights = [];
-        final List<double> dailyIntakes = [];
-        final List<bool> intakeIsValid = [];
-
-        var current = analysisStart;
-        while (!current.isAfter(yesterday)) {
-          final key = DateTime(current.year, current.month, current.day)
-              .millisecondsSinceEpoch;
-          dailyWeights.add(weightMap[key] ?? 0.0);
-          final stat = statsMap[key];
-          dailyIntakes.add(stat?.calories ?? 0.0);
-          intakeIsValid.add(stat != null && stat.logCount > 0);
-          current = DateTime(current.year, current.month, current.day + 1);
-        }
-
-        // 5. Run Kalman filter
-        final initialWeight = _settings.anchorWeight > 0
-            ? _settings.anchorWeight
-            : (weights.isNotEmpty ? weights.first.weight : 70.0);
-
-        final estimates = GoalLogicService.calculateKalmanTDEE(
-          weights: dailyWeights,
-          intakes: dailyIntakes,
-          initialTDEE: _settings.maintenanceCaloriesStart,
-          initialWeight: initialWeight,
-          isMetric: _settings.useMetric,
-          intakeIsValid: intakeIsValid,
+        // Update maintenance baseline with Kalman result
+        _settings = _settings.copyWith(
+          maintenanceCaloriesStart: kalmanTDEE,
         );
 
-        if (estimates.isNotEmpty) {
-          final kalmanTDEE = estimates.last.tdee.clamp(800.0, 6000.0);
-          final kalmanWeight = estimates.last.weight;
-          kalmanWeightEstimate = kalmanWeight;
-
-          // Update maintenance baseline with Kalman result
-          _settings = _settings.copyWith(
-            maintenanceCaloriesStart: kalmanTDEE,
-          );
-
-          // Apply mode
-          if (_settings.mode == GoalMode.maintain) {
-            // Drift correction: adjust calories to steer weight back to anchor
-            final double C = _settings.useMetric
-                ? GoalLogicService.kCalPerKg
-                : GoalLogicService.kCalPerLb;
-            final drift = kalmanWeight - _settings.anchorWeight;
-            final correctionCals = drift * C /
-                _settings.correctionWindowDays;
-            targetCalories = kalmanTDEE + correctionCals;
+        // Apply mode
+        if (_settings.mode == GoalMode.maintain) {
+          // Drift correction: adjust calories to steer weight back to anchor
+          final double C = _settings.useMetric
+              ? GoalLogicService.kCalPerKg
+              : GoalLogicService.kCalPerLb;
+          final drift = kalmanWeight - _settings.anchorWeight;
+          final correctionCals = drift * C /
+              _settings.correctionWindowDays;
+          targetCalories = kalmanTDEE + correctionCals;
+        } else {
+          double delta = _settings.fixedDelta;
+          if (_settings.mode == GoalMode.lose) {
+            delta = -delta.abs();
           } else {
-            double delta = _settings.fixedDelta;
-            if (_settings.mode == GoalMode.lose) {
-              delta = -delta.abs();
-            } else {
-              delta = delta.abs();
-            }
-            targetCalories = kalmanTDEE + delta;
+            delta = delta.abs();
           }
+          targetCalories = kalmanTDEE + delta;
         }
 
         _settings = _settings.copyWith(lastTargetUpdate: _clock());

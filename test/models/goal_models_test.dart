@@ -47,8 +47,7 @@ void main() {
       expect(settings.anchorWeight, 0.0);
     });
 
-    test('old JSON with tdeeWindowDays still deserializes without error', () {
-      // Simulate JSON from an older version that had tdeeWindowDays
+    test('old JSON without tdeeWindowDays defaults to 28', () {
       final oldJson = {
         'anchorWeight': 80.0,
         'maintenanceCaloriesStart': 2500.0,
@@ -62,20 +61,24 @@ void main() {
         'lastTargetUpdate': DateTime(2023, 10, 1).millisecondsSinceEpoch,
         'useMetric': true,
         'isSet': true,
-        'tdeeWindowDays': 30, // old field
         'enableSmartTargets': true,
       };
 
-      // Should not throw
       final decoded = GoalSettings.fromJson(oldJson);
-      expect(decoded.anchorWeight, 80.0);
-      expect(decoded.enableSmartTargets, true);
+      expect(decoded.tdeeWindowDays, 28);
     });
 
-    test('toJson should not contain tdeeWindowDays', () {
+    test('toJson includes tdeeWindowDays', () {
       final settings = GoalSettings.defaultSettings();
       final json = settings.toJson();
-      expect(json.containsKey('tdeeWindowDays'), isFalse);
+      expect(json['tdeeWindowDays'], 28);
+    });
+
+    test('tdeeWindowDays roundtrips through JSON', () {
+      final settings = GoalSettings.defaultSettings().copyWith(tdeeWindowDays: 60);
+      final json = settings.toJson();
+      final decoded = GoalSettings.fromJson(json);
+      expect(decoded.tdeeWindowDays, 60);
     });
   });
 

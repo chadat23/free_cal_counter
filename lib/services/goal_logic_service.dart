@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:meal_of_record/models/daily_macro_stats.dart';
 import 'package:meal_of_record/models/weight.dart';
 
 class KalmanEstimate {
@@ -9,8 +10,8 @@ class KalmanEstimate {
 }
 
 class GoalLogicService {
-  static const int kTdeeWindowDays = 14;
-  static const int kMinWeightDays = 10;
+  static const int kTdeeWindowDays = 28;
+  static const int kMinWeightDays = 20; // 70% of default 28
   static const double kCalPerLb = 3500.0;
   static const double kCalPerKg = 7716.0;
 
@@ -191,14 +192,15 @@ class GoalLogicService {
     return estimates;
   }
 
-  /// Returns true if there are at least [minDays] weight entries
+  /// Returns true if there are at least 70% of [windowDays] weight entries
   /// within the last [windowDays] days.
   static bool hasEnoughWeightData(
     List<Weight> weights, {
     int windowDays = kTdeeWindowDays,
-    int minDays = kMinWeightDays,
+    int? minDays,
     DateTime? now,
   }) {
+    final threshold = minDays ?? (windowDays * 0.7).ceil();
     final today = now ?? DateTime.now();
     final cutoff = DateTime(today.year, today.month, today.day)
         .subtract(Duration(days: windowDays));
@@ -206,6 +208,83 @@ class GoalLogicService {
       final d = DateTime(w.date.year, w.date.month, w.date.day);
       return !d.isBefore(cutoff);
     }).length;
-    return recentCount >= minDays;
+    return recentCount >= threshold;
+  }
+
+  /// Determines the effective TDEE window based on available data.
+  /// Falls back to the largest tier <= userWindow that has enough data.
+  /// Returns 0 if not enough data for any tier.
+  static int effectiveWindow(int userWindow, int daysOfData) {
+    const tiers = [60, 28, 14];
+    for (final t in tiers) {
+      if (t <= userWindow && t <= daysOfData) return t;
+    }
+    return 0; // not enough data
+  }
+
+  /// Computes the Kalman TDEE as of a given date.
+  /// [tdeeWindow] — user-configured TDEE window (e.g. 28).
+  /// [tdeeDate] — reference date; TDEE is reported as of dt-1 (yesterday relative to dt).
+  /// [weightMap] — pre-loaded {date: weight} map covering the needed range.
+  /// [statsMap] — pre-loaded {date: DailyMacroStats} map.
+  /// [initialTDEE], [initialWeight], [isMetric] — Kalman seed params.
+  /// Returns null if not enough data.
+  static KalmanEstimate? computeTdeeAtDate({
+    required int tdeeWindow,
+    required DateTime tdeeDate,
+    required Map<DateTime, double> weightMap,
+    required Map<DateTime, DailyMacroStats> statsMap,
+    required double initialTDEE,
+    required double initialWeight,
+    required bool isMetric,
+  }) {
+    // Find earliest weight in weightMap to compute daysOfData
+    if (weightMap.isEmpty) return null;
+    final earliestWeight = weightMap.keys.reduce((a, b) => a.isBefore(b) ? a : b);
+    final daysOfData = tdeeDate.difference(earliestWeight).inDays;
+
+    final effectiveWin = effectiveWindow(tdeeWindow, daysOfData);
+    if (effectiveWin == 0) return null;
+
+    final windowStart = tdeeDate.subtract(Duration(days: effectiveWin));
+
+    // Build parallel arrays from windowStart to dt-1
+    final List<double> dailyWeights = [];
+    final List<double> dailyIntakes = [];
+    final List<bool> intakeIsValid = [];
+    final List<Weight> weightsInWindow = [];
+
+    var current = windowStart;
+    final yesterday = tdeeDate.subtract(const Duration(days: 1));
+    while (!current.isAfter(yesterday)) {
+      final dateOnly = DateTime(current.year, current.month, current.day);
+      final w = weightMap[dateOnly] ?? 0.0;
+      dailyWeights.add(w);
+      if (w > 0) {
+        weightsInWindow.add(Weight(weight: w, date: dateOnly));
+      }
+
+      final stat = statsMap[dateOnly];
+      dailyIntakes.add(stat?.calories ?? 0.0);
+      intakeIsValid.add(stat != null && stat.logCount > 0);
+
+      current = DateTime(current.year, current.month, current.day + 1);
+    }
+
+    // Check we have enough weight data in this window
+    if (!hasEnoughWeightData(weightsInWindow, windowDays: effectiveWin, now: tdeeDate)) {
+      return null;
+    }
+
+    final estimates = calculateKalmanTDEE(
+      weights: dailyWeights,
+      intakes: dailyIntakes,
+      initialTDEE: initialTDEE,
+      initialWeight: initialWeight,
+      isMetric: isMetric,
+      intakeIsValid: intakeIsValid,
+    );
+
+    return estimates.isNotEmpty ? estimates.last : null;
   }
 }

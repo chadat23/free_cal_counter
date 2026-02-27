@@ -322,13 +322,62 @@ void main() {
       expect(
         GoalLogicService.hasEnoughWeightData(
           [],
+          windowDays: 28,
           now: DateTime(2024, 1, 15),
         ),
         isFalse,
       );
     });
 
-    test('9 of 14 -> false', () {
+    test('70% threshold: 19 of 28 -> false', () {
+      final now = DateTime(2024, 1, 15);
+      // 70% of 28 = 19.6, ceil = 20. So 19 is not enough.
+      final weights = List.generate(
+        19,
+        (i) => Weight(
+          weight: 100.0,
+          date: now.subtract(Duration(days: i)),
+        ),
+      );
+      expect(
+        GoalLogicService.hasEnoughWeightData(weights, windowDays: 28, now: now),
+        isFalse,
+      );
+    });
+
+    test('70% threshold: 20 of 28 -> true', () {
+      final now = DateTime(2024, 1, 15);
+      // 70% of 28 = 19.6, ceil = 20
+      final weights = List.generate(
+        20,
+        (i) => Weight(
+          weight: 100.0,
+          date: now.subtract(Duration(days: i)),
+        ),
+      );
+      expect(
+        GoalLogicService.hasEnoughWeightData(weights, windowDays: 28, now: now),
+        isTrue,
+      );
+    });
+
+    test('70% threshold: 10 of 14 -> true', () {
+      final now = DateTime(2024, 1, 15);
+      // 70% of 14 = 9.8, ceil = 10
+      final weights = List.generate(
+        10,
+        (i) => Weight(
+          weight: 100.0,
+          date: now.subtract(Duration(days: i)),
+        ),
+      );
+      expect(
+        GoalLogicService.hasEnoughWeightData(weights, windowDays: 14, now: now),
+        isTrue,
+      );
+    });
+
+    test('70% threshold: 9 of 14 -> false', () {
       final now = DateTime(2024, 1, 15);
       final weights = List.generate(
         9,
@@ -338,44 +387,30 @@ void main() {
         ),
       );
       expect(
-        GoalLogicService.hasEnoughWeightData(weights, now: now),
+        GoalLogicService.hasEnoughWeightData(weights, windowDays: 14, now: now),
         isFalse,
       );
     });
 
-    test('10 of 14 -> true', () {
+    test('70% threshold: 42 of 60 -> true', () {
       final now = DateTime(2024, 1, 15);
+      // 70% of 60 = 42
       final weights = List.generate(
-        10,
+        42,
         (i) => Weight(
           weight: 100.0,
           date: now.subtract(Duration(days: i)),
         ),
       );
       expect(
-        GoalLogicService.hasEnoughWeightData(weights, now: now),
-        isTrue,
-      );
-    });
-
-    test('14 of 14 -> true', () {
-      final now = DateTime(2024, 1, 15);
-      final weights = List.generate(
-        14,
-        (i) => Weight(
-          weight: 100.0,
-          date: now.subtract(Duration(days: i)),
-        ),
-      );
-      expect(
-        GoalLogicService.hasEnoughWeightData(weights, now: now),
+        GoalLogicService.hasEnoughWeightData(weights, windowDays: 60, now: now),
         isTrue,
       );
     });
 
     test('weights outside window do not count', () {
       final now = DateTime(2024, 1, 15);
-      // 9 recent + 10 old (beyond 14 days)
+      // 9 recent + 10 old (beyond 28 days)
       final recentWeights = List.generate(
         9,
         (i) => Weight(
@@ -387,16 +422,59 @@ void main() {
         10,
         (i) => Weight(
           weight: 100.0,
-          date: now.subtract(Duration(days: 20 + i)),
+          date: now.subtract(Duration(days: 30 + i)),
         ),
       );
       expect(
         GoalLogicService.hasEnoughWeightData(
           [...recentWeights, ...oldWeights],
+          windowDays: 28,
           now: now,
         ),
         isFalse,
       );
+    });
+  });
+
+  group('effectiveWindow', () {
+    test('60d setting with 90 days of data -> 60', () {
+      expect(GoalLogicService.effectiveWindow(60, 90), 60);
+    });
+
+    test('60d setting with 60 days of data -> 60', () {
+      expect(GoalLogicService.effectiveWindow(60, 60), 60);
+    });
+
+    test('60d setting with 30 days of data -> 28', () {
+      expect(GoalLogicService.effectiveWindow(60, 30), 28);
+    });
+
+    test('60d setting with 20 days of data -> 14', () {
+      expect(GoalLogicService.effectiveWindow(60, 20), 14);
+    });
+
+    test('60d setting with 10 days of data -> 0 (not enough)', () {
+      expect(GoalLogicService.effectiveWindow(60, 10), 0);
+    });
+
+    test('28d setting with 90 days of data -> 28', () {
+      expect(GoalLogicService.effectiveWindow(28, 90), 28);
+    });
+
+    test('28d setting with 15 days of data -> 14', () {
+      expect(GoalLogicService.effectiveWindow(28, 15), 14);
+    });
+
+    test('14d setting with 90 days of data -> 14', () {
+      expect(GoalLogicService.effectiveWindow(14, 90), 14);
+    });
+
+    test('14d setting with 10 days of data -> 0', () {
+      expect(GoalLogicService.effectiveWindow(14, 10), 0);
+    });
+
+    test('14d setting with 14 days of data -> 14', () {
+      expect(GoalLogicService.effectiveWindow(14, 14), 14);
     });
   });
 }

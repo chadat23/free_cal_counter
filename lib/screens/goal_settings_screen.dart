@@ -30,6 +30,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
   late ProteinTargetMode _proteinTargetMode;
   late bool _useMetric;
   late bool _enableSmartTargets;
+  late int _tdeeWindowDays;
   late GoalSettings _initialSettings;
 
   @override
@@ -70,6 +71,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
     _proteinTargetMode = settings.proteinTargetMode;
     _useMetric = settings.useMetric;
     _enableSmartTargets = settings.enableSmartTargets;
+    _tdeeWindowDays = settings.tdeeWindowDays;
     _initialSettings = settings;
   }
 
@@ -185,6 +187,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
       isSet: true,
       enableSmartTargets: _enableSmartTargets,
       correctionWindowDays: int.tryParse(_correctionWindowController.text) ?? 30,
+      tdeeWindowDays: _tdeeWindowDays,
     );
 
     await goalsProvider.saveSettings(
@@ -225,7 +228,8 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
         anchorWeight != _initialSettings.anchorWeight ||
         (_mode != GoalMode.maintain && delta != _initialSettings.fixedDelta) ||
         (int.tryParse(_correctionWindowController.text) ?? 30) !=
-            _initialSettings.correctionWindowDays;
+            _initialSettings.correctionWindowDays ||
+        _tdeeWindowDays != _initialSettings.tdeeWindowDays;
   }
 
   Future<void> _showDiscardChangesDialog() async {
@@ -304,6 +308,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
             value: _enableSmartTargets,
             onChanged: (val) => setState(() => _enableSmartTargets = val),
           ),
+          if (_enableSmartTargets) _buildTdeeWindowSelector(),
           const Divider(height: 20),
           _buildTextField(
             controller: _anchorWeightController,
@@ -371,6 +376,44 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
     ),
   );
 }
+
+  Widget _buildTdeeWindowSelector() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'TDEE Window',
+            style: TextStyle(fontSize: 14, color: Colors.grey),
+          ),
+          const SizedBox(height: 8),
+          SegmentedButton<int>(
+            segments: const [
+              ButtonSegment(
+                value: 14,
+                label: Text('Responsive (14d)'),
+              ),
+              ButtonSegment(
+                value: 28,
+                label: Text('Balanced (28d)'),
+              ),
+              ButtonSegment(
+                value: 60,
+                label: Text('Smooth (60d)'),
+              ),
+            ],
+            selected: {_tdeeWindowDays},
+            onSelectionChanged: (newSelection) {
+              setState(() {
+                _tdeeWindowDays = newSelection.first;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildCalcModeSelector() {
     return Column(

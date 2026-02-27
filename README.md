@@ -28,6 +28,7 @@ v0.2.0
  - Added Recipe links
  - Better weight smoothing/estimating
  Bugs:
+ - Fixed TDEE window inconsistancies
  - Log multiselect wasn't properly unselecting in screen change
  - 6 months weight graph didn't show data points
  - OFF Log Queue replacing each other

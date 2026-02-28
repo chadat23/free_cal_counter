@@ -99,12 +99,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
           DateTime(s.date.year, s.date.month, s.date.day): s,
       };
 
-      final initialWeight = goalsProvider.settings.anchorWeight > 0
-          ? goalsProvider.settings.anchorWeight
-          : (analysisWeights.isNotEmpty
-                ? analysisWeights.first.weight
-                : 0.0);
-
       // Compute TDEE per displayed day using the shared function
       final List<double> displayMaintenance = [];
       final List<double> displayKalmanWeights = [];
@@ -116,7 +110,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
           weightMap: weightMap,
           statsMap: statsMap,
           initialTDEE: goalsProvider.settings.maintenanceCaloriesStart,
-          initialWeight: initialWeight,
         );
         displayMaintenance.add(estimate?.tdee ?? 0.0);
         displayKalmanWeights.add(estimate?.weight ?? 0.0);

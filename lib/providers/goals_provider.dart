@@ -256,17 +256,12 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
           DateTime(s.date.year, s.date.month, s.date.day): s,
       };
 
-      final initialWeight = settings.anchorWeight > 0
-          ? settings.anchorWeight
-          : (weights.isNotEmpty ? weights.first.weight : 70.0);
-
       final estimate = GoalLogicService.computeTdeeAtDate(
         tdeeWindow: userWindow,
         tdeeDate: today,
         weightMap: weightMap,
         statsMap: statsMap,
         initialTDEE: settings.maintenanceCaloriesStart,
-        initialWeight: initialWeight,
       );
 
       if (estimate == null) {

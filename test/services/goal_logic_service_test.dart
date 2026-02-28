@@ -702,7 +702,7 @@ void main() {
         weightMap: weightMap,
         statsMap: statsMap,
         initialTDEE: 0.0,
-        initialWeight: 180.0,
+
 
       );
 
@@ -739,7 +739,7 @@ void main() {
         weightMap: weightMap,
         statsMap: statsMap,
         initialTDEE: 2000.0,
-        initialWeight: 180.0,
+
 
       );
 
@@ -772,7 +772,7 @@ void main() {
         weightMap: weightMap,
         statsMap: statsMap,
         initialTDEE: 2000.0,
-        initialWeight: 180.0,
+
 
       );
 
@@ -782,7 +782,7 @@ void main() {
         weightMap: weightMap,
         statsMap: statsMap,
         initialTDEE: 2661.0,
-        initialWeight: 180.0,
+
 
       );
 
@@ -838,7 +838,7 @@ void main() {
         weightMap: weightMap,
         statsMap: statsMap,
         initialTDEE: 2000.0,
-        initialWeight: 180.0,
+
 
       );
 
@@ -875,7 +875,7 @@ void main() {
         weightMap: weightMap,
         statsMap: statsMap,
         initialTDEE: 2000.0,
-        initialWeight: 180.0,
+
 
       );
 

@@ -233,7 +233,6 @@ class GoalLogicService {
     required Map<DateTime, double> weightMap,
     required Map<DateTime, DailyMacroStats> statsMap,
     required double initialTDEE,
-    required double initialWeight,
   }) {
     // Find earliest weight in weightMap to compute daysOfData
     if (weightMap.isEmpty) return null;
@@ -277,7 +276,7 @@ class GoalLogicService {
       weights: dailyWeights,
       intakes: dailyIntakes,
       initialTDEE: initialTDEE,
-      initialWeight: initialWeight,
+      initialWeight: weightsInWindow.first.weight,
       intakeIsValid: intakeIsValid,
     );
 

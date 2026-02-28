@@ -113,8 +113,6 @@ class _WeightScreenState extends State<WeightScreen> {
                   final weightEntry = weightProvider.getWeightForDate(
                     _selectedDate,
                   );
-                  final useMetric = goalsProvider.settings.useMetric;
-
                   // Update controller if user navigated and we have data
                   if (weightEntry != null &&
                       _weightController.text.isEmpty &&
@@ -144,7 +142,7 @@ class _WeightScreenState extends State<WeightScreen> {
                               hintText: 'Weight',
                               hintStyle: TextStyle(color: Colors.grey[600]),
                               border: const UnderlineInputBorder(),
-                              suffixText: useMetric ? 'kg' : 'lbs',
+                              suffixText: 'lbs',
                             ),
                             onSubmitted: (_) => _submitWeight(),
                             onTap: () {

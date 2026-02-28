@@ -23,7 +23,6 @@ class GoalSettings {
   final double proteinMultiplier;
   final double fixedDelta; // Used for gain/lose modes
   final DateTime lastTargetUpdate;
-  final bool useMetric;
   final bool isSet;
   final bool enableSmartTargets;
   final int correctionWindowDays;
@@ -42,7 +41,6 @@ class GoalSettings {
     required this.proteinMultiplier,
     required this.fixedDelta,
     required this.lastTargetUpdate,
-    this.useMetric = false,
     this.isSet = true,
     this.enableSmartTargets = true,
     this.correctionWindowDays = 30,
@@ -75,7 +73,6 @@ class GoalSettings {
       lastTargetUpdate: DateTime.fromMillisecondsSinceEpoch(
         json['lastTargetUpdate'] as int? ?? 0,
       ),
-      useMetric: json['useMetric'] as bool? ?? false,
       isSet: json['isSet'] as bool? ?? true,
       enableSmartTargets: json['enableSmartTargets'] as bool? ?? true,
       correctionWindowDays: json['correctionWindowDays'] as int? ?? 30,
@@ -97,7 +94,6 @@ class GoalSettings {
       'proteinMultiplier': proteinMultiplier,
       'fixedDelta': fixedDelta,
       'lastTargetUpdate': lastTargetUpdate.millisecondsSinceEpoch,
-      'useMetric': useMetric,
       'isSet': isSet,
       'enableSmartTargets': enableSmartTargets,
       'correctionWindowDays': correctionWindowDays,
@@ -120,7 +116,6 @@ class GoalSettings {
       proteinMultiplier: 1.0,
       fixedDelta: 0.0,
       lastTargetUpdate: DateTime(2000), // Far in the past to trigger update
-      useMetric: false,
       isSet: false,
       enableSmartTargets: true,
       correctionWindowDays: 30,
@@ -142,7 +137,6 @@ class GoalSettings {
     double? proteinMultiplier,
     double? fixedDelta,
     DateTime? lastTargetUpdate,
-    bool? useMetric,
     bool? isSet,
     bool? enableSmartTargets,
     int? correctionWindowDays,
@@ -162,7 +156,6 @@ class GoalSettings {
       proteinMultiplier: proteinMultiplier ?? this.proteinMultiplier,
       fixedDelta: fixedDelta ?? this.fixedDelta,
       lastTargetUpdate: lastTargetUpdate ?? this.lastTargetUpdate,
-      useMetric: useMetric ?? this.useMetric,
       isSet: isSet ?? this.isSet,
       enableSmartTargets: enableSmartTargets ?? this.enableSmartTargets,
       correctionWindowDays: correctionWindowDays ?? this.correctionWindowDays,

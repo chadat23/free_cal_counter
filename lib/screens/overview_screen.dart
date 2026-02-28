@@ -117,7 +117,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
           statsMap: statsMap,
           initialTDEE: goalsProvider.settings.maintenanceCaloriesStart,
           initialWeight: initialWeight,
-          isMetric: goalsProvider.settings.useMetric,
         );
         displayMaintenance.add(estimate?.tdee ?? 0.0);
         displayKalmanWeights.add(estimate?.weight ?? 0.0);

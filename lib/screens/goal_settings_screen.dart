@@ -28,7 +28,6 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
   late GoalMode _mode;
   late MacroCalculationMode _calcMode;
   late ProteinTargetMode _proteinTargetMode;
-  late bool _useMetric;
   late bool _enableSmartTargets;
   late int _tdeeWindowDays;
   late GoalSettings _initialSettings;
@@ -69,7 +68,6 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
     _mode = settings.mode;
     _calcMode = settings.calculationMode;
     _proteinTargetMode = settings.proteinTargetMode;
-    _useMetric = settings.useMetric;
     _enableSmartTargets = settings.enableSmartTargets;
     _tdeeWindowDays = settings.tdeeWindowDays;
     _initialSettings = settings;
@@ -183,7 +181,6 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
       proteinMultiplier: proteinMultiplier ?? 1.0,
       fixedDelta: _mode != GoalMode.maintain ? delta! : 0.0,
       lastTargetUpdate: goalsProvider.settings.lastTargetUpdate,
-      useMetric: _useMetric,
       isSet: true,
       enableSmartTargets: _enableSmartTargets,
       correctionWindowDays: int.tryParse(_correctionWindowController.text) ?? 30,
@@ -217,7 +214,6 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
     return _mode != _initialSettings.mode ||
         _calcMode != _initialSettings.calculationMode ||
         _proteinTargetMode != _initialSettings.proteinTargetMode ||
-        _useMetric != _initialSettings.useMetric ||
         _enableSmartTargets != _initialSettings.enableSmartTargets ||
         maintenanceCal != _initialSettings.maintenanceCaloriesStart ||
         protein != _initialSettings.proteinTarget ||
@@ -295,12 +291,6 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
           //const Divider(height: 40),
           const Divider(height: 20),
           SwitchListTile(
-            title: const Text('Use Metric Units (kg)'),
-            subtitle: const Text('Affects calorie drift calculation'),
-            value: _useMetric,
-            onChanged: (val) => setState(() => _useMetric = val),
-          ),
-          SwitchListTile(
             title: const Text('Smart Target Calculations'),
             subtitle: const Text(
               'Targets are auto-adjusted based on weight/food trends after the first week.',
@@ -314,8 +304,8 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
             controller: _anchorWeightController,
             label:
                 _mode == GoalMode.maintain
-                    ? 'Target Weight (${_useMetric ? 'kg' : 'lb'})'
-                    : 'Starting Weight (${_useMetric ? 'kg' : 'lb'})',
+                    ? 'Target Weight (lb)'
+                    : 'Starting Weight (lb)',
             hint: 'Your weight',
           ),
           _buildTextField(
@@ -393,7 +383,6 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
       proteinMultiplier: double.tryParse(_proteinMultiplierController.text) ?? 1.0,
       fixedDelta: double.tryParse(_fixedDeltaController.text) ?? 0.0,
       lastTargetUpdate: goalsProvider.settings.lastTargetUpdate,
-      useMetric: _useMetric,
       isSet: goalsProvider.isGoalsSet,
       enableSmartTargets: _enableSmartTargets,
       correctionWindowDays: int.tryParse(_correctionWindowController.text) ?? 30,
@@ -519,8 +508,8 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
         else ...[
           _buildTextField(
             controller: _proteinMultiplierController,
-            label: 'Multiplier (g per ${_useMetric ? 'kg' : 'lb'})',
-            hint: _useMetric ? 'e.g. 2.0' : 'e.g. 1.0',
+            label: 'Multiplier (g per lb)',
+            hint: 'e.g. 1.0',
             keyboardType: TextInputType.number,
           ),
         ],

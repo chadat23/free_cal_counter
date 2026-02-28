@@ -267,7 +267,6 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
         statsMap: statsMap,
         initialTDEE: settings.maintenanceCaloriesStart,
         initialWeight: initialWeight,
-        isMetric: settings.useMetric,
       );
 
       if (estimate == null) {
@@ -297,9 +296,7 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
         // Apply mode
         if (settings.mode == GoalMode.maintain) {
           // Drift correction: adjust calories to steer weight back to anchor
-          final double C = settings.useMetric
-              ? GoalLogicService.kCalPerKg
-              : GoalLogicService.kCalPerLb;
+          final double C = GoalLogicService.kCalPerLb;
           final drift = kalmanWeight - settings.anchorWeight;
           final correctionCals = drift * C /
               settings.correctionWindowDays;

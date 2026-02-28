@@ -54,8 +54,6 @@ void main() {
       find.text('Target Weight (lb)'),
       findsOneWidget,
     ); // Default is Imperial
-    expect(find.text('Use Metric Units (kg)'), findsOneWidget);
-
     // Scroll to see the save button
     final saveButton = find.text('Save Settings');
     await tester.scrollUntilVisible(
@@ -67,32 +65,6 @@ void main() {
 
     // Check for save button
     expect(saveButton, findsOneWidget);
-  });
-
-  testWidgets('Toggling metric updates the target weight label', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider<GoalsProvider>.value(value: mockGoalsProvider),
-          ChangeNotifierProvider<WeightProvider>.value(
-            value: mockWeightProvider,
-          ),
-        ],
-        child: const MaterialApp(home: GoalSettingsScreen()),
-      ),
-    );
-
-    expect(find.text('Target Weight (lb)'), findsOneWidget);
-
-    // Tap the metric switch
-    await tester.tap(
-      find.widgetWithText(SwitchListTile, 'Use Metric Units (kg)'),
-    );
-    await tester.pumpAndSettle();
-
-    expect(find.text('Target Weight (kg)'), findsOneWidget);
   });
 
   testWidgets('Saving settings saves settings', (tester) async {

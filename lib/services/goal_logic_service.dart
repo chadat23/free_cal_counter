@@ -13,7 +13,6 @@ class GoalLogicService {
   static const int kTdeeWindowDays = 28;
   static const int kMinWeightDays = 20; // 70% of default 28
   static const double kCalPerLb = 3500.0;
-  static const double kCalPerKg = 7716.0;
 
   /// Calculates the smoothed "Trend Weight" from history.
   /// Uses a simple Exponential Moving Average (EMA).
@@ -118,12 +117,11 @@ class GoalLogicService {
     required List<double> intakes, // Daily caloric intakes
     required double initialTDEE,
     required double initialWeight,
-    bool isMetric = false,
     List<bool>? intakeIsValid, // null = all valid
   }) {
     if (weights.isEmpty || intakes.isEmpty) return [];
 
-    final double C = isMetric ? kCalPerKg : kCalPerLb;
+    final double C = kCalPerLb;
     final double invC = 1.0 / C;
 
     // State initialization
@@ -236,7 +234,6 @@ class GoalLogicService {
     required Map<DateTime, DailyMacroStats> statsMap,
     required double initialTDEE,
     required double initialWeight,
-    required bool isMetric,
   }) {
     // Find earliest weight in weightMap to compute daysOfData
     if (weightMap.isEmpty) return null;
@@ -281,7 +278,6 @@ class GoalLogicService {
       intakes: dailyIntakes,
       initialTDEE: initialTDEE,
       initialWeight: initialWeight,
-      isMetric: isMetric,
       intakeIsValid: intakeIsValid,
     );
 

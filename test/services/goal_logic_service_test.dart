@@ -217,32 +217,6 @@ void main() {
       expect(results.last.tdee, closeTo(2500.0, 50.0));
     });
 
-    test('metric vs imperial -> different due to C constant', () {
-      final weights = List.generate(30, (i) => 80.0 + i * 0.05);
-      final intakes = List.generate(30, (_) => 2500.0);
-
-      final resultsImperial = GoalLogicService.calculateKalmanTDEE(
-        weights: weights,
-        intakes: intakes,
-        initialTDEE: 2500.0,
-        initialWeight: 80.0,
-        isMetric: false,
-      );
-
-      final resultsMetric = GoalLogicService.calculateKalmanTDEE(
-        weights: weights,
-        intakes: intakes,
-        initialTDEE: 2500.0,
-        initialWeight: 80.0,
-        isMetric: true,
-      );
-
-      // With metric (kCalPerKg = 7716), the same weight change implies a
-      // larger caloric surplus/deficit than imperial (kCalPerLb = 3500).
-      // So the TDEE estimates should differ.
-      expect(resultsImperial.last.tdee != resultsMetric.last.tdee, isTrue);
-    });
-
     test('large surplus -> correct weight gain model', () {
       // 1000 cal surplus/day for 30 days at 3500 cal/lb
       // Expected gain: 1000/3500 = 0.286 lb/day
@@ -529,7 +503,7 @@ void main() {
         statsMap: statsMap,
         initialTDEE: 0.0,
         initialWeight: 180.0,
-        isMetric: false,
+
       );
 
       // Seed=0 still moves toward 2700 but undershoots significantly
@@ -566,7 +540,7 @@ void main() {
         statsMap: statsMap,
         initialTDEE: 2000.0,
         initialWeight: 180.0,
-        isMetric: false,
+
       );
 
       expect(estimate, isNotNull);
@@ -599,7 +573,7 @@ void main() {
         statsMap: statsMap,
         initialTDEE: 2000.0,
         initialWeight: 180.0,
-        isMetric: false,
+
       );
 
       final estimateSeed2661 = GoalLogicService.computeTdeeAtDate(
@@ -609,7 +583,7 @@ void main() {
         statsMap: statsMap,
         initialTDEE: 2661.0,
         initialWeight: 180.0,
-        isMetric: false,
+
       );
 
       expect(estimateSeed2000, isNotNull);
@@ -665,7 +639,7 @@ void main() {
         statsMap: statsMap,
         initialTDEE: 2000.0,
         initialWeight: 180.0,
-        isMetric: false,
+
       );
 
       expect(estimate, isNotNull);
@@ -702,7 +676,7 @@ void main() {
         statsMap: statsMap,
         initialTDEE: 2000.0,
         initialWeight: 180.0,
-        isMetric: false,
+
       );
 
       expect(estimate, isNotNull);

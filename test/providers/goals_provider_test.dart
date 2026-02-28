@@ -125,7 +125,7 @@ void main() {
         proteinMultiplier: 1.0,
         fixedDelta: 0,
         lastTargetUpdate: DateTime(2024, 1, 1), // old
-        useMetric: false,
+
         fiberTarget: 37.0,
         enableSmartTargets: true,
       );
@@ -158,7 +158,7 @@ void main() {
         proteinMultiplier: 1.0,
         fixedDelta: 0,
         lastTargetUpdate: DateTime(2024, 1, 1),
-        useMetric: false,
+
         fiberTarget: 37.0,
         enableSmartTargets: true,
       );
@@ -193,7 +193,7 @@ void main() {
         proteinMultiplier: 1.0,
         fixedDelta: 0,
         lastTargetUpdate: DateTime(2024, 1, 1),
-        useMetric: false,
+
         fiberTarget: 37.0,
         enableSmartTargets: true,
         tdeeWindowDays: 60,
@@ -245,7 +245,7 @@ void main() {
         proteinMultiplier: 1.0,
         fixedDelta: fixedDelta,
         lastTargetUpdate: DateTime(2024, 1, 1), // old, forces recalc on Monday
-        useMetric: false,
+
         fiberTarget: 37.0,
         enableSmartTargets: true,
       );
@@ -354,7 +354,7 @@ void main() {
         proteinMultiplier: 1.0,
         fixedDelta: 0,
         lastTargetUpdate: DateTime(2024, 1, 1),
-        useMetric: false,
+
         fiberTarget: 37.0,
         enableSmartTargets: false,
       );
@@ -386,7 +386,7 @@ void main() {
         proteinMultiplier: 1.0,
         fixedDelta: 0,
         lastTargetUpdate: DateTime(2024, 1, 8), // last Monday
-        useMetric: false,
+
         fiberTarget: 37.0,
         enableSmartTargets: true,
       );
@@ -415,7 +415,7 @@ void main() {
         proteinMultiplier: 1.0,
         fixedDelta: 0,
         lastTargetUpdate: DateTime(2024, 1, 15), // today
-        useMetric: false,
+
         fiberTarget: 37.0,
         enableSmartTargets: true,
       );
@@ -446,7 +446,7 @@ void main() {
         proteinMultiplier: 1.0,
         fixedDelta: 0,
         lastTargetUpdate: DateTime(2024, 1, 8), // before last Monday (Jan 15)
-        useMetric: false,
+
         fiberTarget: 37.0,
         enableSmartTargets: true,
       );
@@ -476,7 +476,7 @@ void main() {
         proteinMultiplier: 1.0,
         fixedDelta: 0,
         lastTargetUpdate: DateTime(2024, 1, 16), // Tuesday, after last Monday
-        useMetric: false,
+
         fiberTarget: 37.0,
         enableSmartTargets: true,
       );
@@ -527,7 +527,7 @@ void main() {
         proteinMultiplier: 1.0,
         fixedDelta: 0,
         lastTargetUpdate: DateTime(2024, 1, 1),
-        useMetric: false,
+
         fiberTarget: 37.0,
         enableSmartTargets: true,
       );
@@ -590,7 +590,7 @@ void main() {
         proteinMultiplier: 1.0,
         fixedDelta: 0,
         lastTargetUpdate: DateTime(2024, 1, 1),
-        useMetric: false,
+
         fiberTarget: 37.0,
         enableSmartTargets: true,
       );
@@ -627,7 +627,7 @@ void main() {
         proteinMultiplier: 1.0,
         fixedDelta: 0,
         lastTargetUpdate: DateTime(2024, 1, 1),
-        useMetric: false,
+
         fiberTarget: 37.0,
         enableSmartTargets: true,
       );
@@ -743,7 +743,7 @@ void main() {
         proteinMultiplier: 1.0,
         fixedDelta: 0,
         lastTargetUpdate: DateTime(2024, 1, 1),
-        useMetric: false,
+
         fiberTarget: 37.0,
         enableSmartTargets: true,
       );

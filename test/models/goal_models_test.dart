@@ -18,7 +18,6 @@ void main() {
         proteinMultiplier: 1.0,
         fixedDelta: 0,
         lastTargetUpdate: DateTime(2023, 10, 1),
-        useMetric: true,
       );
 
       final json = settings.toJson();
@@ -59,7 +58,6 @@ void main() {
         'calculationMode': 'MacroCalculationMode.proteinCarbs',
         'fixedDelta': 500.0,
         'lastTargetUpdate': DateTime(2023, 10, 1).millisecondsSinceEpoch,
-        'useMetric': true,
         'isSet': true,
         'enableSmartTargets': true,
       };

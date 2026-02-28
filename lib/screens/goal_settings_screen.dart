@@ -320,7 +320,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
           ),
           _buildTextField(
             controller: _maintenanceCalController,
-            label: 'Initial Maintenance Calories',
+            label: 'Initial TDEE',
             hint: 'Your estimated TDEE',
             keyboardType: TextInputType.number,
           ),
@@ -334,7 +334,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
           if (_mode == GoalMode.maintain)
             _buildTextField(
               controller: _correctionWindowController,
-              label: 'Correction Window (days)',
+              label: 'Correct weight drift back to the Target (days)',
               hint: 'e.g. 30',
               keyboardType: TextInputType.number,
             ),
@@ -420,7 +420,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'TDEE Window',
+            'Total Daily Energy Expenditure (TDEE) Window',
             style: TextStyle(fontSize: 14, color: Colors.grey),
           ),
           const SizedBox(height: 8),

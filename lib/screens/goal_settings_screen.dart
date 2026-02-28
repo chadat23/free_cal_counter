@@ -324,7 +324,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
           if (_mode == GoalMode.maintain)
             _buildTextField(
               controller: _correctionWindowController,
-              label: 'Correct weight drift back to the Target (days)',
+              label: 'Correct Weight Drift Back to the Target (days)',
               hint: 'e.g. 30',
               keyboardType: TextInputType.number,
             ),

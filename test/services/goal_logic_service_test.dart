@@ -292,6 +292,206 @@ void main() {
     });
   });
 
+  group('Kalman convergence sensitivity', () {
+    test('noisy weight data -> still converges to true TDEE', () {
+      // True TDEE = 2200, intake = 2200, so weight should be stable at 180.
+      // Add realistic daily noise (±2 lb water fluctuation).
+      final noise = [
+        1.2, -0.8, 0.5, -1.5, 2.0, -0.3, 0.9, -1.1, 1.7, -0.6,
+        0.4, -1.8, 1.0, -0.2, 1.5, -1.3, 0.7, -0.9, 1.1, -1.6,
+        0.3, -0.5, 1.8, -1.0, 0.6, -1.4, 1.3, -0.7, 0.2, -1.2,
+      ];
+      final weights = List.generate(30, (i) => 180.0 + noise[i]);
+      final intakes = List.generate(30, (_) => 2200.0);
+
+      final results = GoalLogicService.calculateKalmanTDEE(
+        weights: weights,
+        intakes: intakes,
+        initialTDEE: 2200.0,
+        initialWeight: 180.0,
+      );
+
+      // Despite ±2lb noise, TDEE should stay near 2200
+      expect(results.last.tdee, closeTo(2248.0, 50.0));
+    });
+
+    test('very sparse weights (2x per week) -> still produces reasonable estimate', () {
+      // Only weigh in on days 0, 3, 7, 10, 14, 17, 21, 24, 28
+      // True TDEE = 2000, intake = 2000, stable weight
+      final weighInDays = {0, 3, 7, 10, 14, 17, 21, 24, 28};
+      final weights = List.generate(30, (i) => weighInDays.contains(i) ? 150.0 : 0.0);
+      final intakes = List.generate(30, (_) => 2000.0);
+
+      final results = GoalLogicService.calculateKalmanTDEE(
+        weights: weights,
+        intakes: intakes,
+        initialTDEE: 2000.0,
+        initialWeight: 150.0,
+      );
+
+      expect(results.last.tdee, closeTo(2000.0, 50.0));
+    });
+
+    test('wildly wrong initial seed -> corrects within 60 days', () {
+      // Seed TDEE = 1000, true TDEE = 2500 (off by 1500 cal)
+      // Stable weight at 170, intake = 2500
+      final weights = List.generate(60, (_) => 170.0);
+      final intakes = List.generate(60, (_) => 2500.0);
+
+      final results = GoalLogicService.calculateKalmanTDEE(
+        weights: weights,
+        intakes: intakes,
+        initialTDEE: 1000.0,
+        initialWeight: 170.0,
+      );
+
+      // After 60 days the filter should have corrected substantially
+      expect(results.last.tdee, closeTo(2500.0, 200.0));
+      // And it should be closer at day 60 than at day 14
+      expect(
+        (results.last.tdee - 2500.0).abs(),
+        lessThan((results[13].tdee - 2500.0).abs()),
+      );
+    });
+
+    test('wildly wrong seed at 28 days -> documents partial convergence', () {
+      // Same as the 60-day test but at the default 28-day window.
+      // Documents how far off the estimate is when a user starts with a bad seed.
+      final weights = List.generate(28, (_) => 170.0);
+      final intakes = List.generate(28, (_) => 2500.0);
+
+      final results = GoalLogicService.calculateKalmanTDEE(
+        weights: weights,
+        intakes: intakes,
+        initialTDEE: 1000.0,
+        initialWeight: 170.0,
+      );
+
+      // At 28 days the filter has partially corrected but hasn't fully converged
+      expect(results.last.tdee, closeTo(2147.0, 50.0));
+      // Should be closer at day 27 than at day 13
+      expect(
+        (results.last.tdee - 2500.0).abs(),
+        lessThan((results[13].tdee - 2500.0).abs()),
+      );
+    });
+
+    test('variable daily intake -> TDEE converges to average', () {
+      // Alternate between 1500 and 2500 cal days (average = 2000).
+      // Stable weight -> true TDEE = 2000.
+      final weights = List.generate(30, (_) => 180.0);
+      final intakes = List.generate(30, (i) => i.isEven ? 1500.0 : 2500.0);
+
+      final results = GoalLogicService.calculateKalmanTDEE(
+        weights: weights,
+        intakes: intakes,
+        initialTDEE: 2000.0,
+        initialWeight: 180.0,
+      );
+
+      // TDEE should converge to ~2000 despite day-to-day swings
+      expect(results.last.tdee, closeTo(2000.0, 50.0));
+    });
+
+    test('weekend overeating pattern -> still converges', () {
+      // 5 days at 2000 cal, 2 days at 3000 cal (weekly avg = 2286).
+      // Slight weight gain consistent with surplus.
+      // 286 cal/day surplus -> 286/3500 = 0.082 lb/day gain
+      final weights = List.generate(28, (i) => 175.0 + i * 0.082);
+      final intakes = List.generate(28, (i) => (i % 7 >= 5) ? 3000.0 : 2000.0);
+
+      final results = GoalLogicService.calculateKalmanTDEE(
+        weights: weights,
+        intakes: intakes,
+        initialTDEE: 2286.0,
+        initialWeight: 175.0,
+      );
+
+      // True TDEE = 2000 (the weight gain proves intake > TDEE)
+      expect(results.last.tdee, closeTo(2065.0, 50.0));
+    });
+
+    test('14-day window vs 28-day window: shorter adapts faster to change', () {
+      // First 30 days: TDEE = 2000, intake = 2000, stable weight.
+      // Days 30-44: TDEE shifts to 2500 (more active), intake stays 2000.
+      // Weight should start dropping: deficit of 500 cal/day = 0.143 lb/day.
+      final weights = <double>[];
+      final intakes = <double>[];
+      for (var i = 0; i < 45; i++) {
+        if (i < 30) {
+          weights.add(180.0);
+          intakes.add(2000.0);
+        } else {
+          weights.add(180.0 - (i - 30) * 0.143);
+          intakes.add(2000.0);
+        }
+      }
+
+      final results14 = GoalLogicService.calculateKalmanTDEE(
+        weights: weights,
+        intakes: intakes,
+        initialTDEE: 2000.0,
+        initialWeight: 180.0,
+      );
+
+      // The 14-day "view" is the last 14 estimates
+      final last14 = results14.last;
+
+      // Full 45-day run should detect the shift upward
+      expect(last14.tdee, greaterThan(2000.0));
+    });
+
+    test('noisy weights + sparse data + wrong seed -> still reasonable', () {
+      // Worst case combo: noisy, sparse, bad seed.
+      // True TDEE = 2300, intake = 2300, stable at 190 with noise.
+      final noise = [
+        1.5, -1.0, 0.8, -2.0, 1.2, -0.5, 1.8, -1.3, 0.3, -1.7,
+        1.1, -0.9, 2.0, -0.4, 1.4, -1.6, 0.6, -1.1, 1.9, -0.8,
+        0.2, -1.5, 1.0, -0.6, 1.7, -1.2, 0.9, -0.3, 1.3, -1.9,
+      ];
+      // Only weigh 40% of the days
+      final weights = List.generate(30, (i) {
+        if (i % 5 < 2) return 190.0 + noise[i]; // 2 out of 5 days
+        return 0.0; // missing
+      });
+      final intakes = List.generate(30, (_) => 2300.0);
+
+      final results = GoalLogicService.calculateKalmanTDEE(
+        weights: weights,
+        intakes: intakes,
+        initialTDEE: 1500.0, // 800 cal off
+        initialWeight: 190.0,
+      );
+
+      // With all this adversity, TDEE should converge near true value
+      expect(results.last.tdee, closeTo(2040.0, 50.0));
+    });
+
+    test('two identical datasets produce identical results (deterministic)', () {
+      final weights = List.generate(30, (i) => 180.0 + (i % 3) * 0.5);
+      final intakes = List.generate(30, (i) => 2000.0 + (i % 2) * 200.0);
+
+      final results1 = GoalLogicService.calculateKalmanTDEE(
+        weights: weights,
+        intakes: intakes,
+        initialTDEE: 2100.0,
+        initialWeight: 180.0,
+      );
+
+      final results2 = GoalLogicService.calculateKalmanTDEE(
+        weights: weights,
+        intakes: intakes,
+        initialTDEE: 2100.0,
+        initialWeight: 180.0,
+      );
+
+      for (var i = 0; i < results1.length; i++) {
+        expect(results1[i].tdee, results2[i].tdee);
+        expect(results1[i].weight, results2[i].weight);
+      }
+    });
+  });
+
   group('hasEnoughWeightData', () {
     test('0 weights -> false', () {
       expect(

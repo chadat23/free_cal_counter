@@ -3,17 +3,17 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i6;
-import 'dart:ui' as _i7;
+import 'dart:async' as _i7;
+import 'dart:ui' as _i8;
 
 import 'package:flutter/material.dart' as _i10;
 import 'package:flutter/services.dart' as _i9;
 import 'package:meal_of_record/models/goal_settings.dart' as _i2;
 import 'package:meal_of_record/models/macro_goals.dart' as _i3;
-import 'package:meal_of_record/models/weight.dart' as _i5;
-import 'package:meal_of_record/providers/goals_provider.dart' as _i8;
+import 'package:meal_of_record/models/weight.dart' as _i6;
+import 'package:meal_of_record/providers/goals_provider.dart' as _i4;
 import 'package:meal_of_record/providers/navigation_provider.dart' as _i11;
-import 'package:meal_of_record/providers/weight_provider.dart' as _i4;
+import 'package:meal_of_record/providers/weight_provider.dart' as _i5;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i12;
 
@@ -42,29 +42,35 @@ class _FakeMacroGoals_1 extends _i1.SmartFake implements _i3.MacroGoals {
     : super(parent, parentInvocation);
 }
 
+class _FakeTargetRecalcResult_2 extends _i1.SmartFake
+    implements _i4.TargetRecalcResult {
+  _FakeTargetRecalcResult_2(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
 /// A class which mocks [WeightProvider].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockWeightProvider extends _i1.Mock implements _i4.WeightProvider {
+class MockWeightProvider extends _i1.Mock implements _i5.WeightProvider {
   MockWeightProvider() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  List<_i5.Weight> get weights =>
+  List<_i6.Weight> get weights =>
       (super.noSuchMethod(
             Invocation.getter(#weights),
-            returnValue: <_i5.Weight>[],
+            returnValue: <_i6.Weight>[],
           )
-          as List<_i5.Weight>);
+          as List<_i6.Weight>);
 
   @override
-  List<_i5.Weight> get recentWeights =>
+  List<_i6.Weight> get recentWeights =>
       (super.noSuchMethod(
             Invocation.getter(#recentWeights),
-            returnValue: <_i5.Weight>[],
+            returnValue: <_i6.Weight>[],
           )
-          as List<_i5.Weight>);
+          as List<_i6.Weight>);
 
   @override
   bool get isLoading =>
@@ -85,45 +91,45 @@ class MockWeightProvider extends _i1.Mock implements _i4.WeightProvider {
           as bool);
 
   @override
-  _i5.Weight? getWeightForDate(DateTime? date) =>
+  _i6.Weight? getWeightForDate(DateTime? date) =>
       (super.noSuchMethod(Invocation.method(#getWeightForDate, [date]))
-          as _i5.Weight?);
+          as _i6.Weight?);
 
   @override
-  _i6.Future<void> loadWeights(DateTime? start, DateTime? end) =>
+  _i7.Future<void> loadWeights(DateTime? start, DateTime? end) =>
       (super.noSuchMethod(
             Invocation.method(#loadWeights, [start, end]),
-            returnValue: _i6.Future<void>.value(),
-            returnValueForMissingStub: _i6.Future<void>.value(),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
           )
-          as _i6.Future<void>);
+          as _i7.Future<void>);
 
   @override
-  _i6.Future<void> saveWeight(double? value, DateTime? date) =>
+  _i7.Future<void> saveWeight(double? value, DateTime? date) =>
       (super.noSuchMethod(
             Invocation.method(#saveWeight, [value, date]),
-            returnValue: _i6.Future<void>.value(),
-            returnValueForMissingStub: _i6.Future<void>.value(),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
           )
-          as _i6.Future<void>);
+          as _i7.Future<void>);
 
   @override
-  _i6.Future<void> deleteWeight(int? id) =>
+  _i7.Future<void> deleteWeight(int? id) =>
       (super.noSuchMethod(
             Invocation.method(#deleteWeight, [id]),
-            returnValue: _i6.Future<void>.value(),
-            returnValueForMissingStub: _i6.Future<void>.value(),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
           )
-          as _i6.Future<void>);
+          as _i7.Future<void>);
 
   @override
-  void addListener(_i7.VoidCallback? listener) => super.noSuchMethod(
+  void addListener(_i8.VoidCallback? listener) => super.noSuchMethod(
     Invocation.method(#addListener, [listener]),
     returnValueForMissingStub: null,
   );
 
   @override
-  void removeListener(_i7.VoidCallback? listener) => super.noSuchMethod(
+  void removeListener(_i8.VoidCallback? listener) => super.noSuchMethod(
     Invocation.method(#removeListener, [listener]),
     returnValueForMissingStub: null,
   );
@@ -144,7 +150,7 @@ class MockWeightProvider extends _i1.Mock implements _i4.WeightProvider {
 /// A class which mocks [GoalsProvider].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockGoalsProvider extends _i1.Mock implements _i8.GoalsProvider {
+class MockGoalsProvider extends _i1.Mock implements _i4.GoalsProvider {
   MockGoalsProvider() {
     _i1.throwOnMissingStub(this);
   }
@@ -209,7 +215,7 @@ class MockGoalsProvider extends _i1.Mock implements _i8.GoalsProvider {
   );
 
   @override
-  void didChangeAppLifecycleState(_i7.AppLifecycleState? state) =>
+  void didChangeAppLifecycleState(_i8.AppLifecycleState? state) =>
       super.noSuchMethod(
         Invocation.method(#didChangeAppLifecycleState, [state]),
         returnValueForMissingStub: null,
@@ -222,7 +228,7 @@ class MockGoalsProvider extends _i1.Mock implements _i8.GoalsProvider {
   );
 
   @override
-  _i6.Future<void> saveSettings(
+  _i7.Future<void> saveSettings(
     _i2.GoalSettings? newSettings, {
     bool? isInitialSetup = false,
   }) =>
@@ -232,57 +238,70 @@ class MockGoalsProvider extends _i1.Mock implements _i8.GoalsProvider {
               [newSettings],
               {#isInitialSetup: isInitialSetup},
             ),
-            returnValue: _i6.Future<void>.value(),
-            returnValueForMissingStub: _i6.Future<void>.value(),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
           )
-          as _i6.Future<void>);
+          as _i7.Future<void>);
 
   @override
-  _i6.Future<void> markWelcomeSeen() =>
+  _i7.Future<void> markWelcomeSeen() =>
       (super.noSuchMethod(
             Invocation.method(#markWelcomeSeen, []),
-            returnValue: _i6.Future<void>.value(),
-            returnValueForMissingStub: _i6.Future<void>.value(),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
           )
-          as _i6.Future<void>);
+          as _i7.Future<void>);
 
   @override
-  _i6.Future<void> reload() =>
+  _i7.Future<void> reload() =>
       (super.noSuchMethod(
             Invocation.method(#reload, []),
-            returnValue: _i6.Future<void>.value(),
-            returnValueForMissingStub: _i6.Future<void>.value(),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
           )
-          as _i6.Future<void>);
+          as _i7.Future<void>);
 
   @override
-  _i6.Future<void> checkWeeklyUpdate() =>
+  _i7.Future<void> checkWeeklyUpdate() =>
       (super.noSuchMethod(
             Invocation.method(#checkWeeklyUpdate, []),
-            returnValue: _i6.Future<void>.value(),
-            returnValueForMissingStub: _i6.Future<void>.value(),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
           )
-          as _i6.Future<void>);
+          as _i7.Future<void>);
 
   @override
-  _i6.Future<void> recalculateTargets({bool? isInitialSetup = false}) =>
+  _i7.Future<_i4.TargetRecalcResult> recalculateTargets(
+    _i2.GoalSettings? settings, {
+    bool? isInitialSetup = false,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#recalculateTargets, [], {
-              #isInitialSetup: isInitialSetup,
-            }),
-            returnValue: _i6.Future<void>.value(),
-            returnValueForMissingStub: _i6.Future<void>.value(),
+            Invocation.method(
+              #recalculateTargets,
+              [settings],
+              {#isInitialSetup: isInitialSetup},
+            ),
+            returnValue: _i7.Future<_i4.TargetRecalcResult>.value(
+              _FakeTargetRecalcResult_2(
+                this,
+                Invocation.method(
+                  #recalculateTargets,
+                  [settings],
+                  {#isInitialSetup: isInitialSetup},
+                ),
+              ),
+            ),
           )
-          as _i6.Future<void>);
+          as _i7.Future<_i4.TargetRecalcResult>);
 
   @override
-  void addListener(_i7.VoidCallback? listener) => super.noSuchMethod(
+  void addListener(_i8.VoidCallback? listener) => super.noSuchMethod(
     Invocation.method(#addListener, [listener]),
     returnValueForMissingStub: null,
   );
 
   @override
-  void removeListener(_i7.VoidCallback? listener) => super.noSuchMethod(
+  void removeListener(_i8.VoidCallback? listener) => super.noSuchMethod(
     Invocation.method(#removeListener, [listener]),
     returnValueForMissingStub: null,
   );
@@ -294,12 +313,12 @@ class MockGoalsProvider extends _i1.Mock implements _i8.GoalsProvider {
   );
 
   @override
-  _i6.Future<bool> didPopRoute() =>
+  _i7.Future<bool> didPopRoute() =>
       (super.noSuchMethod(
             Invocation.method(#didPopRoute, []),
-            returnValue: _i6.Future<bool>.value(false),
+            returnValue: _i7.Future<bool>.value(false),
           )
-          as _i6.Future<bool>);
+          as _i7.Future<bool>);
 
   @override
   bool handleStartBackGesture(_i9.PredictiveBackEvent? backEvent) =>
@@ -335,22 +354,22 @@ class MockGoalsProvider extends _i1.Mock implements _i8.GoalsProvider {
   );
 
   @override
-  _i6.Future<bool> didPushRoute(String? route) =>
+  _i7.Future<bool> didPushRoute(String? route) =>
       (super.noSuchMethod(
             Invocation.method(#didPushRoute, [route]),
-            returnValue: _i6.Future<bool>.value(false),
+            returnValue: _i7.Future<bool>.value(false),
           )
-          as _i6.Future<bool>);
+          as _i7.Future<bool>);
 
   @override
-  _i6.Future<bool> didPushRouteInformation(
+  _i7.Future<bool> didPushRouteInformation(
     _i10.RouteInformation? routeInformation,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#didPushRouteInformation, [routeInformation]),
-            returnValue: _i6.Future<bool>.value(false),
+            returnValue: _i7.Future<bool>.value(false),
           )
-          as _i6.Future<bool>);
+          as _i7.Future<bool>);
 
   @override
   void didChangeMetrics() => super.noSuchMethod(
@@ -371,26 +390,26 @@ class MockGoalsProvider extends _i1.Mock implements _i8.GoalsProvider {
   );
 
   @override
-  void didChangeLocales(List<_i7.Locale>? locales) => super.noSuchMethod(
+  void didChangeLocales(List<_i8.Locale>? locales) => super.noSuchMethod(
     Invocation.method(#didChangeLocales, [locales]),
     returnValueForMissingStub: null,
   );
 
   @override
-  void didChangeViewFocus(_i7.ViewFocusEvent? event) => super.noSuchMethod(
+  void didChangeViewFocus(_i8.ViewFocusEvent? event) => super.noSuchMethod(
     Invocation.method(#didChangeViewFocus, [event]),
     returnValueForMissingStub: null,
   );
 
   @override
-  _i6.Future<_i7.AppExitResponse> didRequestAppExit() =>
+  _i7.Future<_i8.AppExitResponse> didRequestAppExit() =>
       (super.noSuchMethod(
             Invocation.method(#didRequestAppExit, []),
-            returnValue: _i6.Future<_i7.AppExitResponse>.value(
-              _i7.AppExitResponse.exit,
+            returnValue: _i7.Future<_i8.AppExitResponse>.value(
+              _i8.AppExitResponse.exit,
             ),
           )
-          as _i6.Future<_i7.AppExitResponse>);
+          as _i7.Future<_i8.AppExitResponse>);
 
   @override
   void didHaveMemoryPressure() => super.noSuchMethod(
@@ -496,13 +515,13 @@ class MockNavigationProvider extends _i1.Mock
   );
 
   @override
-  void addListener(_i7.VoidCallback? listener) => super.noSuchMethod(
+  void addListener(_i8.VoidCallback? listener) => super.noSuchMethod(
     Invocation.method(#addListener, [listener]),
     returnValueForMissingStub: null,
   );
 
   @override
-  void removeListener(_i7.VoidCallback? listener) => super.noSuchMethod(
+  void removeListener(_i8.VoidCallback? listener) => super.noSuchMethod(
     Invocation.method(#removeListener, [listener]),
     returnValueForMissingStub: null,
   );

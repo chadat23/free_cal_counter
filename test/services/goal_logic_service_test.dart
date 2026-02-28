@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meal_of_record/models/daily_macro_stats.dart';
 import 'package:meal_of_record/models/weight.dart';
 import 'package:meal_of_record/services/goal_logic_service.dart';
 
@@ -475,6 +476,238 @@ void main() {
 
     test('14d setting with 14 days of data -> 14', () {
       expect(GoalLogicService.effectiveWindow(14, 14), 14);
+    });
+  });
+
+  group('computeTdeeAtDate', () {
+    /// Helper: builds weightMap and statsMap for 28 days ending at [now].
+    /// [makeStats] returns a DailyMacroStats for each day index (0 = oldest).
+    /// All days get a weight of [weight].
+    Map<String, dynamic> buildMaps({
+      required DateTime now,
+      required int days,
+      required double weight,
+      required DailyMacroStats Function(DateTime date, int index) makeStats,
+    }) {
+      final Map<DateTime, double> weightMap = {};
+      final Map<DateTime, DailyMacroStats> statsMap = {};
+
+      for (int i = 0; i < days; i++) {
+        final date = now.subtract(Duration(days: days - i));
+        final dateOnly = DateTime(date.year, date.month, date.day);
+        weightMap[dateOnly] = weight;
+        statsMap[dateOnly] = makeStats(dateOnly, i);
+      }
+      return {'weightMap': weightMap, 'statsMap': statsMap};
+    }
+
+    test('seed=0 converges slowly (documents why UI uses 2000 default)', () {
+      // With seed=0, the Kalman filter starts far from the true TDEE.
+      // In 28 days it moves toward the truth but doesn't fully converge.
+      // This documents WHY the UI now defaults to 2000 instead of 0.
+      final now = DateTime(2024, 3, 1);
+      const days = 28;
+
+      final maps = buildMaps(
+        now: now,
+        days: days,
+        weight: 180.0,
+        makeStats: (date, i) => DailyMacroStats(
+          date: date,
+          calories: 2700,
+          logCount: 3,
+        ),
+      );
+
+      final weightMap = maps['weightMap'] as Map<DateTime, double>;
+      final statsMap = maps['statsMap'] as Map<DateTime, DailyMacroStats>;
+
+      final estimateSeed0 = GoalLogicService.computeTdeeAtDate(
+        tdeeWindow: 28,
+        tdeeDate: now,
+        weightMap: weightMap,
+        statsMap: statsMap,
+        initialTDEE: 0.0,
+        initialWeight: 180.0,
+        isMetric: false,
+      );
+
+      // Seed=0 still moves toward 2700 but undershoots significantly
+      expect(estimateSeed0, isNotNull);
+      expect(estimateSeed0!.tdee, greaterThan(1500));
+      expect(estimateSeed0.tdee, lessThan(2700));
+    });
+
+    test('seed=2000 + zero-calorie logged days: fixed preview scenario', () {
+      // After both fixes: seed defaults to 2000 (not 0), and
+      // zero-calorie logged days are marked invalid (not treated as 0 intake).
+      final now = DateTime(2024, 3, 1);
+      const days = 28;
+
+      final maps = buildMaps(
+        now: now,
+        days: days,
+        weight: 180.0,
+        makeStats: (date, i) {
+          if (i % 3 == 0) {
+            return DailyMacroStats(date: date, calories: 0, logCount: 1);
+          }
+          return DailyMacroStats(date: date, calories: 2700, logCount: 3);
+        },
+      );
+
+      final weightMap = maps['weightMap'] as Map<DateTime, double>;
+      final statsMap = maps['statsMap'] as Map<DateTime, DailyMacroStats>;
+
+      final estimate = GoalLogicService.computeTdeeAtDate(
+        tdeeWindow: 28,
+        tdeeDate: now,
+        weightMap: weightMap,
+        statsMap: statsMap,
+        initialTDEE: 2000.0,
+        initialWeight: 180.0,
+        isMetric: false,
+      );
+
+      expect(estimate, isNotNull);
+      // With both fixes, TDEE should converge near 2700
+      expect(estimate!.tdee, closeTo(2700, 400));
+    });
+
+    test('seed sensitivity: seed 2000 vs 2661 both converge to ~2700', () {
+      final now = DateTime(2024, 3, 1);
+      const days = 28;
+
+      final maps = buildMaps(
+        now: now,
+        days: days,
+        weight: 180.0,
+        makeStats: (date, i) => DailyMacroStats(
+          date: date,
+          calories: 2700,
+          logCount: 3,
+        ),
+      );
+
+      final weightMap = maps['weightMap'] as Map<DateTime, double>;
+      final statsMap = maps['statsMap'] as Map<DateTime, DailyMacroStats>;
+
+      final estimateSeed2000 = GoalLogicService.computeTdeeAtDate(
+        tdeeWindow: 28,
+        tdeeDate: now,
+        weightMap: weightMap,
+        statsMap: statsMap,
+        initialTDEE: 2000.0,
+        initialWeight: 180.0,
+        isMetric: false,
+      );
+
+      final estimateSeed2661 = GoalLogicService.computeTdeeAtDate(
+        tdeeWindow: 28,
+        tdeeDate: now,
+        weightMap: weightMap,
+        statsMap: statsMap,
+        initialTDEE: 2661.0,
+        initialWeight: 180.0,
+        isMetric: false,
+      );
+
+      expect(estimateSeed2000, isNotNull);
+      expect(estimateSeed2661, isNotNull);
+      // Both should converge near 2700, not diverge wildly
+      expect(estimateSeed2000!.tdee, closeTo(2700, 200));
+      expect(estimateSeed2661!.tdee, closeTo(2700, 200));
+      // And they should be close to each other
+      expect(
+        (estimateSeed2000.tdee - estimateSeed2661.tdee).abs(),
+        lessThan(300),
+      );
+    });
+
+    test('zero-calorie logged days: intakeIsValid filters them out', () {
+      // Scenario: some days have logCount > 0 but calories == 0.
+      // Before the fix, these were marked valid → filter used 0 as intake
+      // → TDEE collapsed toward 0 (clamped to 800).
+      // After the fix, these are marked invalid → filter substitutes xTdee
+      // → TDEE stays reasonable.
+      final now = DateTime(2024, 3, 1);
+      const days = 28;
+
+      final maps = buildMaps(
+        now: now,
+        days: days,
+        weight: 180.0,
+        makeStats: (date, i) {
+          if (i % 3 == 0) {
+            // Every 3rd day: logged something but 0 calories
+            return DailyMacroStats(
+              date: date,
+              calories: 0,
+              logCount: 1,
+            );
+          }
+          // Other days: normal logging
+          return DailyMacroStats(
+            date: date,
+            calories: 2700,
+            logCount: 3,
+          );
+        },
+      );
+
+      final weightMap = maps['weightMap'] as Map<DateTime, double>;
+      final statsMap = maps['statsMap'] as Map<DateTime, DailyMacroStats>;
+
+      final estimate = GoalLogicService.computeTdeeAtDate(
+        tdeeWindow: 28,
+        tdeeDate: now,
+        weightMap: weightMap,
+        statsMap: statsMap,
+        initialTDEE: 2000.0,
+        initialWeight: 180.0,
+        isMetric: false,
+      );
+
+      expect(estimate, isNotNull);
+      // With the fix, TDEE should stay reasonable (near 2700), not collapse
+      expect(estimate!.tdee, greaterThan(1500));
+      expect(estimate.tdee, closeTo(2700, 400));
+    });
+
+    test('all-zero-calorie days with seed 2000: TDEE stays near seed', () {
+      // When ALL days have logCount > 0 but calories == 0,
+      // all are marked invalid → filter uses xTdee for every day → neutral.
+      // TDEE should stay near the seed.
+      final now = DateTime(2024, 3, 1);
+      const days = 28;
+
+      final maps = buildMaps(
+        now: now,
+        days: days,
+        weight: 180.0,
+        makeStats: (date, i) => DailyMacroStats(
+          date: date,
+          calories: 0,
+          logCount: 1,
+        ),
+      );
+
+      final weightMap = maps['weightMap'] as Map<DateTime, double>;
+      final statsMap = maps['statsMap'] as Map<DateTime, DailyMacroStats>;
+
+      final estimate = GoalLogicService.computeTdeeAtDate(
+        tdeeWindow: 28,
+        tdeeDate: now,
+        weightMap: weightMap,
+        statsMap: statsMap,
+        initialTDEE: 2000.0,
+        initialWeight: 180.0,
+        isMetric: false,
+      );
+
+      expect(estimate, isNotNull);
+      // All intake invalid → neutral predictions → TDEE stays near seed
+      expect(estimate!.tdee, closeTo(2000, 100));
     });
   });
 }

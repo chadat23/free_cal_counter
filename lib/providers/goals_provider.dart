@@ -8,6 +8,12 @@ import 'package:meal_of_record/models/daily_macro_stats.dart';
 import 'package:meal_of_record/services/goal_logic_service.dart';
 import 'package:meal_of_record/models/weight.dart';
 
+class TargetRecalcResult {
+  final GoalSettings settings;
+  final MacroGoals goals;
+  const TargetRecalcResult({required this.settings, required this.goals});
+}
+
 class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
   static const String _settingsKey = 'goal_settings';
   static const String _targetsKey = 'macro_targets';
@@ -121,6 +127,13 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
+  Future<void> _saveToPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_settingsKey, jsonEncode(_settings.toJson()));
+    await prefs.setString(_targetsKey, jsonEncode(_currentGoals!.toJson()));
+    await prefs.reload();
+  }
+
   Future<void> saveSettings(
     GoalSettings newSettings, {
     bool isInitialSetup = false,
@@ -128,11 +141,11 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
     // Ensure we mark them as set when saving
     _settings = newSettings.copyWith(isSet: true);
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_settingsKey, jsonEncode(_settings.toJson()));
-
-    // Changing settings might require immediate recalculation of targets
-    await recalculateTargets(isInitialSetup: isInitialSetup);
+    // Recalculate, apply result, persist once
+    final result = await recalculateTargets(_settings, isInitialSetup: isInitialSetup);
+    _settings = result.settings;
+    _currentGoals = result.goals;
+    await _saveToPrefs();
     notifyListeners();
   }
 
@@ -168,18 +181,22 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
 
     // Trigger if the last update was before the most recent Monday
     if (lastMonday.isAfter(lastUpdate)) {
-      await recalculateTargets(isInitialSetup: false);
+      final result = await recalculateTargets(_settings, isInitialSetup: false);
+      _settings = result.settings;
+      _currentGoals = result.goals;
+      await _saveToPrefs();
       _showUpdateNotification = true;
       notifyListeners();
     }
   }
 
   /// The core calculation engine for dynamic macro targets.
-  Future<void> recalculateTargets({bool isInitialSetup = false}) async {
+  /// Pure computation: takes settings, returns result. Does NOT persist or notify.
+  Future<TargetRecalcResult> recalculateTargets(GoalSettings settings, {bool isInitialSetup = false}) async {
     final now = _clock();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
-    final userWindow = _settings.tdeeWindowDays;
+    final userWindow = settings.tdeeWindowDays;
     // Use DateTime(y, m, d) to ensure midnight and avoid DST issues
     final rawAnalysisStart = today.subtract(Duration(days: userWindow));
     final analysisStart = DateTime(rawAnalysisStart.year, rawAnalysisStart.month, rawAnalysisStart.day);
@@ -188,8 +205,8 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
     // We fetch a broad range to support both inputs
     List<Weight> weights = [];
     try {
-      if (_settings.enableSmartTargets ||
-          _settings.proteinTargetMode == ProteinTargetMode.percentageOfWeight) {
+      if (settings.enableSmartTargets ||
+          settings.proteinTargetMode == ProteinTargetMode.percentageOfWeight) {
         weights = await _databaseService.getWeightsForRange(analysisStart, now);
       }
     } catch (e) {
@@ -197,27 +214,27 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
       rethrow;
     }
 
-    double targetCalories = _settings.maintenanceCaloriesStart;
+    double targetCalories = settings.maintenanceCaloriesStart;
     double? kalmanWeightEstimate;
 
     // Use initial setup logic (manual calories) if requested OR if smart targets are disabled
-    final useManualLogic = isInitialSetup || !_settings.enableSmartTargets;
+    final useManualLogic = isInitialSetup || !settings.enableSmartTargets;
 
     if (useManualLogic) {
       // Manual mode: maintenance ± delta
-      if (_settings.mode == GoalMode.maintain) {
-        targetCalories = _settings.maintenanceCaloriesStart;
+      if (settings.mode == GoalMode.maintain) {
+        targetCalories = settings.maintenanceCaloriesStart;
       } else {
-        double delta = _settings.fixedDelta;
-        if (_settings.mode == GoalMode.lose) {
+        double delta = settings.fixedDelta;
+        if (settings.mode == GoalMode.lose) {
           delta = -delta.abs();
         } else {
           delta = delta.abs();
         }
-        targetCalories = _settings.maintenanceCaloriesStart + delta;
+        targetCalories = settings.maintenanceCaloriesStart + delta;
       }
 
-      _settings = _settings.copyWith(
+      settings = settings.copyWith(
         lastTargetUpdate: _clock(),
       );
     } else {
@@ -239,8 +256,8 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
           DateTime(s.date.year, s.date.month, s.date.day): s,
       };
 
-      final initialWeight = _settings.anchorWeight > 0
-          ? _settings.anchorWeight
+      final initialWeight = settings.anchorWeight > 0
+          ? settings.anchorWeight
           : (weights.isNotEmpty ? weights.first.weight : 70.0);
 
       final estimate = GoalLogicService.computeTdeeAtDate(
@@ -248,48 +265,48 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
         tdeeDate: today,
         weightMap: weightMap,
         statsMap: statsMap,
-        initialTDEE: _settings.maintenanceCaloriesStart,
+        initialTDEE: settings.maintenanceCaloriesStart,
         initialWeight: initialWeight,
-        isMetric: _settings.useMetric,
+        isMetric: settings.useMetric,
       );
 
       if (estimate == null) {
         // Fall back to manual mode
-        if (_settings.mode == GoalMode.maintain) {
-          targetCalories = _settings.maintenanceCaloriesStart;
+        if (settings.mode == GoalMode.maintain) {
+          targetCalories = settings.maintenanceCaloriesStart;
         } else {
-          double delta = _settings.fixedDelta;
-          if (_settings.mode == GoalMode.lose) {
+          double delta = settings.fixedDelta;
+          if (settings.mode == GoalMode.lose) {
             delta = -delta.abs();
           } else {
             delta = delta.abs();
           }
-          targetCalories = _settings.maintenanceCaloriesStart + delta;
+          targetCalories = settings.maintenanceCaloriesStart + delta;
         }
-        _settings = _settings.copyWith(lastTargetUpdate: _clock());
+        settings = settings.copyWith(lastTargetUpdate: _clock());
       } else {
         final kalmanTDEE = estimate.tdee.clamp(800.0, 6000.0).roundToDouble();
         final kalmanWeight = estimate.weight;
         kalmanWeightEstimate = kalmanWeight;
 
         // Update maintenance baseline with Kalman result
-        _settings = _settings.copyWith(
+        settings = settings.copyWith(
           maintenanceCaloriesStart: kalmanTDEE,
         );
 
         // Apply mode
-        if (_settings.mode == GoalMode.maintain) {
+        if (settings.mode == GoalMode.maintain) {
           // Drift correction: adjust calories to steer weight back to anchor
-          final double C = _settings.useMetric
+          final double C = settings.useMetric
               ? GoalLogicService.kCalPerKg
               : GoalLogicService.kCalPerLb;
-          final drift = kalmanWeight - _settings.anchorWeight;
+          final drift = kalmanWeight - settings.anchorWeight;
           final correctionCals = drift * C /
-              _settings.correctionWindowDays;
+              settings.correctionWindowDays;
           targetCalories = kalmanTDEE + correctionCals;
         } else {
-          double delta = _settings.fixedDelta;
-          if (_settings.mode == GoalMode.lose) {
+          double delta = settings.fixedDelta;
+          if (settings.mode == GoalMode.lose) {
             delta = -delta.abs();
           } else {
             delta = delta.abs();
@@ -297,12 +314,12 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
           targetCalories = kalmanTDEE + delta;
         }
 
-        _settings = _settings.copyWith(lastTargetUpdate: _clock());
+        settings = settings.copyWith(lastTargetUpdate: _clock());
       }
     }
 
     // --- Dynamic Protein Calculation ---
-    if (_settings.proteinTargetMode == ProteinTargetMode.percentageOfWeight) {
+    if (settings.proteinTargetMode == ProteinTargetMode.percentageOfWeight) {
       double referenceWeight = 0.0;
 
       // 1. Try Kalman weight estimate (smart mode, warm boot)
@@ -314,50 +331,44 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
         referenceWeight = weights.last.weight;
       } else {
         // 3. Fallback to anchor weight
-        referenceWeight = _settings.anchorWeight;
+        referenceWeight = settings.anchorWeight;
       }
 
       if (referenceWeight > 0) {
-        final newProtein = referenceWeight * _settings.proteinMultiplier;
-        _settings = _settings.copyWith(proteinTarget: newProtein);
+        final newProtein = referenceWeight * settings.proteinMultiplier;
+        settings = settings.copyWith(proteinTarget: newProtein);
       }
     }
 
     // Derive macros
     final Map<String, double> macros;
-    if (_settings.calculationMode == MacroCalculationMode.proteinFat) {
+    if (settings.calculationMode == MacroCalculationMode.proteinFat) {
       macros = GoalLogicService.calculateMacrosFromProteinFat(
         targetCalories: targetCalories,
-        proteinGrams: _settings.proteinTarget,
-        fatGrams: _settings.fatTarget,
+        proteinGrams: settings.proteinTarget,
+        fatGrams: settings.fatTarget,
       );
     } else {
       macros = GoalLogicService.calculateMacrosFromProteinCarbs(
         targetCalories: targetCalories,
-        proteinGrams: _settings.proteinTarget,
-        carbGrams: _settings.carbTarget,
+        proteinGrams: settings.proteinTarget,
+        carbGrams: settings.carbTarget,
       );
     }
 
-    _currentGoals = MacroGoals(
+    final computedGoals = MacroGoals(
       calories: macros['calories']!,
       protein: macros['protein']!,
       fat: macros['fat']!,
       carbs: macros['carbs']!,
-      fiber: _settings.fiberTarget,
+      fiber: settings.fiberTarget,
     );
 
     debugPrint(
-      'Calculated goals: calories=${_currentGoals!.calories}, protein=${_currentGoals!.protein}, fat=${_currentGoals!.fat}, carbs=${_currentGoals!.carbs}, fiber=${_currentGoals!.fiber}',
+      'Calculated goals: calories=${computedGoals.calories}, protein=${computedGoals.protein}, fat=${computedGoals.fat}, carbs=${computedGoals.carbs}, fiber=${computedGoals.fiber}',
     );
 
-    // Persist results
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_settingsKey, jsonEncode(_settings.toJson()));
-    await prefs.setString(_targetsKey, jsonEncode(_currentGoals!.toJson()));
-    await prefs.reload();
-
-    notifyListeners();
+    return TargetRecalcResult(settings: settings, goals: computedGoals);
   }
 
   ///// Calculates the next Monday from a given date.

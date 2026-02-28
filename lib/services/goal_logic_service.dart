@@ -266,7 +266,7 @@ class GoalLogicService {
 
       final stat = statsMap[dateOnly];
       dailyIntakes.add(stat?.calories ?? 0.0);
-      intakeIsValid.add(stat != null && stat.logCount > 0);
+      intakeIsValid.add(stat != null && stat.logCount > 0 && stat.calories > 0);
 
       current = DateTime(current.year, current.month, current.day + 1);
     }

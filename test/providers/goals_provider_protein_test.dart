@@ -70,11 +70,11 @@ void main() {
         weights: [Weight(date: now, weight: 180.0)], // Weight differs
       );
 
-      // Force recalculate
-      await provider.recalculateTargets();
+      // Force recalculate — now returns a result
+      final result = await provider.recalculateTargets(settings);
 
-      expect(provider.settings.proteinTarget, 200.0);
-      expect(provider.currentGoals.protein, 200.0);
+      expect(result.settings.proteinTarget, 200.0);
+      expect(result.goals.protein, 200.0);
     });
 
     test('Multiplier mode: uses latest weight when Kalman unavailable', () async {
@@ -105,11 +105,11 @@ void main() {
         weights: weights,
       );
 
-      await provider.recalculateTargets();
+      final result = await provider.recalculateTargets(settings);
 
       // Latest weight is 200. Multiplier 1.0 -> 200g protein.
-      expect(provider.settings.proteinTarget, 200.0);
-      expect(provider.currentGoals.protein, 200.0);
+      expect(result.settings.proteinTarget, 200.0);
+      expect(result.goals.protein, 200.0);
     });
 
     test('Multiplier mode: falls back to latest weight if single weight entry', () async {
@@ -139,10 +139,10 @@ void main() {
         weights: weights,
       );
 
-      await provider.recalculateTargets();
+      final result = await provider.recalculateTargets(settings);
 
       // Latest weight is 180. 180 * 1.5 = 270.
-      expect(provider.settings.proteinTarget, 270.0);
+      expect(result.settings.proteinTarget, 270.0);
     });
 
     test('Multiplier mode: falls back to Anchor Weight if no weights', () async {
@@ -167,10 +167,10 @@ void main() {
         weights: [], // No weights
       );
 
-      await provider.recalculateTargets();
+      final result = await provider.recalculateTargets(settings);
 
       // 160 * 0.5 = 80.
-      expect(provider.settings.proteinTarget, 80.0);
+      expect(result.settings.proteinTarget, 80.0);
     });
 
     test('Changing mode refreshes calculation', () async {

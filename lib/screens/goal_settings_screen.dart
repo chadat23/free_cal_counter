@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:meal_of_record/models/goal_settings.dart';
-import 'package:meal_of_record/models/daily_macro_stats.dart';
 import 'package:meal_of_record/providers/goals_provider.dart';
 import 'package:meal_of_record/providers/navigation_provider.dart';
 import 'package:meal_of_record/providers/weight_provider.dart';
 import 'package:meal_of_record/models/weight.dart';
-import 'package:meal_of_record/services/database_service.dart';
-import 'package:meal_of_record/services/goal_logic_service.dart';
 import 'package:meal_of_record/widgets/screen_background.dart';
 import 'package:meal_of_record/utils/ui_utils.dart';
 
@@ -380,48 +377,40 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
   );
 }
 
-  Future<void> _recalcTdeePreview() async {
-    final db = DatabaseService.instance;
-    final today = DateTime.now();
-    final now = DateTime(today.year, today.month, today.day);
-    final yesterday = now.subtract(const Duration(days: 1));
-    final analysisStart = now.subtract(Duration(days: _tdeeWindowDays));
+  Future<void> _runPreview() async {
+    final goalsProvider = Provider.of<GoalsProvider>(context, listen: false);
 
-    final weights = await db.getWeightsForRange(analysisStart, now);
-    final dtos = await db.getLoggedMacrosForDateRange(analysisStart, now);
-    final dailyStats = DailyMacroStats.fromDTOS(dtos, analysisStart, yesterday);
-
-    final Map<DateTime, double> weightMap = {
-      for (var w in weights)
-        DateTime(w.date.year, w.date.month, w.date.day): w.weight,
-    };
-    final Map<DateTime, DailyMacroStats> statsMap = {
-      for (var s in dailyStats)
-        DateTime(s.date.year, s.date.month, s.date.day): s,
-    };
-
-    final seedTdee =
-        double.tryParse(_maintenanceCalController.text) ?? 0.0;
-    final seedWeight =
-        double.tryParse(_anchorWeightController.text) ?? 70.0;
-
-    final estimate = GoalLogicService.computeTdeeAtDate(
-      tdeeWindow: _tdeeWindowDays,
-      tdeeDate: now,
-      weightMap: weightMap,
-      statsMap: statsMap,
-      initialTDEE: seedTdee,
-      initialWeight: seedWeight,
-      isMetric: _useMetric,
+    final previewSettings = GoalSettings(
+      anchorWeight: double.tryParse(_anchorWeightController.text) ?? 0.0,
+      maintenanceCaloriesStart: double.tryParse(_maintenanceCalController.text) ?? 2000.0,
+      proteinTarget: double.tryParse(_proteinController.text) ?? 0.0,
+      fatTarget: double.tryParse(_fatController.text) ?? 0.0,
+      carbTarget: double.tryParse(_carbController.text) ?? 0.0,
+      fiberTarget: double.tryParse(_fiberController.text) ?? 30.0,
+      mode: _mode,
+      calculationMode: _calcMode,
+      proteinTargetMode: _proteinTargetMode,
+      proteinMultiplier: double.tryParse(_proteinMultiplierController.text) ?? 1.0,
+      fixedDelta: double.tryParse(_fixedDeltaController.text) ?? 0.0,
+      lastTargetUpdate: goalsProvider.settings.lastTargetUpdate,
+      useMetric: _useMetric,
+      isSet: goalsProvider.isGoalsSet,
+      enableSmartTargets: _enableSmartTargets,
+      correctionWindowDays: int.tryParse(_correctionWindowController.text) ?? 30,
+      tdeeWindowDays: _tdeeWindowDays,
     );
 
+    final result = await goalsProvider.recalculateTargets(previewSettings);
+
     if (!mounted) return;
-    if (estimate != null) {
-      setState(() {
-        _maintenanceCalController.text =
-            estimate.tdee.roundToDouble().toString();
-      });
-    }
+    setState(() {
+      _maintenanceCalController.text =
+          result.settings.maintenanceCaloriesStart.roundToDouble().toString();
+      if (_proteinTargetMode == ProteinTargetMode.percentageOfWeight) {
+        _proteinController.text =
+            result.settings.proteinTarget.roundToDouble().toString();
+      }
+    });
   }
 
   Widget _buildTdeeWindowSelector() {
@@ -455,7 +444,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
               setState(() {
                 _tdeeWindowDays = newSelection.first;
               });
-              _recalcTdeePreview();
+              _runPreview();
             },
           ),
         ],

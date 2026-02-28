@@ -8,7 +8,7 @@ import 'dart:ui' as _i6;
 
 import 'package:flutter/material.dart' as _i9;
 import 'package:flutter/services.dart' as _i8;
-import 'package:meal_of_record/models/daily_macro_stats.dart' as _i4;
+import 'package:meal_of_record/models/daily_macro_stats.dart' as _i5;
 import 'package:meal_of_record/models/food.dart' as _i18;
 import 'package:meal_of_record/models/food_portion.dart' as _i15;
 import 'package:meal_of_record/models/goal_settings.dart' as _i2;
@@ -16,7 +16,7 @@ import 'package:meal_of_record/models/logged_portion.dart' as _i16;
 import 'package:meal_of_record/models/macro_goals.dart' as _i3;
 import 'package:meal_of_record/models/recipe.dart' as _i17;
 import 'package:meal_of_record/models/weight.dart' as _i13;
-import 'package:meal_of_record/providers/goals_provider.dart' as _i5;
+import 'package:meal_of_record/providers/goals_provider.dart' as _i4;
 import 'package:meal_of_record/providers/log_provider.dart' as _i14;
 import 'package:meal_of_record/providers/navigation_provider.dart' as _i10;
 import 'package:meal_of_record/providers/weight_provider.dart' as _i12;
@@ -48,21 +48,27 @@ class _FakeMacroGoals_1 extends _i1.SmartFake implements _i3.MacroGoals {
     : super(parent, parentInvocation);
 }
 
-class _FakeDateTime_2 extends _i1.SmartFake implements DateTime {
-  _FakeDateTime_2(Object parent, Invocation parentInvocation)
+class _FakeTargetRecalcResult_2 extends _i1.SmartFake
+    implements _i4.TargetRecalcResult {
+  _FakeTargetRecalcResult_2(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeDailyMacroStats_3 extends _i1.SmartFake
-    implements _i4.DailyMacroStats {
-  _FakeDailyMacroStats_3(Object parent, Invocation parentInvocation)
+class _FakeDateTime_3 extends _i1.SmartFake implements DateTime {
+  _FakeDateTime_3(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeDailyMacroStats_4 extends _i1.SmartFake
+    implements _i5.DailyMacroStats {
+  _FakeDailyMacroStats_4(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
 /// A class which mocks [GoalsProvider].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockGoalsProvider extends _i1.Mock implements _i5.GoalsProvider {
+class MockGoalsProvider extends _i1.Mock implements _i4.GoalsProvider {
   MockGoalsProvider() {
     _i1.throwOnMissingStub(this);
   }
@@ -183,15 +189,28 @@ class MockGoalsProvider extends _i1.Mock implements _i5.GoalsProvider {
           as _i7.Future<void>);
 
   @override
-  _i7.Future<void> recalculateTargets({bool? isInitialSetup = false}) =>
+  _i7.Future<_i4.TargetRecalcResult> recalculateTargets(
+    _i2.GoalSettings? settings, {
+    bool? isInitialSetup = false,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#recalculateTargets, [], {
-              #isInitialSetup: isInitialSetup,
-            }),
-            returnValue: _i7.Future<void>.value(),
-            returnValueForMissingStub: _i7.Future<void>.value(),
+            Invocation.method(
+              #recalculateTargets,
+              [settings],
+              {#isInitialSetup: isInitialSetup},
+            ),
+            returnValue: _i7.Future<_i4.TargetRecalcResult>.value(
+              _FakeTargetRecalcResult_2(
+                this,
+                Invocation.method(
+                  #recalculateTargets,
+                  [settings],
+                  {#isInitialSetup: isInitialSetup},
+                ),
+              ),
+            ),
           )
-          as _i7.Future<void>);
+          as _i7.Future<_i4.TargetRecalcResult>);
 
   @override
   void addListener(_i6.VoidCallback? listener) => super.noSuchMethod(
@@ -645,7 +664,7 @@ class MockLogProvider extends _i1.Mock implements _i14.LogProvider {
   DateTime get currentDate =>
       (super.noSuchMethod(
             Invocation.getter(#currentDate),
-            returnValue: _FakeDateTime_2(this, Invocation.getter(#currentDate)),
+            returnValue: _FakeDateTime_3(this, Invocation.getter(#currentDate)),
           )
           as DateTime);
 
@@ -802,30 +821,30 @@ class MockLogProvider extends _i1.Mock implements _i14.LogProvider {
           as _i7.Future<void>);
 
   @override
-  _i7.Future<List<_i4.DailyMacroStats>> getDailyMacroStats(
+  _i7.Future<List<_i5.DailyMacroStats>> getDailyMacroStats(
     DateTime? start,
     DateTime? end,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#getDailyMacroStats, [start, end]),
-            returnValue: _i7.Future<List<_i4.DailyMacroStats>>.value(
-              <_i4.DailyMacroStats>[],
+            returnValue: _i7.Future<List<_i5.DailyMacroStats>>.value(
+              <_i5.DailyMacroStats>[],
             ),
           )
-          as _i7.Future<List<_i4.DailyMacroStats>>);
+          as _i7.Future<List<_i5.DailyMacroStats>>);
 
   @override
-  _i7.Future<_i4.DailyMacroStats> getTodayStats() =>
+  _i7.Future<_i5.DailyMacroStats> getTodayStats() =>
       (super.noSuchMethod(
             Invocation.method(#getTodayStats, []),
-            returnValue: _i7.Future<_i4.DailyMacroStats>.value(
-              _FakeDailyMacroStats_3(
+            returnValue: _i7.Future<_i5.DailyMacroStats>.value(
+              _FakeDailyMacroStats_4(
                 this,
                 Invocation.method(#getTodayStats, []),
               ),
             ),
           )
-          as _i7.Future<_i4.DailyMacroStats>);
+          as _i7.Future<_i5.DailyMacroStats>);
 
   @override
   void togglePortionSelection(int? portionId) => super.noSuchMethod(

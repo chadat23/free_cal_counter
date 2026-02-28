@@ -42,6 +42,12 @@ class _FakeMacroGoals_1 extends _i1.SmartFake implements _i3.MacroGoals {
     : super(parent, parentInvocation);
 }
 
+class _FakeTargetRecalcResult_2 extends _i1.SmartFake
+    implements _i4.TargetRecalcResult {
+  _FakeTargetRecalcResult_2(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
 /// A class which mocks [GoalsProvider].
 ///
 /// See the documentation for Mockito's code generation for more information.
@@ -166,15 +172,28 @@ class MockGoalsProvider extends _i1.Mock implements _i4.GoalsProvider {
           as _i6.Future<void>);
 
   @override
-  _i6.Future<void> recalculateTargets({bool? isInitialSetup = false}) =>
+  _i6.Future<_i4.TargetRecalcResult> recalculateTargets(
+    _i2.GoalSettings? settings, {
+    bool? isInitialSetup = false,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#recalculateTargets, [], {
-              #isInitialSetup: isInitialSetup,
-            }),
-            returnValue: _i6.Future<void>.value(),
-            returnValueForMissingStub: _i6.Future<void>.value(),
+            Invocation.method(
+              #recalculateTargets,
+              [settings],
+              {#isInitialSetup: isInitialSetup},
+            ),
+            returnValue: _i6.Future<_i4.TargetRecalcResult>.value(
+              _FakeTargetRecalcResult_2(
+                this,
+                Invocation.method(
+                  #recalculateTargets,
+                  [settings],
+                  {#isInitialSetup: isInitialSetup},
+                ),
+              ),
+            ),
           )
-          as _i6.Future<void>);
+          as _i6.Future<_i4.TargetRecalcResult>);
 
   @override
   void addListener(_i5.VoidCallback? listener) => super.noSuchMethod(

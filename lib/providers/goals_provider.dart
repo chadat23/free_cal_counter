@@ -138,13 +138,55 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
     GoalSettings newSettings, {
     bool isInitialSetup = false,
   }) async {
-    // Ensure we mark them as set when saving
-    _settings = newSettings.copyWith(isSet: true);
+    _settings = newSettings.copyWith(isSet: true, lastTargetUpdate: _clock());
 
-    // Recalculate, apply result, persist once
-    final result = await recalculateTargets(_settings, isInitialSetup: isInitialSetup);
-    _settings = result.settings;
-    _currentGoals = result.goals;
+    // Dynamic protein: resolve weight-based protein before computing macros
+    if (_settings.proteinTargetMode == ProteinTargetMode.percentageOfWeight) {
+      final now = _clock();
+      final today = DateTime(now.year, now.month, now.day);
+      final lookback = today.subtract(Duration(days: _settings.tdeeWindowDays));
+      final weights = await _databaseService.getWeightsForRange(lookback, now);
+      double referenceWeight = _settings.anchorWeight;
+      if (weights.isNotEmpty) {
+        weights.sort((a, b) => a.date.compareTo(b.date));
+        referenceWeight = weights.last.weight;
+      }
+      if (referenceWeight > 0) {
+        _settings = _settings.copyWith(
+          proteinTarget: referenceWeight * _settings.proteinMultiplier,
+        );
+      }
+    }
+
+    // Compute target calories from the displayed TDEE + mode adjustment
+    double targetCalories = _settings.maintenanceCaloriesStart;
+    if (_settings.mode == GoalMode.lose) {
+      targetCalories -= _settings.fixedDelta.abs();
+    } else if (_settings.mode == GoalMode.gain) {
+      targetCalories += _settings.fixedDelta.abs();
+    }
+
+    // Derive macros from the user's inputs
+    final macros = _settings.calculationMode == MacroCalculationMode.proteinFat
+        ? GoalLogicService.calculateMacrosFromProteinFat(
+            targetCalories: targetCalories,
+            proteinGrams: _settings.proteinTarget,
+            fatGrams: _settings.fatTarget,
+          )
+        : GoalLogicService.calculateMacrosFromProteinCarbs(
+            targetCalories: targetCalories,
+            proteinGrams: _settings.proteinTarget,
+            carbGrams: _settings.carbTarget,
+          );
+
+    _currentGoals = MacroGoals(
+      calories: macros['calories']!,
+      protein: macros['protein']!,
+      fat: macros['fat']!,
+      carbs: macros['carbs']!,
+      fiber: _settings.fiberTarget,
+    );
+
     await _saveToPrefs();
     notifyListeners();
   }
@@ -261,7 +303,7 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
         tdeeDate: today,
         weightMap: weightMap,
         statsMap: statsMap,
-        initialTDEE: settings.maintenanceCaloriesStart,
+        initialTDEE: _settings.maintenanceCaloriesStart,
       );
 
       if (estimate == null) {

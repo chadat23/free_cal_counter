@@ -88,3 +88,5 @@ You specify one and the app calculates the other from the remaining calories aft
     - **Delta** comes from your mode: a fixed deficit (Lose), fixed surplus (Gain), or an adaptive correction (Maintain) based on drift from your anchor weight.
 
     This feedback loop means that even if your initial maintenance estimate is off by a few hundred calories, the app converges on your true TDEE within a few weeks.
+
+    **A note on the TDEE preview:** When you change the TDEE window on the Goals screen, the maintenance calories field updates to show what the app *would* estimate with that window. Each preview uses your currently saved maintenance value as its starting point. If you save and then preview again, the new saved value becomes the starting point for the next estimate — so repeatedly saving and re-previewing can cause the number to drift. This is normal. Pick the window that looks right, save once, and let the weekly updates handle it from there.

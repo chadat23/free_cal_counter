@@ -308,6 +308,17 @@ class MockGoalsProvider extends _i1.Mock implements _i8.GoalsProvider {
   );
 
   @override
+  _i7.MacroGoals targetFor(DateTime? date) =>
+      (super.noSuchMethod(
+            Invocation.method(#targetFor, [date]),
+            returnValue: _FakeMacroGoals_5(
+              this,
+              Invocation.method(#targetFor, [date]),
+            ),
+          )
+          as _i7.MacroGoals);
+
+  @override
   _i9.Future<void> saveSettings(
     _i6.GoalSettings? newSettings, {
     bool? isInitialSetup = false,

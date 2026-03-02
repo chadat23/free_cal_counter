@@ -76,6 +76,7 @@ void main() {
     when(mockRecipeProvider.thumbnail).thenReturn(null);
 
     when(mockGoalsProvider.currentGoals).thenReturn(MacroGoals.hardcoded());
+    when(mockGoalsProvider.targetFor(any)).thenReturn(MacroGoals.hardcoded());
     when(mockGoalsProvider.settings).thenReturn(GoalSettings.defaultSettings());
   });
 

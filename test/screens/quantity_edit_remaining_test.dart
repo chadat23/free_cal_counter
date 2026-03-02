@@ -64,6 +64,7 @@ void main() {
       carbs: 300.0,
       fiber: 30.0,
     ));
+    when(mockGoalsProvider.targetFor(any)).thenReturn(MacroGoals.hardcoded());
 
     when(mockRecipeProvider.totalCalories).thenReturn(0.0);
     when(mockRecipeProvider.totalProtein).thenReturn(0.0);

@@ -62,6 +62,7 @@ void main() {
       carbs: goalCarbs,
       fiber: goalFiber,
     ));
+    when(mockGoalsProvider.targetFor(any)).thenReturn(MacroGoals.hardcoded());
 
     when(mockNavigationProvider.showConsumed).thenReturn(showConsumed);
   }

@@ -67,6 +67,7 @@ void main() {
       when(mockRecipeProvider.totalFiber).thenReturn(0.0);
 
       when(mockGoalsProvider.currentGoals).thenReturn(MacroGoals.hardcoded());
+      when(mockGoalsProvider.targetFor(any)).thenReturn(MacroGoals.hardcoded());
 
       when(mockNavigationProvider.showConsumed).thenReturn(true);
     });

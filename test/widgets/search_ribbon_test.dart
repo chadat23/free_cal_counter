@@ -58,6 +58,7 @@ void main() {
 
     // Default mock for GoalsProvider
     when(mockGoalsProvider.currentGoals).thenReturn(MacroGoals.hardcoded());
+    when(mockGoalsProvider.targetFor(any)).thenReturn(MacroGoals.hardcoded());
   });
 
   Widget createTestWidget() {

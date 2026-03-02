@@ -64,6 +64,7 @@ void main() {
     when(mockRecipeProvider.servingsCreated).thenReturn(1.0);
 
     when(mockGoalsProvider.currentGoals).thenReturn(MacroGoals.hardcoded());
+    when(mockGoalsProvider.targetFor(any)).thenReturn(MacroGoals.hardcoded());
     when(mockNavigationProvider.showConsumed).thenReturn(true);
   });
 

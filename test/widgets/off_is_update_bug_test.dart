@@ -48,6 +48,7 @@ void main() {
     when(mockSearchProvider.displayNotes).thenReturn({});
     when(mockNavigationProvider.showConsumed).thenReturn(true);
     when(mockGoalsProvider.currentGoals).thenReturn(MacroGoals.hardcoded());
+    when(mockGoalsProvider.targetFor(any)).thenReturn(MacroGoals.hardcoded());
   });
 
   Widget createTestWidget() {

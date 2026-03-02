@@ -9,6 +9,7 @@ import 'package:meal_of_record/widgets/log_header.dart';
 import 'package:meal_of_record/providers/goals_provider.dart';
 import 'package:meal_of_record/providers/weight_provider.dart';
 import 'package:meal_of_record/models/macro_goals.dart';
+import 'package:meal_of_record/models/goal_settings.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
@@ -94,6 +95,8 @@ void main() {
 
     // Stub GoalsProvider
     when(mockGoalsProvider.currentGoals).thenReturn(MacroGoals.hardcoded());
+    when(mockGoalsProvider.targetFor(any)).thenReturn(MacroGoals.hardcoded());
+    when(mockGoalsProvider.settings).thenReturn(GoalSettings.defaultSettings());
 
     // Stub WeightProvider
     when(mockWeightProvider.recentWeights).thenReturn([]);

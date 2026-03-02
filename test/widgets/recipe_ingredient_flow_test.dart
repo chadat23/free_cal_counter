@@ -98,6 +98,7 @@ void main() {
 
     // Default mock for GoalsProvider
     when(mockGoalsProvider.currentGoals).thenReturn(MacroGoals.hardcoded());
+    when(mockGoalsProvider.targetFor(any)).thenReturn(MacroGoals.hardcoded());
   });
 
   testWidgets('Plus button adds ingredient to recipe context', (tester) async {

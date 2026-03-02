@@ -18,12 +18,14 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
   static const String _settingsKey = 'goal_settings';
   static const String _targetsKey = 'macro_targets';
   static const String _hasSeenWelcomeKey = 'has_seen_welcome';
+  static const String _snapshotsKey = 'target_snapshots';
 
   GoalSettings _settings = GoalSettings.defaultSettings();
   MacroGoals? _currentGoals;
   bool _isLoading = true;
   bool _showUpdateNotification = false;
   bool _hasSeenWelcome = false;
+  List<Map<String, dynamic>> _targetSnapshots = [];
 
   final DatabaseService _databaseService;
   final DateTime Function() _clock;
@@ -47,6 +49,7 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       // Check for weekly update when app returns to foreground
       if (_settings.isSet && !_isLoading) {
+        _saveTargetSnapshot();
         checkWeeklyUpdate();
       }
     }
@@ -63,6 +66,64 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
   void dismissNotification() {
     _showUpdateNotification = false;
     notifyListeners();
+  }
+
+  String _dateToString(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  DateTime _dateFromString(String s) {
+    final parts = s.split('-');
+    return DateTime(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
+  }
+
+  Future<void> _saveTargetSnapshot() async {
+    if (_currentGoals == null) return;
+
+    final now = _clock();
+    final todayStr = _dateToString(DateTime(now.year, now.month, now.day));
+    final goals = _currentGoals!;
+
+    if (_targetSnapshots.isEmpty) {
+      // First time: prepopulate 7 entries (past 6 days + today)
+      final today = DateTime(now.year, now.month, now.day);
+      for (int i = 6; i >= 0; i--) {
+        final d = today.subtract(Duration(days: i));
+        _targetSnapshots.add({
+          'date': _dateToString(d),
+          ...goals.toJson(),
+        });
+      }
+    } else {
+      final existingIdx = _targetSnapshots.indexWhere((s) => s['date'] == todayStr);
+      if (existingIdx >= 0) {
+        _targetSnapshots[existingIdx] = {'date': todayStr, ...goals.toJson()};
+      } else {
+        _targetSnapshots.add({'date': todayStr, ...goals.toJson()});
+        if (_targetSnapshots.length > 7) {
+          _targetSnapshots = _targetSnapshots.sublist(_targetSnapshots.length - 7);
+        }
+      }
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_snapshotsKey, jsonEncode(_targetSnapshots));
+  }
+
+  MacroGoals targetFor(DateTime date) {
+    if (_targetSnapshots.isEmpty) return currentGoals;
+
+    final target = DateTime(date.year, date.month, date.day);
+    Map<String, dynamic>? best;
+
+    for (final snap in _targetSnapshots) {
+      final snapDate = _dateFromString(snap['date'] as String);
+      if (!snapDate.isAfter(target)) {
+        best = snap;
+      }
+    }
+
+    if (best == null) return currentGoals;
+    return MacroGoals.fromJson(best);
   }
 
   Future<void> _loadFromPrefs() async {
@@ -114,9 +175,18 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
         );
       }
 
+      // Load target snapshots
+      final snapshotsJson = prefs.getString(_snapshotsKey);
+      if (snapshotsJson != null) {
+        _targetSnapshots = List<Map<String, dynamic>>.from(
+          (jsonDecode(snapshotsJson) as List).map((e) => Map<String, dynamic>.from(e)),
+        );
+      }
+
       // After loading, check if a weekly update is due
       // Only check if goals are actually set
       if (_settings.isSet) {
+        await _saveTargetSnapshot();
         await checkWeeklyUpdate();
       }
     } catch (e) {
@@ -188,6 +258,7 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
     );
 
     await _saveToPrefs();
+    await _saveTargetSnapshot();
     notifyListeners();
   }
 
@@ -227,6 +298,7 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
       _settings = result.settings;
       _currentGoals = result.goals;
       await _saveToPrefs();
+      await _saveTargetSnapshot();
       _showUpdateNotification = true;
       notifyListeners();
     }

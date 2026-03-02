@@ -5,6 +5,7 @@ import 'package:meal_of_record/providers/weight_provider.dart';
 import 'package:meal_of_record/providers/goals_provider.dart';
 import 'package:meal_of_record/providers/navigation_provider.dart';
 import 'package:meal_of_record/models/goal_settings.dart';
+import 'package:meal_of_record/models/macro_goals.dart';
 import 'package:provider/provider.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -26,6 +27,7 @@ void main() {
     when(mockWeightProvider.loadWeights(any, any)).thenAnswer((_) async => {});
 
     when(mockGoalsProvider.settings).thenReturn(GoalSettings.defaultSettings());
+    when(mockGoalsProvider.targetFor(any)).thenReturn(MacroGoals.hardcoded());
     when(mockNavigationProvider.changeTab(any)).thenReturn(null);
   });
 

@@ -101,7 +101,7 @@ class _NutritionTargetsOverviewChartState
                                       ),
                                       child: VerticalMiniBarChart(
                                         consumed: data.dailyAmounts[dayIndex],
-                                        target: data.targetAmount,
+                                        target: data.dailyTargets[dayIndex],
                                         color: data.color,
                                         showConsumed: showConsumed,
                                       ),
@@ -140,9 +140,10 @@ class _NutritionTargetsOverviewChartState
                     children: widget.nutritionData.map((data) {
                       final selectedAmount =
                           data.dailyAmounts[_selectedDayIndex];
+                      final selectedTarget = data.dailyTargets[_selectedDayIndex];
                       final displayAmount = showConsumed
                           ? selectedAmount
-                          : (data.targetAmount - selectedAmount);
+                          : (selectedTarget - selectedAmount);
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -158,7 +159,7 @@ class _NutritionTargetsOverviewChartState
                             child: Align(
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                '${displayAmount.isFinite ? displayAmount.toInt() : 0} ${data.macroLabel}\n of ${data.targetAmount.isFinite ? data.targetAmount.toInt() : 0}${data.unitLabel}',
+                                '${displayAmount.isFinite ? displayAmount.toInt() : 0} ${data.macroLabel}\n of ${selectedTarget.isFinite ? selectedTarget.toInt() : 0}${data.unitLabel}',
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,

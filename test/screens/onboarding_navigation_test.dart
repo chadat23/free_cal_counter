@@ -46,6 +46,7 @@ void main() {
       mockLogProvider.getDailyMacroStats(any, any),
     ).thenAnswer((_) async => []);
     when(mockGoalsProvider.currentGoals).thenReturn(MacroGoals.hardcoded());
+    when(mockGoalsProvider.targetFor(any)).thenReturn(MacroGoals.hardcoded());
   });
 
   testWidgets('Saving initial goals should return to Overview screen (tab 0)', (

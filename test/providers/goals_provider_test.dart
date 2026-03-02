@@ -758,6 +758,168 @@ void main() {
     });
   });
 
+  group('GoalsProvider target snapshots', () {
+    GoalSettings snapshotSettings({DateTime? lastUpdate}) {
+      return GoalSettings(
+        anchorWeight: 75.0,
+        maintenanceCaloriesStart: 2000,
+        proteinTarget: 150,
+        fatTarget: 70,
+        carbTarget: 200,
+        mode: GoalMode.maintain,
+        calculationMode: MacroCalculationMode.proteinCarbs,
+        proteinTargetMode: ProteinTargetMode.fixed,
+        proteinMultiplier: 1.0,
+        fixedDelta: 0,
+        lastTargetUpdate: lastUpdate ?? DateTime(2024, 1, 15),
+        fiberTarget: 37.0,
+      );
+    }
+
+    test('first load prepopulates 7 snapshots', () async {
+      final now = DateTime(2024, 1, 15); // Monday
+      await createProvider(
+        clock: () => now,
+        initialSettings: snapshotSettings(),
+      );
+
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString('target_snapshots');
+      expect(raw, isNotNull);
+      final list = List<Map<String, dynamic>>.from(
+        (jsonDecode(raw!) as List).map((e) => Map<String, dynamic>.from(e)),
+      );
+      expect(list.length, 7);
+      expect(list.first['date'], '2024-01-09');
+      expect(list.last['date'], '2024-01-15');
+    });
+
+    test('Monday recalc overwrites today snapshot', () async {
+      final now = DateTime(2024, 1, 15, 10); // Monday
+      await createProvider(
+        clock: () => now,
+        initialSettings: snapshotSettings(lastUpdate: DateTime(2024, 1, 8)),
+      );
+
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString('target_snapshots');
+      final list = List<Map<String, dynamic>>.from(
+        (jsonDecode(raw!) as List).map((e) => Map<String, dynamic>.from(e)),
+      );
+      // Today's snapshot should exist and have been overwritten by recalc
+      final todaySnap = list.where((s) => s['date'] == '2024-01-15').toList();
+      expect(todaySnap.length, 1);
+      expect(todaySnap.first['calories'], isNotNull);
+    });
+
+    test('saveSettings overwrites today snapshot', () async {
+      final now = DateTime(2024, 1, 15);
+      final provider = await createProvider(
+        clock: () => now,
+        initialSettings: snapshotSettings(),
+      );
+
+      // Change settings with different calories
+      final newSettings = snapshotSettings().copyWith(
+        maintenanceCaloriesStart: 2500,
+      );
+      await provider.saveSettings(newSettings);
+
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString('target_snapshots');
+      final list = List<Map<String, dynamic>>.from(
+        (jsonDecode(raw!) as List).map((e) => Map<String, dynamic>.from(e)),
+      );
+      final todaySnap = list.lastWhere((s) => s['date'] == '2024-01-15');
+      expect(todaySnap['calories'], 2500.0);
+    });
+
+    test('previous days retain old snapshots after target change', () async {
+      final now = DateTime(2024, 1, 15);
+      final provider = await createProvider(
+        clock: () => now,
+        initialSettings: snapshotSettings(),
+      );
+
+      // All 7 days should have calories=2000
+      final prefs = await SharedPreferences.getInstance();
+      var raw = prefs.getString('target_snapshots');
+      var list = List<Map<String, dynamic>>.from(
+        (jsonDecode(raw!) as List).map((e) => Map<String, dynamic>.from(e)),
+      );
+      expect(list.first['calories'], 2000.0);
+
+      // Change settings
+      final newSettings = snapshotSettings().copyWith(
+        maintenanceCaloriesStart: 2500,
+      );
+      await provider.saveSettings(newSettings);
+
+      raw = prefs.getString('target_snapshots');
+      list = List<Map<String, dynamic>>.from(
+        (jsonDecode(raw!) as List).map((e) => Map<String, dynamic>.from(e)),
+      );
+      // Previous days still have 2000
+      expect(list.first['calories'], 2000.0);
+      // Today has 2500
+      expect(list.last['calories'], 2500.0);
+    });
+
+    test('list trims to 7 after 8+ days', () async {
+      // Start on day 1 with 7 snapshots
+      final day1 = DateTime(2024, 1, 15);
+      await createProvider(
+        clock: () => day1,
+        initialSettings: snapshotSettings(),
+      );
+
+      // Manually inject an 8th day by simulating a new day
+      final prefs = await SharedPreferences.getInstance();
+      var raw = prefs.getString('target_snapshots');
+      var list = List<Map<String, dynamic>>.from(
+        (jsonDecode(raw!) as List).map((e) => Map<String, dynamic>.from(e)),
+      );
+      // Add an 8th entry
+      list.add({'date': '2024-01-16', 'calories': 2000.0, 'protein': 150.0, 'fat': 70.0, 'carbs': 200.0, 'fiber': 37.0});
+      expect(list.length, 8);
+
+      // Persist the 8-entry list
+      await prefs.setString('target_snapshots', jsonEncode(list));
+
+      // Create a new provider for the next day which will reload and save
+      final day2 = DateTime(2024, 1, 17);
+      SharedPreferences.setMockInitialValues({
+        'goal_settings': jsonEncode(snapshotSettings().toJson()),
+        'target_snapshots': jsonEncode(list),
+      });
+      // ignore: unused_local_variable
+      final provider2 = GoalsProvider(
+        databaseService: mockDatabaseService,
+        clock: () => day2,
+      );
+      await Future.delayed(Duration.zero);
+
+      raw = (await SharedPreferences.getInstance()).getString('target_snapshots');
+      final finalList = List<Map<String, dynamic>>.from(
+        (jsonDecode(raw!) as List).map((e) => Map<String, dynamic>.from(e)),
+      );
+      expect(finalList.length, lessThanOrEqualTo(7));
+    });
+
+    test('targetFor with date before all snapshots falls back to currentGoals', () async {
+      final now = DateTime(2024, 1, 15);
+      final provider = await createProvider(
+        clock: () => now,
+        initialSettings: snapshotSettings(),
+      );
+
+      // Query a date well before any snapshot
+      final oldDate = DateTime(2023, 1, 1);
+      final result = provider.targetFor(oldDate);
+      expect(result.calories, provider.currentGoals.calories);
+    });
+  });
+
   group('GoalsProvider Onboarding', () {
     test('initial hasSeenWelcome should be false', () async {
       SharedPreferences.setMockInitialValues({});

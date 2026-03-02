@@ -42,6 +42,7 @@ void main() {
     when(mockGoalsProvider.isLoading).thenReturn(false);
     when(mockGoalsProvider.currentGoals).thenReturn(MacroGoals.hardcoded());
     when(mockGoalsProvider.settings).thenReturn(GoalSettings.defaultSettings());
+    when(mockGoalsProvider.targetFor(any)).thenReturn(MacroGoals.hardcoded());
 
     // Stub WeightProvider
     when(mockWeightProvider.recentWeights).thenReturn([]);

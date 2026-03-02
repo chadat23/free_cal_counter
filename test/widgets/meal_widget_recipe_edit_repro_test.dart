@@ -66,6 +66,7 @@ void main() {
     when(mockGoalsProvider.currentGoals).thenReturn(
       MacroGoals(calories: 2000, protein: 150, fat: 70, carbs: 250, fiber: 30),
     );
+    when(mockGoalsProvider.targetFor(any)).thenReturn(MacroGoals.hardcoded());
 
     when(mockNavigationProvider.showConsumed).thenReturn(true);
   });

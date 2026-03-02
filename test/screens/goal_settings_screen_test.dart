@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:meal_of_record/screens/goal_settings_screen.dart';
 import 'package:meal_of_record/providers/goals_provider.dart';
 import 'package:meal_of_record/models/goal_settings.dart';
+import 'package:meal_of_record/models/macro_goals.dart';
 import 'package:meal_of_record/providers/weight_provider.dart';
 import 'package:meal_of_record/models/weight.dart';
 
@@ -26,6 +27,7 @@ void main() {
 
     // Stub the settings getter
     when(mockGoalsProvider.settings).thenReturn(GoalSettings.defaultSettings());
+    when(mockGoalsProvider.targetFor(any)).thenReturn(MacroGoals.hardcoded());
     when(mockGoalsProvider.isGoalsSet).thenReturn(false);
 
     // Stub weight provider

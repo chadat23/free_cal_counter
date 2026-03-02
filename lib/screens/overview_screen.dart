@@ -120,7 +120,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
       if (mounted) {
         setState(() {
           _nutritionDates = stats.map((s) => s.date).toList();
-          _nutritionData = _buildTargets(stats, goals);
+          _nutritionData = _buildTargets(stats, goals, goalsProvider);
           _weightHistory = weightProvider.weights.where((w) {
             final d = DateTime(w.date.year, w.date.month, w.date.day);
             return !d.isBefore(rangeStart);
@@ -178,6 +178,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
   List<NutritionTarget> _buildTargets(
     List<DailyMacroStats> stats,
     MacroGoals goals,
+    GoalsProvider goalsProvider,
   ) {
     // Extract daily lists (ensure 7 days, index 0 is oldest, index 6 is today)
     // DailyMacroStats.fromDTOS usually returns sorted by date
@@ -194,6 +195,13 @@ class _OverviewScreenState extends State<OverviewScreen> {
     final carbs = mapField((s) => s.carbs);
     final fiber = mapField((s) => s.fiber);
 
+    // Build per-day target lists from snapshots
+    final dailyCalorieTargets = stats.map((s) => goalsProvider.targetFor(s.date).calories).toList();
+    final dailyProteinTargets = stats.map((s) => goalsProvider.targetFor(s.date).protein).toList();
+    final dailyFatTargets = stats.map((s) => goalsProvider.targetFor(s.date).fat).toList();
+    final dailyCarbTargets = stats.map((s) => goalsProvider.targetFor(s.date).carbs).toList();
+    final dailyFiberTargets = stats.map((s) => goalsProvider.targetFor(s.date).fiber).toList();
+
     // Get Today's values (last in the list)
     final todayStats = stats.last;
 
@@ -205,6 +213,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
         macroLabel: '🔥',
         unitLabel: '',
         dailyAmounts: calories,
+        dailyTargets: dailyCalorieTargets,
       ),
       NutritionTarget(
         color: Colors.red,
@@ -213,6 +222,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
         macroLabel: 'P',
         unitLabel: 'g',
         dailyAmounts: protein,
+        dailyTargets: dailyProteinTargets,
       ),
       NutritionTarget(
         color: Colors.yellow,
@@ -221,6 +231,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
         macroLabel: 'F',
         unitLabel: 'g',
         dailyAmounts: fat,
+        dailyTargets: dailyFatTargets,
       ),
       NutritionTarget(
         color: Colors.green,
@@ -229,6 +240,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
         macroLabel: 'C',
         unitLabel: 'g',
         dailyAmounts: carbs,
+        dailyTargets: dailyCarbTargets,
       ),
       NutritionTarget(
         color: Colors.brown,
@@ -237,6 +249,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
         macroLabel: 'Fb',
         unitLabel: 'g',
         dailyAmounts: fiber,
+        dailyTargets: dailyFiberTargets,
       ),
     ];
   }

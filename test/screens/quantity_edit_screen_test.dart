@@ -61,6 +61,7 @@ void main() {
 
     // Default mock behavior for GoalsProvider
     when(mockGoalsProvider.currentGoals).thenReturn(MacroGoals.hardcoded());
+    when(mockGoalsProvider.targetFor(any)).thenReturn(MacroGoals.hardcoded());
 
     // Default mock behavior for NavigationProvider
     when(mockNavigationProvider.showConsumed).thenReturn(true);

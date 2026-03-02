@@ -30,6 +30,7 @@ void main() {
           1714.4,
           2143.0,
         ],
+        dailyTargets: [2143.0, 2143.0, 2143.0, 2143.0, 2143.0, 2143.0, 2143.0],
       ),
       NutritionTarget(
         color: Colors.red,
@@ -38,6 +39,7 @@ void main() {
         macroLabel: 'P',
         unitLabel: 'g',
         dailyAmounts: [141.0, 126.9, 133.95, 148.05, 119.85, 126.9, 143.82],
+        dailyTargets: [141.0, 141.0, 141.0, 141.0, 141.0, 141.0, 141.0],
       ),
       NutritionTarget(
         color: Colors.yellow,
@@ -46,6 +48,7 @@ void main() {
         macroLabel: 'F',
         unitLabel: 'g',
         dailyAmounts: [63.9, 71.0, 74.55, 67.45, 56.8, 60.35, 69.58],
+        dailyTargets: [71.0, 71.0, 71.0, 71.0, 71.0, 71.0, 71.0],
       ),
       NutritionTarget(
         color: Colors.green,
@@ -54,6 +57,7 @@ void main() {
         macroLabel: 'C',
         unitLabel: 'g',
         dailyAmounts: [221.35, 198.05, 209.7, 233.0, 244.65, 186.4, 242.32],
+        dailyTargets: [233.0, 233.0, 233.0, 233.0, 233.0, 233.0, 233.0],
       ),
       NutritionTarget(
         color: Colors.brown,
@@ -62,6 +66,7 @@ void main() {
         macroLabel: 'Fb',
         unitLabel: 'g',
         dailyAmounts: [22.5, 28.0, 31.5, 25.0, 18.0, 29.0, 26.5],
+        dailyTargets: [30.0, 30.0, 30.0, 30.0, 30.0, 30.0, 30.0],
       ),
     ];
 

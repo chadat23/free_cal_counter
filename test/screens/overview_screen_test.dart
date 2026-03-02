@@ -89,6 +89,7 @@ void main() {
     // Stub GoalsProvider
     when(mockGoalsProvider.currentGoals).thenReturn(MacroGoals.hardcoded());
     when(mockGoalsProvider.settings).thenReturn(GoalSettings.defaultSettings());
+    when(mockGoalsProvider.targetFor(any)).thenReturn(MacroGoals.hardcoded());
     when(mockGoalsProvider.hasSeenWelcome).thenReturn(true);
     when(mockGoalsProvider.isGoalsSet).thenReturn(true);
     when(mockGoalsProvider.showUpdateNotification).thenReturn(false);

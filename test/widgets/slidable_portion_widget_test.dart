@@ -3,10 +3,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meal_of_record/models/food.dart';
 import 'package:meal_of_record/models/food_portion.dart';
 import 'package:meal_of_record/models/food_serving.dart';
-
+import 'package:meal_of_record/providers/goals_provider.dart';
 import 'package:meal_of_record/widgets/slidable_portion_widget.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+import 'package:provider/provider.dart';
 
+import 'slidable_portion_widget_test.mocks.dart';
+
+@GenerateMocks([GoalsProvider])
 void main() {
+  late MockGoalsProvider mockGoalsProvider;
+
+  setUp(() {
+    mockGoalsProvider = MockGoalsProvider();
+    when(mockGoalsProvider.useNetCarbs).thenReturn(false);
+  });
+
   testWidgets(
     'SlidableServingWidget slides to reveal delete button and deletes on tap',
     (WidgetTester tester) async {
@@ -29,13 +42,16 @@ void main() {
       final serving = FoodPortion(food: food, grams: 100, unit: 'g');
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SlidablePortionWidget(
-              serving: serving,
-              onDelete: () {
-                onDeleteCalled = true;
-              },
+        ChangeNotifierProvider<GoalsProvider>.value(
+          value: mockGoalsProvider,
+          child: MaterialApp(
+            home: Scaffold(
+              body: SlidablePortionWidget(
+                serving: serving,
+                onDelete: () {
+                  onDeleteCalled = true;
+                },
+              ),
             ),
           ),
         ),
@@ -81,14 +97,17 @@ void main() {
     final serving = FoodPortion(food: food, grams: 100, unit: 'g');
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SlidablePortionWidget(
-            serving: serving,
-            onDelete: () {},
-            onEdit: () {
-              onEditCalled = true;
-            },
+      ChangeNotifierProvider<GoalsProvider>.value(
+        value: mockGoalsProvider,
+        child: MaterialApp(
+          home: Scaffold(
+            body: SlidablePortionWidget(
+              serving: serving,
+              onDelete: () {},
+              onEdit: () {
+                onEditCalled = true;
+              },
+            ),
           ),
         ),
       ),

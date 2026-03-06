@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meal_of_record/models/food.dart';
 import 'package:meal_of_record/models/food_serving.dart';
+import 'package:meal_of_record/providers/goals_provider.dart';
 import 'package:meal_of_record/providers/log_provider.dart';
 import 'package:meal_of_record/providers/recipe_provider.dart';
 import 'package:meal_of_record/providers/search_provider.dart';
@@ -19,6 +20,7 @@ import 'package:meal_of_record/services/reference_database.dart' as ref_db;
 import 'dump_functionality_test.mocks.dart';
 
 @GenerateMocks([
+  GoalsProvider,
   LogProvider,
   RecipeProvider,
   SearchProvider,
@@ -31,6 +33,7 @@ void main() {
     final refDb = ref_db.ReferenceDatabase(connection: NativeDatabase.memory());
     DatabaseService.initSingletonForTesting(liveDb, refDb);
   });
+  late MockGoalsProvider mockGoalsProvider;
   late MockLogProvider mockLogProvider;
   late MockRecipeProvider mockRecipeProvider;
   late MockSearchProvider mockSearchProvider;
@@ -49,10 +52,12 @@ void main() {
   );
 
   setUp(() {
+    mockGoalsProvider = MockGoalsProvider();
     mockLogProvider = MockLogProvider();
     mockRecipeProvider = MockRecipeProvider();
     mockSearchProvider = MockSearchProvider();
     mockNavigationProvider = MockNavigationProvider();
+    when(mockGoalsProvider.useNetCarbs).thenReturn(false);
 
     // Setup defaults
     when(mockRecipeProvider.name).thenReturn('Apple Pie');
@@ -74,6 +79,7 @@ void main() {
     when(mockRecipeProvider.totalFat).thenReturn(0.0);
     when(mockRecipeProvider.totalCarbs).thenReturn(0.0);
     when(mockRecipeProvider.totalFiber).thenReturn(0.0);
+    when(mockRecipeProvider.totalNetCarbs).thenReturn(0.0);
     when(mockRecipeProvider.emoji).thenReturn('🍴');
     when(mockRecipeProvider.thumbnail).thenReturn(null);
 
@@ -92,6 +98,7 @@ void main() {
         ChangeNotifierProvider<NavigationProvider>.value(
           value: mockNavigationProvider,
         ),
+        ChangeNotifierProvider<GoalsProvider>.value(value: mockGoalsProvider),
       ],
       child: MaterialApp(home: child),
     );

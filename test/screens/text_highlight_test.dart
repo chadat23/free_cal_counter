@@ -78,6 +78,7 @@ void main() {
     when(mockGoalsProvider.currentGoals).thenReturn(MacroGoals.hardcoded());
     when(mockGoalsProvider.targetFor(any)).thenReturn(MacroGoals.hardcoded());
     when(mockGoalsProvider.settings).thenReturn(GoalSettings.defaultSettings());
+    when(mockGoalsProvider.useNetCarbs).thenReturn(false);
   });
 
   Widget wrapWithProviders(Widget child) {

@@ -204,6 +204,11 @@ class MockGoalsProvider extends _i1.Mock implements _i4.GoalsProvider {
           as bool);
 
   @override
+  bool get useNetCarbs =>
+      (super.noSuchMethod(Invocation.getter(#useNetCarbs), returnValue: false)
+          as bool);
+
+  @override
   bool get hasListeners =>
       (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
           as bool);

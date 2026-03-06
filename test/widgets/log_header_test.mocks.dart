@@ -241,6 +241,21 @@ class MockLogProvider extends _i1.Mock implements _i6.LogProvider {
           as double);
 
   @override
+  double get loggedNetCarbs =>
+      (super.noSuchMethod(Invocation.getter(#loggedNetCarbs), returnValue: 0.0)
+          as double);
+
+  @override
+  double get queuedNetCarbs =>
+      (super.noSuchMethod(Invocation.getter(#queuedNetCarbs), returnValue: 0.0)
+          as double);
+
+  @override
+  double get totalNetCarbs =>
+      (super.noSuchMethod(Invocation.getter(#totalNetCarbs), returnValue: 0.0)
+          as double);
+
+  @override
   List<_i7.FoodPortion> get logQueue =>
       (super.noSuchMethod(
             Invocation.getter(#logQueue),

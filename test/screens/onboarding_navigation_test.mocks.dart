@@ -122,6 +122,11 @@ class MockGoalsProvider extends _i1.Mock implements _i4.GoalsProvider {
           as bool);
 
   @override
+  bool get useNetCarbs =>
+      (super.noSuchMethod(Invocation.getter(#useNetCarbs), returnValue: false)
+          as bool);
+
+  @override
   bool get hasListeners =>
       (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
           as bool);
@@ -648,6 +653,21 @@ class MockLogProvider extends _i1.Mock implements _i14.LogProvider {
   @override
   double get totalFiber =>
       (super.noSuchMethod(Invocation.getter(#totalFiber), returnValue: 0.0)
+          as double);
+
+  @override
+  double get loggedNetCarbs =>
+      (super.noSuchMethod(Invocation.getter(#loggedNetCarbs), returnValue: 0.0)
+          as double);
+
+  @override
+  double get queuedNetCarbs =>
+      (super.noSuchMethod(Invocation.getter(#queuedNetCarbs), returnValue: 0.0)
+          as double);
+
+  @override
+  double get totalNetCarbs =>
+      (super.noSuchMethod(Invocation.getter(#totalNetCarbs), returnValue: 0.0)
           as double);
 
   @override

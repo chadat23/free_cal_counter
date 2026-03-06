@@ -11,15 +11,20 @@ import 'package:meal_of_record/widgets/slidable_portion_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:meal_of_record/providers/goals_provider.dart';
 import 'package:meal_of_record/providers/log_provider.dart';
 import 'meal_widget_test.mocks.dart';
 
-@GenerateMocks([LogProvider])
+@GenerateMocks([LogProvider, GoalsProvider])
 void main() {
   late MockLogProvider mockLogProvider;
 
+  late MockGoalsProvider mockGoalsProvider;
+
   setUp(() {
     mockLogProvider = MockLogProvider();
+    mockGoalsProvider = MockGoalsProvider();
+    when(mockGoalsProvider.useNetCarbs).thenReturn(false);
     // Stub multiselect methods
     when(mockLogProvider.selectedPortionIds).thenReturn({});
     when(mockLogProvider.hasSelectedPortions).thenReturn(false);
@@ -79,6 +84,7 @@ void main() {
       MultiProvider(
         providers: [
           ChangeNotifierProvider<LogProvider>.value(value: mockLogProvider),
+          ChangeNotifierProvider<GoalsProvider>.value(value: mockGoalsProvider),
         ],
         child: MaterialApp(
           home: Scaffold(body: MealWidget(meal: meal)),
@@ -128,6 +134,7 @@ void main() {
       MultiProvider(
         providers: [
           ChangeNotifierProvider<LogProvider>.value(value: mockLogProvider),
+          ChangeNotifierProvider<GoalsProvider>.value(value: mockGoalsProvider),
         ],
         child: MaterialApp(
           home: Scaffold(

@@ -3,9 +3,24 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meal_of_record/models/food.dart';
 import 'package:meal_of_record/models/food_portion.dart';
 import 'package:meal_of_record/models/food_serving.dart';
+import 'package:meal_of_record/providers/goals_provider.dart';
 import 'package:meal_of_record/widgets/portion_widget.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+import 'package:provider/provider.dart';
+
+import 'portion_widget_test.mocks.dart';
+
+@GenerateMocks([GoalsProvider])
 
 void main() {
+  late MockGoalsProvider mockGoalsProvider;
+
+  setUp(() {
+    mockGoalsProvider = MockGoalsProvider();
+    when(mockGoalsProvider.useNetCarbs).thenReturn(false);
+  });
+
   testWidgets('Serving widget displays correctly', (WidgetTester tester) async {
     // Given
     final food = Food(
@@ -24,8 +39,11 @@ void main() {
 
     // When
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(body: PortionWidget(portion: serving)),
+      ChangeNotifierProvider<GoalsProvider>.value(
+        value: mockGoalsProvider,
+        child: MaterialApp(
+          home: Scaffold(body: PortionWidget(portion: serving)),
+        ),
       ),
     );
 

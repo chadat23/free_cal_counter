@@ -176,6 +176,7 @@ void main() {
         anchorWeight: 170.0,
       );
       when(mockGoalsProvider.settings).thenReturn(settings);
+      when(mockGoalsProvider.useNetCarbs).thenReturn(false);
 
       await tester.pumpWidget(
         MultiProvider(

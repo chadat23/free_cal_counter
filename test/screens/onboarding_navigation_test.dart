@@ -144,6 +144,7 @@ void main() {
 
       // Stage 2: Re-pump with Welcome ALREADY seen (simulating next app open)
       when(mockGoalsProvider.hasSeenWelcome).thenReturn(true);
+      when(mockGoalsProvider.useNetCarbs).thenReturn(false);
 
       // Close dialog
       await tester.tap(find.text('Set up Goals'));

@@ -1,21 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
-import 'package:meal_of_record/screens/recipe_edit_screen.dart';
+import 'package:meal_of_record/providers/goals_provider.dart';
 import 'package:meal_of_record/providers/recipe_provider.dart';
+import 'package:meal_of_record/screens/recipe_edit_screen.dart';
 import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 import 'package:meal_of_record/services/database_service.dart';
 
 import 'package:meal_of_record/services/live_database.dart' as live_db;
 import 'package:meal_of_record/services/reference_database.dart' as ref_db;
 import 'package:drift/native.dart';
 
-@GenerateMocks([DatabaseService])
+import 'recipe_edit_screen_test.mocks.dart';
+
+@GenerateMocks([DatabaseService, GoalsProvider])
 void main() {
+  late MockGoalsProvider mockGoalsProvider;
+
   setUpAll(() {
     final liveDb = live_db.LiveDatabase(connection: NativeDatabase.memory());
     final refDb = ref_db.ReferenceDatabase(connection: NativeDatabase.memory());
     DatabaseService.initSingletonForTesting(liveDb, refDb);
+  });
+
+  setUp(() {
+    mockGoalsProvider = MockGoalsProvider();
+    when(mockGoalsProvider.useNetCarbs).thenReturn(false);
   });
 
   testWidgets(
@@ -24,11 +35,12 @@ void main() {
       final provider = RecipeProvider();
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: ChangeNotifierProvider<RecipeProvider>.value(
-            value: provider,
-            child: const RecipeEditScreen(),
-          ),
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider<RecipeProvider>.value(value: provider),
+            ChangeNotifierProvider<GoalsProvider>.value(value: mockGoalsProvider),
+          ],
+          child: const MaterialApp(home: RecipeEditScreen()),
         ),
       );
 

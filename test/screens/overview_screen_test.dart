@@ -93,6 +93,7 @@ void main() {
     when(mockGoalsProvider.hasSeenWelcome).thenReturn(true);
     when(mockGoalsProvider.isGoalsSet).thenReturn(true);
     when(mockGoalsProvider.showUpdateNotification).thenReturn(false);
+    when(mockGoalsProvider.useNetCarbs).thenReturn(false);
   });
 
   Widget createTestWidget() {
@@ -140,6 +141,7 @@ void main() {
 
     testWidgets('hides warning banner when goals are set', (tester) async {
       when(mockGoalsProvider.isGoalsSet).thenReturn(true);
+      when(mockGoalsProvider.useNetCarbs).thenReturn(false);
 
       await tester.pumpWidget(createTestWidget());
       await tester.pump();

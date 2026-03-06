@@ -28,6 +28,7 @@ void main() {
 
     when(mockGoalsProvider.settings).thenReturn(GoalSettings.defaultSettings());
     when(mockGoalsProvider.targetFor(any)).thenReturn(MacroGoals.hardcoded());
+    when(mockGoalsProvider.useNetCarbs).thenReturn(false);
     when(mockNavigationProvider.changeTab(any)).thenReturn(null);
   });
 

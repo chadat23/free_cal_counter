@@ -150,6 +150,21 @@ class MockLogProvider extends _i1.Mock implements _i6.LogProvider {
           as double);
 
   @override
+  double get loggedNetCarbs =>
+      (super.noSuchMethod(Invocation.getter(#loggedNetCarbs), returnValue: 0.0)
+          as double);
+
+  @override
+  double get queuedNetCarbs =>
+      (super.noSuchMethod(Invocation.getter(#queuedNetCarbs), returnValue: 0.0)
+          as double);
+
+  @override
+  double get totalNetCarbs =>
+      (super.noSuchMethod(Invocation.getter(#totalNetCarbs), returnValue: 0.0)
+          as double);
+
+  @override
   List<_i7.FoodPortion> get logQueue =>
       (super.noSuchMethod(
             Invocation.getter(#logQueue),
@@ -574,6 +589,11 @@ class MockRecipeProvider extends _i1.Mock implements _i13.RecipeProvider {
           as double);
 
   @override
+  double get totalNetCarbs =>
+      (super.noSuchMethod(Invocation.getter(#totalNetCarbs), returnValue: 0.0)
+          as double);
+
+  @override
   double get caloriesPerPortion =>
       (super.noSuchMethod(
             Invocation.getter(#caloriesPerPortion),
@@ -803,6 +823,11 @@ class MockGoalsProvider extends _i1.Mock implements _i5.GoalsProvider {
             Invocation.getter(#hasSeenWelcome),
             returnValue: false,
           )
+          as bool);
+
+  @override
+  bool get useNetCarbs =>
+      (super.noSuchMethod(Invocation.getter(#useNetCarbs), returnValue: false)
           as bool);
 
   @override

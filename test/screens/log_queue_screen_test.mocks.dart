@@ -162,6 +162,14 @@ class MockDatabaseService extends _i1.Mock implements _i5.DatabaseService {
           as _i9.Future<_i5.LastLoggedInfo?>);
 
   @override
+  _i9.Future<_i5.LastLoggedInfo?> getLastLoggedInfoForRecipe(int? recipeId) =>
+      (super.noSuchMethod(
+            Invocation.method(#getLastLoggedInfoForRecipe, [recipeId]),
+            returnValue: _i9.Future<_i5.LastLoggedInfo?>.value(),
+          )
+          as _i9.Future<_i5.LastLoggedInfo?>);
+
+  @override
   _i9.Future<_i4.Food?> getFoodByBarcode(String? barcode) =>
       (super.noSuchMethod(
             Invocation.method(#getFoodByBarcode, [barcode]),

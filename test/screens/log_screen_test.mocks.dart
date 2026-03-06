@@ -190,6 +190,21 @@ class MockLogProvider extends _i1.Mock implements _i12.LogProvider {
           as double);
 
   @override
+  double get loggedNetCarbs =>
+      (super.noSuchMethod(Invocation.getter(#loggedNetCarbs), returnValue: 0.0)
+          as double);
+
+  @override
+  double get queuedNetCarbs =>
+      (super.noSuchMethod(Invocation.getter(#queuedNetCarbs), returnValue: 0.0)
+          as double);
+
+  @override
+  double get totalNetCarbs =>
+      (super.noSuchMethod(Invocation.getter(#totalNetCarbs), returnValue: 0.0)
+          as double);
+
+  @override
   List<_i13.FoodPortion> get logQueue =>
       (super.noSuchMethod(
             Invocation.getter(#logQueue),
@@ -858,6 +873,14 @@ class MockDatabaseService extends _i1.Mock implements _i3.DatabaseService {
           as _i15.Future<_i3.LastLoggedInfo?>);
 
   @override
+  _i15.Future<_i3.LastLoggedInfo?> getLastLoggedInfoForRecipe(int? recipeId) =>
+      (super.noSuchMethod(
+            Invocation.method(#getLastLoggedInfoForRecipe, [recipeId]),
+            returnValue: _i15.Future<_i3.LastLoggedInfo?>.value(),
+          )
+          as _i15.Future<_i3.LastLoggedInfo?>);
+
+  @override
   _i15.Future<_i8.Food?> getFoodByBarcode(String? barcode) =>
       (super.noSuchMethod(
             Invocation.method(#getFoodByBarcode, [barcode]),
@@ -1429,6 +1452,11 @@ class MockGoalsProvider extends _i1.Mock implements _i11.GoalsProvider {
             Invocation.getter(#hasSeenWelcome),
             returnValue: false,
           )
+          as bool);
+
+  @override
+  bool get useNetCarbs =>
+      (super.noSuchMethod(Invocation.getter(#useNetCarbs), returnValue: false)
           as bool);
 
   @override

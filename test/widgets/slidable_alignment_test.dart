@@ -2,19 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meal_of_record/models/food.dart';
 import 'package:meal_of_record/models/food_serving.dart';
+import 'package:meal_of_record/providers/goals_provider.dart';
 import 'package:meal_of_record/widgets/search/slidable_recipe_search_result.dart';
 import 'package:meal_of_record/widgets/search/slidable_search_result.dart';
 import 'package:drift/native.dart';
 import 'package:meal_of_record/services/database_service.dart';
 import 'package:meal_of_record/services/live_database.dart' as live_db;
 import 'package:meal_of_record/services/reference_database.dart' as ref_db;
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+import 'package:provider/provider.dart';
 
+import 'slidable_alignment_test.mocks.dart';
+
+@GenerateMocks([GoalsProvider])
 void main() {
+  late MockGoalsProvider mockGoalsProvider;
+
   setUpAll(() async {
     final liveDb = live_db.LiveDatabase(connection: NativeDatabase.memory());
     final refDb = ref_db.ReferenceDatabase(connection: NativeDatabase.memory());
     DatabaseService.initSingletonForTesting(liveDb, refDb);
   });
+
+  setUp(() {
+    mockGoalsProvider = MockGoalsProvider();
+    when(mockGoalsProvider.useNetCarbs).thenReturn(false);
+  });
+
   final testFood = Food(
     id: 1,
     name: 'Apple',
@@ -32,15 +47,18 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SlidableRecipeSearchResult(
-              food: testFood,
-              onTap: (_) {},
-              onEdit: () {},
-              onCopy: () {},
-              onDelete: () {},
-              onDecompose: () {},
+        ChangeNotifierProvider<GoalsProvider>.value(
+          value: mockGoalsProvider,
+          child: MaterialApp(
+            home: Scaffold(
+              body: SlidableRecipeSearchResult(
+                food: testFood,
+                onTap: (_) {},
+                onEdit: () {},
+                onCopy: () {},
+                onDelete: () {},
+                onDecompose: () {},
+              ),
             ),
           ),
         ),
@@ -61,15 +79,18 @@ void main() {
 
     testWidgets('reveals Delete when sliding to the left', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SlidableRecipeSearchResult(
-              food: testFood,
-              onTap: (_) {},
-              onEdit: () {},
-              onCopy: () {},
-              onDelete: () {},
-              onDecompose: () {},
+        ChangeNotifierProvider<GoalsProvider>.value(
+          value: mockGoalsProvider,
+          child: MaterialApp(
+            home: Scaffold(
+              body: SlidableRecipeSearchResult(
+                food: testFood,
+                onTap: (_) {},
+                onEdit: () {},
+                onCopy: () {},
+                onDelete: () {},
+                onDecompose: () {},
+              ),
             ),
           ),
         ),
@@ -92,14 +113,17 @@ void main() {
 
     testWidgets('reveals Edit, Copy when sliding to the right', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SlidableSearchResult(
-              food: foodItem,
-              onTap: (_) {},
-              onEdit: () {},
-              onCopy: () {},
-              onDelete: () {},
+        ChangeNotifierProvider<GoalsProvider>.value(
+          value: mockGoalsProvider,
+          child: MaterialApp(
+            home: Scaffold(
+              body: SlidableSearchResult(
+                food: foodItem,
+                onTap: (_) {},
+                onEdit: () {},
+                onCopy: () {},
+                onDelete: () {},
+              ),
             ),
           ),
         ),
@@ -118,14 +142,17 @@ void main() {
 
     testWidgets('reveals Delete when sliding to the left', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SlidableSearchResult(
-              food: foodItem,
-              onTap: (_) {},
-              onEdit: () {},
-              onCopy: () {},
-              onDelete: () {},
+        ChangeNotifierProvider<GoalsProvider>.value(
+          value: mockGoalsProvider,
+          child: MaterialApp(
+            home: Scaffold(
+              body: SlidableSearchResult(
+                food: foodItem,
+                onTap: (_) {},
+                onEdit: () {},
+                onCopy: () {},
+                onDelete: () {},
+              ),
             ),
           ),
         ),

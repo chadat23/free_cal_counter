@@ -60,6 +60,7 @@ void main() {
     when(mockGoalsProvider.showUpdateNotification).thenReturn(false);
     when(mockGoalsProvider.settings).thenReturn(GoalSettings.defaultSettings());
     when(mockGoalsProvider.targetFor(any)).thenReturn(MacroGoals.hardcoded());
+    when(mockGoalsProvider.useNetCarbs).thenReturn(false);
 
     // Stub RecipeProvider
     when(mockRecipeProvider.totalCalories).thenReturn(0.0);

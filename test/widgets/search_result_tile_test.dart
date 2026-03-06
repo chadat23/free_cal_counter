@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meal_of_record/models/food.dart' as model;
 import 'package:meal_of_record/models/food_portion.dart' as model_portion;
 import 'package:meal_of_record/models/food_serving.dart' as model_unit;
+import 'package:meal_of_record/providers/goals_provider.dart';
 import 'package:meal_of_record/providers/log_provider.dart';
 import 'package:meal_of_record/widgets/search_result_tile.dart';
 import 'package:mockito/annotations.dart';
@@ -16,7 +17,7 @@ import 'package:meal_of_record/services/reference_database.dart';
 
 import 'search_result_tile_test.mocks.dart';
 
-@GenerateMocks([LogProvider])
+@GenerateMocks([LogProvider, GoalsProvider])
 void main() {
   setUpAll(() async {
     // Initialize DatabaseService with in-memory databases for testing
@@ -26,6 +27,13 @@ void main() {
   });
 
   group('SearchResultTile', () {
+    late MockGoalsProvider mockGoalsProvider;
+
+    setUp(() {
+      mockGoalsProvider = MockGoalsProvider();
+      when(mockGoalsProvider.useNetCarbs).thenReturn(false);
+    });
+
     testWidgets('displays food name and nutritional info with unit dropdown', (
       tester,
     ) async {
@@ -66,9 +74,12 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchResultTile(food: food, onTap: (_) {}),
+        ChangeNotifierProvider<GoalsProvider>.value(
+          value: mockGoalsProvider,
+          child: MaterialApp(
+            home: Scaffold(
+              body: SearchResultTile(food: food, onTap: (_) {}),
+            ),
           ),
         ),
       );
@@ -138,8 +149,11 @@ void main() {
         );
 
         await tester.pumpWidget(
-          ChangeNotifierProvider<LogProvider>.value(
-            value: mockLogProvider,
+          MultiProvider(
+            providers: [
+              ChangeNotifierProvider<LogProvider>.value(value: mockLogProvider),
+              ChangeNotifierProvider<GoalsProvider>.value(value: mockGoalsProvider),
+            ],
             child: MaterialApp(
               home: Scaffold(
                 body: SearchResultTile(food: food, onTap: (_) {}),
@@ -191,9 +205,12 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchResultTile(food: food, onTap: (_) {}),
+        ChangeNotifierProvider<GoalsProvider>.value(
+          value: mockGoalsProvider,
+          child: MaterialApp(
+            home: Scaffold(
+              body: SearchResultTile(food: food, onTap: (_) {}),
+            ),
           ),
         ),
       );
@@ -238,13 +255,16 @@ void main() {
 
       // Test with isUpdate = true and a note
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchResultTile(
-              food: food,
-              onTap: (_) {},
-              isUpdate: true,
-              note: 'Logged',
+        ChangeNotifierProvider<GoalsProvider>.value(
+          value: mockGoalsProvider,
+          child: MaterialApp(
+            home: Scaffold(
+              body: SearchResultTile(
+                food: food,
+                onTap: (_) {},
+                isUpdate: true,
+                note: 'Logged',
+              ),
             ),
           ),
         ),
@@ -259,13 +279,16 @@ void main() {
 
       // Test with isUpdate = false and another note
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SearchResultTile(
-              food: food,
-              onTap: (_) {},
-              isUpdate: false,
-              note: 'Only Dumpable',
+        ChangeNotifierProvider<GoalsProvider>.value(
+          value: mockGoalsProvider,
+          child: MaterialApp(
+            home: Scaffold(
+              body: SearchResultTile(
+                food: food,
+                onTap: (_) {},
+                isUpdate: false,
+                note: 'Only Dumpable',
+              ),
             ),
           ),
         ),

@@ -2,10 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meal_of_record/models/food.dart';
 import 'package:meal_of_record/models/recipe_item.dart';
-import 'package:meal_of_record/widgets/recipe_item_widget.dart';
+import 'package:meal_of_record/providers/goals_provider.dart';
 import 'package:meal_of_record/widgets/food_image_widget.dart';
+import 'package:meal_of_record/widgets/recipe_item_widget.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+import 'package:provider/provider.dart';
 
+import 'recipe_item_widget_test.mocks.dart';
+
+@GenerateMocks([GoalsProvider])
 void main() {
+  late MockGoalsProvider mockGoalsProvider;
+
+  setUp(() {
+    mockGoalsProvider = MockGoalsProvider();
+    when(mockGoalsProvider.useNetCarbs).thenReturn(false);
+  });
+
   final mockFoodWithEmoji = Food(
     id: 1,
     name: 'Apple',
@@ -38,8 +52,11 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(body: RecipeItemWidget(item: item)),
+      ChangeNotifierProvider<GoalsProvider>.value(
+        value: mockGoalsProvider,
+        child: MaterialApp(
+          home: Scaffold(body: RecipeItemWidget(item: item)),
+        ),
       ),
     );
 
@@ -62,8 +79,11 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(body: RecipeItemWidget(item: item)),
+        ChangeNotifierProvider<GoalsProvider>.value(
+          value: mockGoalsProvider,
+          child: MaterialApp(
+            home: Scaffold(body: RecipeItemWidget(item: item)),
+          ),
         ),
       );
 

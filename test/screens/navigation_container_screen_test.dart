@@ -43,6 +43,7 @@ void main() {
     when(mockGoalsProvider.currentGoals).thenReturn(MacroGoals.hardcoded());
     when(mockGoalsProvider.settings).thenReturn(GoalSettings.defaultSettings());
     when(mockGoalsProvider.targetFor(any)).thenReturn(MacroGoals.hardcoded());
+    when(mockGoalsProvider.useNetCarbs).thenReturn(false);
 
     // Stub WeightProvider
     when(mockWeightProvider.recentWeights).thenReturn([]);
@@ -174,6 +175,7 @@ void main() {
   testWidgets('shows update dialog when showUpdateNotification is true', (tester) async {
     when(mockGoalsProvider.isGoalsSet).thenReturn(true);
     when(mockGoalsProvider.showUpdateNotification).thenReturn(true);
+    when(mockGoalsProvider.useNetCarbs).thenReturn(false);
 
     await tester.pumpWidget(createWidget());
     await tester.pumpAndSettle();

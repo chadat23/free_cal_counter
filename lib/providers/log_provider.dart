@@ -49,6 +49,11 @@ class LogProvider extends ChangeNotifier {
   double get totalCarbs => loggedCarbs + queuedCarbs;
   double get totalFiber => loggedFiber + queuedFiber;
 
+  // Net carb getters (gross carbs minus fiber, clamped to 0)
+  double get loggedNetCarbs => (loggedCarbs - loggedFiber).clamp(0.0, double.infinity);
+  double get queuedNetCarbs => (queuedCarbs - queuedFiber).clamp(0.0, double.infinity);
+  double get totalNetCarbs => (totalCarbs - totalFiber).clamp(0.0, double.infinity);
+
   List<model.FoodPortion> get logQueue => _logQueue;
   List<model.LoggedPortion> get loggedPortion => _loggedPortion;
   bool get isFasted => _isFasted;

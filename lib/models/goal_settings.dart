@@ -27,6 +27,7 @@ class GoalSettings {
   final bool enableSmartTargets;
   final int correctionWindowDays;
   final int tdeeWindowDays;
+  final bool useNetCarbs;
 
   GoalSettings({
     required this.anchorWeight,
@@ -45,6 +46,7 @@ class GoalSettings {
     this.enableSmartTargets = true,
     this.correctionWindowDays = 30,
     this.tdeeWindowDays = 28,
+    this.useNetCarbs = false,
   });
 
   factory GoalSettings.fromJson(Map<String, dynamic> json) {
@@ -77,6 +79,7 @@ class GoalSettings {
       enableSmartTargets: json['enableSmartTargets'] as bool? ?? true,
       correctionWindowDays: json['correctionWindowDays'] as int? ?? 30,
       tdeeWindowDays: json['tdeeWindowDays'] as int? ?? 28,
+      useNetCarbs: json['useNetCarbs'] as bool? ?? false,
     );
   }
 
@@ -98,6 +101,7 @@ class GoalSettings {
       'enableSmartTargets': enableSmartTargets,
       'correctionWindowDays': correctionWindowDays,
       'tdeeWindowDays': tdeeWindowDays,
+      'useNetCarbs': useNetCarbs,
     };
   }
 
@@ -120,6 +124,7 @@ class GoalSettings {
       enableSmartTargets: true,
       correctionWindowDays: 30,
       tdeeWindowDays: 28,
+      useNetCarbs: false,
     );
   }
 
@@ -141,6 +146,7 @@ class GoalSettings {
     bool? enableSmartTargets,
     int? correctionWindowDays,
     int? tdeeWindowDays,
+    bool? useNetCarbs,
   }) {
     return GoalSettings(
       anchorWeight: anchorWeight ?? this.anchorWeight,
@@ -160,6 +166,7 @@ class GoalSettings {
       enableSmartTargets: enableSmartTargets ?? this.enableSmartTargets,
       correctionWindowDays: correctionWindowDays ?? this.correctionWindowDays,
       tdeeWindowDays: tdeeWindowDays ?? this.tdeeWindowDays,
+      useNetCarbs: useNetCarbs ?? this.useNetCarbs,
     );
   }
 }

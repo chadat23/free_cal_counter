@@ -67,7 +67,9 @@ class _LogScreenState extends State<LogScreen> with RouteAware {
   @override
   Widget build(BuildContext context) {
     final logProvider = Provider.of<LogProvider>(context);
-    final goals = Provider.of<GoalsProvider>(context).currentGoals;
+    final goalsProvider = Provider.of<GoalsProvider>(context);
+    final goals = goalsProvider.currentGoals;
+    final useNetCarbs = goalsProvider.useNetCarbs;
 
     final List<NutritionTarget> nutritionTargets = [
       NutritionTarget(
@@ -96,7 +98,7 @@ class _LogScreenState extends State<LogScreen> with RouteAware {
       ),
       NutritionTarget(
         color: Colors.green,
-        thisAmount: logProvider.loggedCarbs,
+        thisAmount: useNetCarbs ? logProvider.loggedNetCarbs : logProvider.loggedCarbs,
         targetAmount: goals.carbs,
         macroLabel: 'C',
         unitLabel: 'g',

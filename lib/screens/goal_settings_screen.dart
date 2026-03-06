@@ -29,6 +29,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
   late MacroCalculationMode _calcMode;
   late ProteinTargetMode _proteinTargetMode;
   late bool _enableSmartTargets;
+  late bool _useNetCarbs;
   late int _tdeeWindowDays;
   late GoalSettings _initialSettings;
 
@@ -69,6 +70,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
     _calcMode = settings.calculationMode;
     _proteinTargetMode = settings.proteinTargetMode;
     _enableSmartTargets = settings.enableSmartTargets;
+    _useNetCarbs = settings.useNetCarbs;
     _tdeeWindowDays = settings.tdeeWindowDays;
     _initialSettings = settings;
   }
@@ -185,6 +187,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
       enableSmartTargets: _enableSmartTargets,
       correctionWindowDays: int.tryParse(_correctionWindowController.text) ?? 30,
       tdeeWindowDays: _tdeeWindowDays,
+      useNetCarbs: _useNetCarbs,
     );
 
     await goalsProvider.saveSettings(
@@ -298,6 +301,14 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
             value: _enableSmartTargets,
             onChanged: (val) => setState(() => _enableSmartTargets = val),
           ),
+          SwitchListTile(
+            title: const Text('Use Net Carbs'),
+            subtitle: const Text(
+              'Display and track carbs minus fiber.',
+            ),
+            value: _useNetCarbs,
+            onChanged: (val) => setState(() => _useNetCarbs = val),
+          ),
           if (_enableSmartTargets) _buildTdeeWindowSelector(),
           const Divider(height: 20),
           _buildTextField(
@@ -347,7 +358,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
           if (_calcMode == MacroCalculationMode.proteinCarbs)
             _buildTextField(
               controller: _carbController,
-              label: 'Carbs (g)',
+              label: _useNetCarbs ? 'Net Carbs (g)' : 'Carbs (g)',
               keyboardType: TextInputType.number,
             ),
           _buildTextField(

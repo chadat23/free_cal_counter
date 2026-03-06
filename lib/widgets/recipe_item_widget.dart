@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:meal_of_record/models/recipe_item.dart';
+import 'package:meal_of_record/providers/goals_provider.dart';
 import 'package:meal_of_record/widgets/food_image_widget.dart';
+import 'package:provider/provider.dart';
 
 class RecipeItemWidget extends StatelessWidget {
   final RecipeItem item;
@@ -10,10 +12,11 @@ class RecipeItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final useNetCarbs = Provider.of<GoalsProvider>(context, listen: false).useNetCarbs;
     final calories = item.calories * item.grams;
     final protein = item.protein * item.grams;
     final fat = item.fat * item.grams;
-    final carbs = item.carbs * item.grams;
+    final carbs = (useNetCarbs ? item.netCarbs : item.carbs) * item.grams;
     final fiber = item.fiber * item.grams;
 
     return ListTile(

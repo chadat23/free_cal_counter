@@ -245,11 +245,14 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
 
         final divisor = (isRecipe && _isPerServing) ? servings : 1.0;
 
+        final useNetCarbs = goalsProvider.useNetCarbs;
+
         // 1. Item Macros
         final itemValues = QuantityEditUtils.calculatePortionMacros(
           food,
           currentGrams,
           divisor,
+          useNetCarbs: useNetCarbs,
         );
 
         // 2. Parent Macros (Projected)
@@ -263,7 +266,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
           totalFat: isRecipe ? recipeProvider.totalFat : logProvider.totalFat,
           totalCarbs: isRecipe
               ? recipeProvider.totalCarbs
-              : logProvider.totalCarbs,
+              : (useNetCarbs ? logProvider.totalNetCarbs : logProvider.totalCarbs),
           totalFiber: isRecipe
               ? recipeProvider.totalFiber
               : logProvider.totalFiber,
@@ -282,7 +285,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
             'Calories': (dailyGoals['Calories']! - logProvider.totalCalories + food.calories * og).clamp(0, double.infinity),
             'Protein': (dailyGoals['Protein']! - logProvider.totalProtein + food.protein * og).clamp(0, double.infinity),
             'Fat': (dailyGoals['Fat']! - logProvider.totalFat + food.fat * og).clamp(0, double.infinity),
-            'Carbs': (dailyGoals['Carbs']! - logProvider.totalCarbs + food.carbs * og).clamp(0, double.infinity),
+            'Carbs': (dailyGoals['Carbs']! - (useNetCarbs ? logProvider.totalNetCarbs : logProvider.totalCarbs) + (useNetCarbs ? food.netCarbs : food.carbs) * og).clamp(0, double.infinity),
             'Fiber': (dailyGoals['Fiber']! - logProvider.totalFiber + food.fiber * og).clamp(0, double.infinity),
           };
         }
@@ -481,11 +484,13 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
         .replaceAll(RegExp(r'\s+[a-zA-Z].*$'), '')
         .trim();
     final quantity = MathEvaluator.evaluate(text) ?? 0.0;
+    final useNetCarbs = Provider.of<GoalsProvider>(context, listen: false).useNetCarbs;
     return QuantityEditUtils.calculateGrams(
       quantity: quantity,
       food: _food,
       selectedUnit: _selectedUnit,
       selectedTargetIndex: _selectedTargetIndex,
+      useNetCarbs: useNetCarbs,
     );
   }
 
@@ -711,6 +716,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
   }
 
   double _getTotalForTarget(LogProvider provider, int targetIndex) {
+    final useNetCarbs = Provider.of<GoalsProvider>(context, listen: false).useNetCarbs;
     switch (targetIndex) {
       case 1:
         return provider.totalCalories;
@@ -719,7 +725,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
       case 3:
         return provider.totalFat;
       case 4:
-        return provider.totalCarbs;
+        return useNetCarbs ? provider.totalNetCarbs : provider.totalCarbs;
       case 5:
         return provider.totalFiber;
       default:
@@ -728,6 +734,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
   }
 
   double _getFoodMacroPerGram(Food food, int targetIndex) {
+    final useNetCarbs = Provider.of<GoalsProvider>(context, listen: false).useNetCarbs;
     switch (targetIndex) {
       case 1:
         return food.calories;
@@ -736,7 +743,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
       case 3:
         return food.fat;
       case 4:
-        return food.carbs;
+        return useNetCarbs ? food.netCarbs : food.carbs;
       case 5:
         return food.fiber;
       default:

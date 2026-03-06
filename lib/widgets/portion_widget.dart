@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:meal_of_record/models/food_portion.dart';
+import 'package:meal_of_record/providers/goals_provider.dart';
 import 'package:meal_of_record/widgets/food_image_widget.dart';
+import 'package:provider/provider.dart';
 
 class PortionWidget extends StatelessWidget {
   final FoodPortion portion;
@@ -30,11 +32,12 @@ class PortionWidget extends StatelessWidget {
 
     // serving.grams is now the actual weight in grams
     final totalGrams = portion.grams;
+    final useNetCarbs = Provider.of<GoalsProvider>(context, listen: false).useNetCarbs;
 
     final calories = portion.food.calories * totalGrams;
     final protein = portion.food.protein * totalGrams;
     final fat = portion.food.fat * totalGrams;
-    final carbs = portion.food.carbs * totalGrams;
+    final carbs = (useNetCarbs ? portion.food.netCarbs : portion.food.carbs) * totalGrams;
     final fiber = portion.food.fiber * totalGrams;
 
     return InkWell(

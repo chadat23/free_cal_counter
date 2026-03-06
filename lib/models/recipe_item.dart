@@ -49,6 +49,7 @@ class RecipeItem {
   double get fat => isFood ? food!.fat : recipe!.fatPerGram;
   double get carbs => isFood ? food!.carbs : recipe!.carbsPerGram;
   double get fiber => isFood ? food!.fiber : recipe!.fiberPerGram;
+  double get netCarbs => (carbs - fiber).clamp(0.0, double.infinity);
 
   factory RecipeItem.fromJson(Map<String, dynamic> json) {
     return RecipeItem(

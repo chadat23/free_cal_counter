@@ -98,7 +98,7 @@ class NavigationContainerScreen extends StatelessWidget {
             ),
             Text('Protein: ${goalsProvider.currentGoals.protein.toInt()}g'),
             Text('Fat: ${goalsProvider.currentGoals.fat.toInt()}g'),
-            Text('Carbs: ${goalsProvider.currentGoals.carbs.toInt()}g'),
+            Text('${goalsProvider.useNetCarbs ? 'Net Carbs' : 'Carbs'}: ${goalsProvider.currentGoals.carbs.toInt()}g'),
           ],
         ),
         actions: [

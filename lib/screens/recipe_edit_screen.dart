@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:meal_of_record/config/app_router.dart';
+import 'package:meal_of_record/providers/goals_provider.dart';
 import 'package:meal_of_record/providers/recipe_provider.dart';
 import 'package:meal_of_record/models/recipe.dart';
 import 'package:meal_of_record/models/recipe_item.dart';
@@ -627,7 +628,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
             provider.totalCalories,
             provider.totalProtein,
             provider.totalFat,
-            provider.totalCarbs,
+            Provider.of<GoalsProvider>(context, listen: false).useNetCarbs ? provider.totalNetCarbs : provider.totalCarbs,
             provider.totalFiber,
           ),
           const SizedBox(height: 16),
@@ -638,7 +639,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
             provider.caloriesPerPortion,
             provider.totalProtein / provider.servingsCreated,
             provider.totalFat / provider.servingsCreated,
-            provider.totalCarbs / provider.servingsCreated,
+            (Provider.of<GoalsProvider>(context, listen: false).useNetCarbs ? provider.totalNetCarbs : provider.totalCarbs) / provider.servingsCreated,
             provider.totalFiber / provider.servingsCreated,
           ),
         ],

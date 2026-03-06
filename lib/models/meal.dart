@@ -26,4 +26,5 @@ class Meal {
     0,
     (sum, item) => sum + item.portion.food.fiber * item.portion.grams,
   );
+  double get totalNetCarbs => (totalCarbs - totalFiber).clamp(0.0, double.infinity);
 }

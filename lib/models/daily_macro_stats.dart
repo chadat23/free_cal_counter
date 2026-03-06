@@ -83,4 +83,6 @@ class DailyMacroStats {
 
     return statsByDay.values.toList()..sort((a, b) => a.date.compareTo(b.date));
   }
+
+  double get netCarbs => (carbs - fiber).clamp(0.0, double.infinity);
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:meal_of_record/config/app_colors.dart';
 import 'package:meal_of_record/models/food.dart';
 import 'package:meal_of_record/models/food_serving.dart';
-import 'package:meal_of_record/config/app_colors.dart';
+import 'package:meal_of_record/providers/goals_provider.dart';
+import 'package:provider/provider.dart';
 
 /// Shows a bottom sheet with all serving sizes and their calculated macros.
 /// Designed for easy reading, not editing.
@@ -111,10 +113,11 @@ class ServingInfoSheet extends StatelessWidget {
     required double grams,
   }) {
     // Calculate macros for this serving size
+    final useNetCarbs = Provider.of<GoalsProvider>(context, listen: false).useNetCarbs;
     final calories = food.calories * grams;
     final protein = food.protein * grams;
     final fat = food.fat * grams;
-    final carbs = food.carbs * grams;
+    final carbs = (useNetCarbs ? food.netCarbs : food.carbs) * grams;
     final fiber = food.fiber * grams;
 
     return Container(
@@ -137,7 +140,7 @@ class ServingInfoSheet extends StatelessWidget {
           _buildMacroRow('Calories', _formatMacro(calories), 'cal'),
           _buildMacroRow('Protein', _formatMacro(protein), 'g'),
           _buildMacroRow('Fat', _formatMacro(fat), 'g'),
-          _buildMacroRow('Carbs', _formatMacro(carbs), 'g'),
+          _buildMacroRow(useNetCarbs ? 'Net Carbs' : 'Carbs', _formatMacro(carbs), 'g'),
           _buildMacroRow('Fiber', _formatMacro(fiber), 'g'),
         ],
       ),

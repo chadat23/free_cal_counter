@@ -7,6 +7,7 @@ class QuantityEditUtils {
     required Food food,
     required String selectedUnit,
     required int selectedTargetIndex,
+    bool useNetCarbs = false,
   }) {
     if (selectedTargetIndex == 0) {
       // Unit target
@@ -29,7 +30,7 @@ class QuantityEditUtils {
           perGram = food.fat;
           break;
         case 4:
-          perGram = food.carbs;
+          perGram = useNetCarbs ? food.netCarbs : food.carbs;
           break;
         case 5:
           perGram = food.fiber;
@@ -45,13 +46,14 @@ class QuantityEditUtils {
   static Map<String, double> calculatePortionMacros(
     Food food,
     double grams,
-    double divisor,
-  ) {
+    double divisor, {
+    bool useNetCarbs = false,
+  }) {
     return {
       'Calories': (food.calories * grams) / divisor,
       'Protein': (food.protein * grams) / divisor,
       'Fat': (food.fat * grams) / divisor,
-      'Carbs': (food.carbs * grams) / divisor,
+      'Carbs': (useNetCarbs ? food.netCarbs : food.carbs) * grams / divisor,
       'Fiber': (food.fiber * grams) / divisor,
     };
   }

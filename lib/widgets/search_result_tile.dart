@@ -3,6 +3,7 @@ import 'package:meal_of_record/config/app_colors.dart';
 import 'package:meal_of_record/models/food.dart';
 import 'package:meal_of_record/models/food_portion.dart';
 import 'package:meal_of_record/models/food_serving.dart' as model_unit;
+import 'package:meal_of_record/providers/goals_provider.dart';
 import 'package:meal_of_record/providers/log_provider.dart';
 import 'package:meal_of_record/services/database_service.dart';
 import 'package:meal_of_record/widgets/food_image_widget.dart';
@@ -164,10 +165,11 @@ class _SearchResultTileState extends State<SearchResultTile> {
   @override
   Widget build(BuildContext context) {
     final displayGrams = _selectedUnit.gramsPerUnit * _displayQuantity;
+    final useNetCarbs = Provider.of<GoalsProvider>(context, listen: false).useNetCarbs;
     final calories = widget.food.calories * displayGrams;
     final protein = widget.food.protein * displayGrams;
     final fat = widget.food.fat * displayGrams;
-    final carbs = widget.food.carbs * displayGrams;
+    final carbs = (useNetCarbs ? widget.food.netCarbs : widget.food.carbs) * displayGrams;
     final fiber = widget.food.fiber * displayGrams;
 
     return ListTile(

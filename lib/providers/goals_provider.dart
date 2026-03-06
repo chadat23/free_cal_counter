@@ -62,6 +62,7 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
   bool get showUpdateNotification => _showUpdateNotification;
   bool get isGoalsSet => _settings.isSet;
   bool get hasSeenWelcome => _hasSeenWelcome;
+  bool get useNetCarbs => _settings.useNetCarbs;
 
   void dismissNotification() {
     _showUpdateNotification = false;
@@ -236,7 +237,9 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
       targetCalories += _settings.fixedDelta.abs();
     }
 
-    // Derive macros from the user's inputs
+    // Derive macros from the user's inputs.
+    // When useNetCarbs is on, carbTarget is a net value so we gross it up for
+    // calorie math, then store the net value in MacroGoals.carbs for display.
     final macros = _settings.calculationMode == MacroCalculationMode.proteinFat
         ? GoalLogicService.calculateMacrosFromProteinFat(
             targetCalories: targetCalories,
@@ -246,14 +249,22 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
         : GoalLogicService.calculateMacrosFromProteinCarbs(
             targetCalories: targetCalories,
             proteinGrams: _settings.proteinTarget,
-            carbGrams: _settings.carbTarget,
+            carbGrams: _settings.useNetCarbs
+                ? _settings.carbTarget + _settings.fiberTarget
+                : _settings.carbTarget,
           );
+
+    final displayCarbs = _settings.useNetCarbs
+        ? (_settings.calculationMode == MacroCalculationMode.proteinFat
+            ? (macros['carbs']! - _settings.fiberTarget).clamp(0.0, double.infinity)
+            : _settings.carbTarget)
+        : macros['carbs']!;
 
     _currentGoals = MacroGoals(
       calories: macros['calories']!,
       protein: macros['protein']!,
       fat: macros['fat']!,
-      carbs: macros['carbs']!,
+      carbs: displayCarbs,
       fiber: _settings.fiberTarget,
     );
 
@@ -446,7 +457,9 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
       }
     }
 
-    // Derive macros
+    // Derive macros.
+    // When useNetCarbs is on, carbTarget is a net value so we gross it up for
+    // calorie math, then store the net value in MacroGoals.carbs for display.
     final Map<String, double> macros;
     if (settings.calculationMode == MacroCalculationMode.proteinFat) {
       macros = GoalLogicService.calculateMacrosFromProteinFat(
@@ -458,15 +471,23 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
       macros = GoalLogicService.calculateMacrosFromProteinCarbs(
         targetCalories: targetCalories,
         proteinGrams: settings.proteinTarget,
-        carbGrams: settings.carbTarget,
+        carbGrams: settings.useNetCarbs
+            ? settings.carbTarget + settings.fiberTarget
+            : settings.carbTarget,
       );
     }
+
+    final displayCarbs = settings.useNetCarbs
+        ? (settings.calculationMode == MacroCalculationMode.proteinFat
+            ? (macros['carbs']! - settings.fiberTarget).clamp(0.0, double.infinity)
+            : settings.carbTarget)
+        : macros['carbs']!;
 
     final computedGoals = MacroGoals(
       calories: macros['calories']!,
       protein: macros['protein']!,
       fat: macros['fat']!,
-      carbs: macros['carbs']!,
+      carbs: displayCarbs,
       fiber: settings.fiberTarget,
     );
 

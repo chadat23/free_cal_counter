@@ -189,10 +189,12 @@ class _OverviewScreenState extends State<OverviewScreen> {
       return stats.map(selector).toList();
     }
 
+    final useNetCarbs = goalsProvider.useNetCarbs;
+
     final calories = mapField((s) => s.calories);
     final protein = mapField((s) => s.protein);
     final fat = mapField((s) => s.fat);
-    final carbs = mapField((s) => s.carbs);
+    final carbs = mapField((s) => useNetCarbs ? s.netCarbs : s.carbs);
     final fiber = mapField((s) => s.fiber);
 
     // Build per-day target lists from snapshots
@@ -235,7 +237,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
       ),
       NutritionTarget(
         color: Colors.green,
-        thisAmount: todayStats.carbs,
+        thisAmount: useNetCarbs ? todayStats.netCarbs : todayStats.carbs,
         targetAmount: goals.carbs,
         macroLabel: 'C',
         unitLabel: 'g',

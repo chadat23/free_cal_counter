@@ -130,6 +130,8 @@ class Food {
     };
   }
 
+  double get netCarbs => (carbs - fiber).clamp(0.0, double.infinity);
+
   /// Check if the thumbnail refers to a local image
   bool isLocalImage() {
     return thumbnail != null &&

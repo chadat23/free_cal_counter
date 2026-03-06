@@ -414,6 +414,40 @@ class DatabaseService {
     return null;
   }
 
+  /// Returns the last logged unit, quantity, and grams for a recipe.
+  /// Returns null for dump-only recipes (isTemplate = true).
+  Future<LastLoggedInfo?> getLastLoggedInfoForRecipe(int recipeId) async {
+    final query =
+        _liveDb.select(_liveDb.loggedPortions).join([
+            innerJoin(
+              _liveDb.recipes,
+              _liveDb.recipes.id.equalsExp(_liveDb.loggedPortions.recipeId),
+            ),
+          ])
+          ..where(
+            _liveDb.loggedPortions.recipeId.equals(recipeId) &
+                _liveDb.recipes.isTemplate.equals(false),
+          )
+          ..orderBy([
+            OrderingTerm(
+              expression: _liveDb.loggedPortions.logTimestamp,
+              mode: OrderingMode.desc,
+            ),
+          ])
+          ..limit(1);
+
+    final row = await query.getSingleOrNull();
+    if (row != null) {
+      final loggedPortion = row.readTable(_liveDb.loggedPortions);
+      return LastLoggedInfo(
+        unit: loggedPortion.unit,
+        quantity: loggedPortion.quantity,
+        grams: loggedPortion.grams,
+      );
+    }
+    return null;
+  }
+
   Future<model.Food?> getFoodByBarcode(String barcode) async {
     final food = await (_liveDb.select(
       _liveDb.foods,

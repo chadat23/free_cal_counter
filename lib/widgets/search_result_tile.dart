@@ -57,19 +57,27 @@ class _SearchResultTileState extends State<SearchResultTile> {
 
   Future<void> _loadLastLoggedInfo() async {
     try {
-      final lastInfo = await DatabaseService.instance.getLastLoggedInfo(
-        widget.food.id,
-      );
+      final LastLoggedInfo? lastInfo;
+      if (widget.food.source == 'recipe') {
+        lastInfo = await DatabaseService.instance.getLastLoggedInfoForRecipe(
+          widget.food.id,
+        );
+      } else {
+        lastInfo = await DatabaseService.instance.getLastLoggedInfo(
+          widget.food.id,
+        );
+      }
       if (lastInfo != null && mounted) {
+        final info = lastInfo;
         final servingIndex = _availableServings.indexWhere(
-          (s) => s.unit == lastInfo.unit,
+          (s) => s.unit == info.unit,
         );
         if (servingIndex != -1) {
           setState(() {
             final serving = _availableServings.removeAt(servingIndex);
             _availableServings.insert(0, serving);
             _selectedUnit = serving;
-            _displayQuantity = lastInfo.quantity;
+            _displayQuantity = info.quantity;
           });
         }
       }

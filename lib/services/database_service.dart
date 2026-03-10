@@ -1915,11 +1915,15 @@ class DatabaseService {
   /// Query only live database foods by name
   Future<List<model.Food>> searchLiveFoodsByName(String query) async {
     if (query.isEmpty) return [];
-    final lowerCaseQuery = '%${query.toLowerCase()}%';
+    final normalized = query.replaceAll(',', ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
+    final lowerCaseQuery = '%${normalized.toLowerCase()}%';
 
     final liveFoodsData =
         await (_liveDb.select(_liveDb.foods)
-              ..where((f) => f.name.lower().like(lowerCaseQuery))
+              ..where((f) => FunctionCallExpression<String>(
+                'replace',
+                [f.name.lower(), const Constant(','), const Constant(' ')],
+              ).like(lowerCaseQuery))
               ..where((f) => f.hidden.equals(false)))
             .get();
 
@@ -1955,11 +1959,15 @@ class DatabaseService {
   /// Query only reference database foods by name
   Future<List<model.Food>> searchReferenceFoodsByName(String query) async {
     if (query.isEmpty) return [];
-    final lowerCaseQuery = '%${query.toLowerCase()}%';
+    final normalized = query.replaceAll(',', ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
+    final lowerCaseQuery = '%${normalized.toLowerCase()}%';
 
     final refFoodsData = await (_referenceDb.select(
       _referenceDb.foods,
-    )..where((f) => f.name.lower().like(lowerCaseQuery))).get();
+    )..where((f) => FunctionCallExpression<String>(
+      'replace',
+      [f.name.lower(), const Constant(','), const Constant(' ')],
+    ).like(lowerCaseQuery))).get();
 
     final idsToFetch = refFoodsData.map((f) => f.id).toList();
     final servingsMap = await getServingsForFoods(idsToFetch, 'reference');

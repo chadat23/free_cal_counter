@@ -61,11 +61,6 @@ class FoodSearchView extends StatelessWidget {
                 context,
                 listen: false,
               ).addFoodToQueue(portion);
-
-              final calories = portion.grams.toStringAsFixed(0);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Added $calories kcal to log')),
-              );
             }
           }
         },

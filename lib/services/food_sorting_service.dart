@@ -4,6 +4,9 @@ import 'package:meal_of_record/models/food_usage_stats.dart';
 import 'package:meal_of_record/models/recipe.dart';
 
 class FoodSortingService {
+  static String _normalize(String s) =>
+      s.replaceAll(',', ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
+
   /// Sort live foods by fuzzy match quality and weighted usage statistics
   /// Logic from llm_context.md 2.1.3.1: weighted considerations of frequency,
   /// recency, and typical time of day.
@@ -18,8 +21,8 @@ class FoodSortingService {
     final currentHour = now.hour;
 
     final scoredFoods = foods.map((food) {
-      final lowerCaseName = food.name.toLowerCase();
-      final lowerCaseQuery = query.toLowerCase();
+      final lowerCaseName = _normalize(food.name.toLowerCase());
+      final lowerCaseQuery = _normalize(query.toLowerCase());
 
       // 1. Calculate fuzzy match score (lower is better)
       int fuzzyScore;
@@ -103,8 +106,8 @@ class FoodSortingService {
     final currentHour = now.hour;
 
     final scoredRecipes = recipes.map((recipe) {
-      final lowerCaseName = recipe.name.toLowerCase();
-      final lowerCaseQuery = query.toLowerCase();
+      final lowerCaseName = _normalize(recipe.name.toLowerCase());
+      final lowerCaseQuery = _normalize(query.toLowerCase());
 
       // 1. Calculate fuzzy match score (lower is better)
       int fuzzyScore = 0;
@@ -171,11 +174,11 @@ class FoodSortingService {
     if (query.isEmpty || foods.isEmpty) {
       return [];
     }
-    final lowerCaseQuery = query.toLowerCase();
+    final lowerCaseQuery = _normalize(query.toLowerCase());
 
     // Score each food based on match quality
     final scoredFoods = foods.map((food) {
-      final lowerCaseName = food.name.toLowerCase();
+      final lowerCaseName = _normalize(food.name.toLowerCase());
       int score;
 
       if (lowerCaseName == lowerCaseQuery) {

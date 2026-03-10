@@ -26,16 +26,19 @@ class SearchService {
     required this.sortingService,
   });
 
+  static String _normalizeQuery(String q) =>
+      q.replaceAll(',', ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
+
   // Helper function to apply fuzzy matching and sorting
   List<model.Food> _applyFuzzyMatching(String query, List<model.Food> foods) {
     if (query.isEmpty || foods.isEmpty) {
       return [];
     }
-    final lowerCaseQuery = query.toLowerCase();
+    final lowerCaseQuery = _normalizeQuery(query.toLowerCase());
 
     // Score each food based on match quality
     final scoredFoods = foods.map((food) {
-      final lowerCaseName = food.name.toLowerCase();
+      final lowerCaseName = _normalizeQuery(food.name.toLowerCase());
       int score;
 
       if (lowerCaseName == lowerCaseQuery) {
@@ -80,10 +83,12 @@ class SearchService {
       return const SearchResults(foods: [], displayNotes: {});
     }
 
+    final normalizedQuery = _normalizeQuery(query);
+
     // 1. Query live and reference databases separately
-    final liveFoods = await databaseService.searchLiveFoodsByName(query);
+    final liveFoods = await databaseService.searchLiveFoodsByName(normalizedQuery);
     final referenceFoods = await databaseService.searchReferenceFoodsByName(
-      query,
+      normalizedQuery,
     );
 
     // 2. Get usage statistics for live foods
@@ -98,13 +103,13 @@ class SearchService {
     final sortedLiveFoods = sortingService.sortLiveFoods(
       liveFoods,
       foodUsageStats,
-      query,
+      normalizedQuery,
     );
 
     // 5. Sort reference foods with fuzzy matching
     final sortedReferenceFoods = sortingService.sortReferenceFoods(
       filteredReferenceFoods,
-      query,
+      normalizedQuery,
     );
 
     // 6. Combine results: strictly Live first, then Reference

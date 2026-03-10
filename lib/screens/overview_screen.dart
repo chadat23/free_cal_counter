@@ -57,7 +57,6 @@ class _OverviewScreenState extends State<OverviewScreen> {
     }
     _isDataLoading = true;
     _needsReload = false;
-    if (!mounted) return;
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -299,9 +298,50 @@ class _OverviewScreenState extends State<OverviewScreen> {
     );
   }
 
+  List<NutritionTarget> _buildLiveTodayTargets(
+    LogProvider logProvider,
+    bool useNetCarbs,
+  ) {
+    if (_nutritionData.length < 5) return _nutritionData;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final lpDate = logProvider.currentDate;
+    final lpIsToday = DateTime(lpDate.year, lpDate.month, lpDate.day) == today;
+    if (!lpIsToday) return _nutritionData;
+    final src = _nutritionData;
+    return [
+      NutritionTarget(color: src[0].color, thisAmount: logProvider.loggedCalories,
+          targetAmount: src[0].targetAmount, macroLabel: src[0].macroLabel,
+          unitLabel: src[0].unitLabel, dailyAmounts: src[0].dailyAmounts,
+          dailyTargets: src[0].dailyTargets),
+      NutritionTarget(color: src[1].color, thisAmount: logProvider.loggedProtein,
+          targetAmount: src[1].targetAmount, macroLabel: src[1].macroLabel,
+          unitLabel: src[1].unitLabel, dailyAmounts: src[1].dailyAmounts,
+          dailyTargets: src[1].dailyTargets),
+      NutritionTarget(color: src[2].color, thisAmount: logProvider.loggedFat,
+          targetAmount: src[2].targetAmount, macroLabel: src[2].macroLabel,
+          unitLabel: src[2].unitLabel, dailyAmounts: src[2].dailyAmounts,
+          dailyTargets: src[2].dailyTargets),
+      NutritionTarget(color: src[3].color,
+          thisAmount: useNetCarbs ? logProvider.loggedNetCarbs : logProvider.loggedCarbs,
+          targetAmount: src[3].targetAmount, macroLabel: src[3].macroLabel,
+          unitLabel: src[3].unitLabel, dailyAmounts: src[3].dailyAmounts,
+          dailyTargets: src[3].dailyTargets),
+      NutritionTarget(color: src[4].color, thisAmount: logProvider.loggedFiber,
+          targetAmount: src[4].targetAmount, macroLabel: src[4].macroLabel,
+          unitLabel: src[4].unitLabel, dailyAmounts: src[4].dailyAmounts,
+          dailyTargets: src[4].dailyTargets),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ScreenBackground(
+    return Consumer<LogProvider>(
+      builder: (context, logProvider, _) {
+      final useNetCarbs =
+          Provider.of<GoalsProvider>(context, listen: false).useNetCarbs;
+      final liveNutritionData = _buildLiveTodayTargets(logProvider, useNetCarbs);
+      return ScreenBackground(
       appBar: AppBar(
         title: const Text('Overview'),
         backgroundColor: Colors.transparent,
@@ -318,7 +358,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: NutritionTargetsOverviewChart(
-                          nutritionData: _nutritionData,
+                          nutritionData: liveNutritionData,
                           dates: _nutritionDates,
                         ),
                       ),
@@ -345,6 +385,8 @@ class _OverviewScreenState extends State<OverviewScreen> {
           const SearchRibbon(),
         ],
       ),
+    );
+      },
     );
   }
 }

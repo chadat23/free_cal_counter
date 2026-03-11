@@ -23,11 +23,13 @@ samples, guidance on mobile development, and a full API reference.
 Updates:
 v0.2.0
  Features:
+ - Added ability to work in Net Carbs
  - Added portion sharing
  - Added Dumpable Recipe portioning
  - Added Recipe links
  - Better weight smoothing/estimating
  Bugs:
+ - Fixed Overview Macro issue
  - Fixed TDEE window inconsistancies
  - Log multiselect wasn't properly unselecting in screen change
  - 6 months weight graph didn't show data points

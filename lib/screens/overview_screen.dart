@@ -60,7 +60,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final start = today.subtract(const Duration(days: 6)); // Last 7 days
+    final start = DateTime(today.year, today.month, today.day - 6); // Last 7 days
 
     try {
       final logProvider = Provider.of<LogProvider>(context, listen: false);
@@ -77,13 +77,13 @@ class _OverviewScreenState extends State<OverviewScreen> {
         context,
         listen: false,
       );
-      final rangeStart = today.subtract(Duration(days: navProvider.weightRangeDays));
+      final rangeStart = DateTime(today.year, today.month, today.day - navProvider.weightRangeDays);
       final userWindow = goalsProvider.settings.tdeeWindowDays;
-      final analysisStart = rangeStart.subtract(Duration(days: userWindow));
+      final analysisStart = DateTime(rangeStart.year, rangeStart.month, rangeStart.day - userWindow);
 
       final analysisStats = await logProvider.getDailyMacroStats(
         analysisStart,
-        today.subtract(const Duration(days: 1)),
+        DateTime(today.year, today.month, today.day - 1),
       );
       await weightProvider.loadWeights(analysisStart, today);
       final analysisWeights = weightProvider.weights;

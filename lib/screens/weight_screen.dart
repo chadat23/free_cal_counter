@@ -84,8 +84,8 @@ class _WeightScreenState extends State<WeightScreen> {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-    final tomorrow = today.add(const Duration(days: 1));
+    final yesterday = DateTime(today.year, today.month, today.day - 1);
+    final tomorrow = DateTime(today.year, today.month, today.day + 1);
     final checkDate = DateTime(date.year, date.month, date.day);
 
     if (checkDate == today) {
@@ -189,7 +189,7 @@ class _WeightScreenState extends State<WeightScreen> {
           IconButton(
             icon: const Icon(Icons.chevron_left, color: Colors.white),
             onPressed: () => _handleDateChanged(
-              _selectedDate.subtract(const Duration(days: 1)),
+              DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day - 1),
             ),
           ),
           const SizedBox(width: 20),
@@ -216,7 +216,7 @@ class _WeightScreenState extends State<WeightScreen> {
           IconButton(
             icon: const Icon(Icons.chevron_right, color: Colors.white),
             onPressed: () =>
-                _handleDateChanged(_selectedDate.add(const Duration(days: 1))),
+                _handleDateChanged(DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day + 1)),
           ),
         ],
       ),

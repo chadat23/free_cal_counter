@@ -88,7 +88,7 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
       // First time: prepopulate 7 entries (past 6 days + today)
       final today = DateTime(now.year, now.month, now.day);
       for (int i = 6; i >= 0; i--) {
-        final d = today.subtract(Duration(days: i));
+        final d = DateTime(today.year, today.month, today.day - i);
         _targetSnapshots.add({
           'date': _dateToString(d),
           ...goals.toJson(),
@@ -215,7 +215,7 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
     if (_settings.proteinTargetMode == ProteinTargetMode.percentageOfWeight) {
       final now = _clock();
       final today = DateTime(now.year, now.month, now.day);
-      final lookback = today.subtract(Duration(days: _settings.tdeeWindowDays));
+      final lookback = DateTime(today.year, today.month, today.day - _settings.tdeeWindowDays);
       final weights = await _databaseService.getWeightsForRange(lookback, now);
       double referenceWeight = _settings.anchorWeight;
       if (weights.isNotEmpty) {
@@ -295,7 +295,7 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
 
     // Find the most recent Monday (today if Monday, else look back)
     final daysSinceMonday = (today.weekday - DateTime.monday) % 7;
-    final lastMonday = today.subtract(Duration(days: daysSinceMonday));
+    final lastMonday = DateTime(today.year, today.month, today.day - daysSinceMonday);
 
     final lastUpdate = DateTime(
       _settings.lastTargetUpdate.year,
@@ -320,11 +320,9 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
   Future<TargetRecalcResult> recalculateTargets(GoalSettings settings, {bool isInitialSetup = false}) async {
     final now = _clock();
     final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
+    final yesterday = DateTime(today.year, today.month, today.day - 1);
     final userWindow = settings.tdeeWindowDays;
-    // Use DateTime(y, m, d) to ensure midnight and avoid DST issues
-    final rawAnalysisStart = today.subtract(Duration(days: userWindow));
-    final analysisStart = DateTime(rawAnalysisStart.year, rawAnalysisStart.month, rawAnalysisStart.day);
+    final analysisStart = DateTime(today.year, today.month, today.day - userWindow);
 
     // Fetch weights if needed for Smart TDEE OR Dynamic Protein
     // We fetch a broad range to support both inputs

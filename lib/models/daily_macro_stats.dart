@@ -44,12 +44,16 @@ class DailyMacroStats {
   ) {
     // 1. Initialize map with all dates in range to ensure empty days are represented
     final Map<int, DailyMacroStats> statsByDay = {};
-    for (int i = 0; i <= end.difference(start).inDays; i++) {
+    // Use UTC to compute day count — avoids DST causing inDays to be one short
+    final startUtc = DateTime.utc(start.year, start.month, start.day);
+    final endUtc = DateTime.utc(end.year, end.month, end.day);
+    final dayCount = endUtc.difference(startUtc).inDays;
+    for (int i = 0; i <= dayCount; i++) {
       final date = DateTime(
         start.year,
         start.month,
-        start.day,
-      ).add(Duration(days: i));
+        start.day + i,
+      );
       // Key by start of day milliseconds for easy lookup
       final dateKey = DateTime(
         date.year,

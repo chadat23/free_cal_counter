@@ -200,8 +200,8 @@ class GoalLogicService {
   }) {
     final threshold = minDays ?? (windowDays * 0.7).ceil();
     final today = now ?? DateTime.now();
-    final cutoff = DateTime(today.year, today.month, today.day)
-        .subtract(Duration(days: windowDays));
+    final todayDate = DateTime(today.year, today.month, today.day);
+    final cutoff = DateTime(todayDate.year, todayDate.month, todayDate.day - windowDays);
     final recentCount = weights.where((w) {
       final d = DateTime(w.date.year, w.date.month, w.date.day);
       return !d.isBefore(cutoff);
@@ -237,12 +237,14 @@ class GoalLogicService {
     // Find earliest weight in weightMap to compute daysOfData
     if (weightMap.isEmpty) return null;
     final earliestWeight = weightMap.keys.reduce((a, b) => a.isBefore(b) ? a : b);
-    final daysOfData = tdeeDate.difference(earliestWeight).inDays;
+    final tdeeDateUtc = DateTime.utc(tdeeDate.year, tdeeDate.month, tdeeDate.day);
+    final earliestUtc = DateTime.utc(earliestWeight.year, earliestWeight.month, earliestWeight.day);
+    final daysOfData = tdeeDateUtc.difference(earliestUtc).inDays;
 
     final effectiveWin = effectiveWindow(tdeeWindow, daysOfData);
     if (effectiveWin == 0) return null;
 
-    final windowStart = tdeeDate.subtract(Duration(days: effectiveWin));
+    final windowStart = DateTime(tdeeDate.year, tdeeDate.month, tdeeDate.day - effectiveWin);
 
     // Build parallel arrays from windowStart to dt-1
     final List<double> dailyWeights = [];
@@ -251,7 +253,7 @@ class GoalLogicService {
     final List<Weight> weightsInWindow = [];
 
     var current = windowStart;
-    final yesterday = tdeeDate.subtract(const Duration(days: 1));
+    final yesterday = DateTime(tdeeDate.year, tdeeDate.month, tdeeDate.day - 1);
     while (!current.isAfter(yesterday)) {
       final dateOnly = DateTime(current.year, current.month, current.day);
       final w = weightMap[dateOnly] ?? 0.0;

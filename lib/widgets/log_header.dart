@@ -26,8 +26,8 @@ class _LogHeaderState extends State<LogHeader> {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-    final tomorrow = today.add(const Duration(days: 1));
+    final yesterday = DateTime(today.year, today.month, today.day - 1);
+    final tomorrow = DateTime(today.year, today.month, today.day + 1);
     final checkDate = DateTime(date.year, date.month, date.day);
 
     if (checkDate == today) {
@@ -58,7 +58,7 @@ class _LogHeaderState extends State<LogHeader> {
                 icon: const Icon(Icons.chevron_left, color: Colors.white),
                 onPressed: () {
                   widget.onDateChanged(
-                    widget.date.subtract(const Duration(days: 1)),
+                    DateTime(widget.date.year, widget.date.month, widget.date.day - 1),
                   );
                 },
               ),
@@ -76,7 +76,7 @@ class _LogHeaderState extends State<LogHeader> {
                 icon: const Icon(Icons.chevron_right, color: Colors.white),
                 onPressed: () {
                   widget.onDateChanged(
-                    widget.date.add(const Duration(days: 1)),
+                    DateTime(widget.date.year, widget.date.month, widget.date.day + 1),
                   );
                 },
               ),

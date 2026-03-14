@@ -211,62 +211,11 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
   }) async {
     _settings = newSettings.copyWith(isSet: true, lastTargetUpdate: _clock());
 
-    // Dynamic protein: resolve weight-based protein before computing macros
-    if (_settings.proteinTargetMode == ProteinTargetMode.percentageOfWeight) {
-      final now = _clock();
-      final today = DateTime(now.year, now.month, now.day);
-      final lookback = DateTime(today.year, today.month, today.day - _settings.tdeeWindowDays);
-      final weights = await _databaseService.getWeightsForRange(lookback, now);
-      double referenceWeight = _settings.anchorWeight;
-      if (weights.isNotEmpty) {
-        weights.sort((a, b) => a.date.compareTo(b.date));
-        referenceWeight = weights.last.weight;
-      }
-      if (referenceWeight > 0) {
-        _settings = _settings.copyWith(
-          proteinTarget: referenceWeight * _settings.proteinMultiplier,
-        );
-      }
-    }
-
-    // Compute target calories from the displayed TDEE + mode adjustment
-    double targetCalories = _settings.maintenanceCaloriesStart;
-    if (_settings.mode == GoalMode.lose) {
-      targetCalories -= _settings.fixedDelta.abs();
-    } else if (_settings.mode == GoalMode.gain) {
-      targetCalories += _settings.fixedDelta.abs();
-    }
-
-    // Derive macros from the user's inputs.
-    // When useNetCarbs is on, carbTarget is a net value so we gross it up for
-    // calorie math, then store the net value in MacroGoals.carbs for display.
-    final macros = _settings.calculationMode == MacroCalculationMode.proteinFat
-        ? GoalLogicService.calculateMacrosFromProteinFat(
-            targetCalories: targetCalories,
-            proteinGrams: _settings.proteinTarget,
-            fatGrams: _settings.fatTarget,
-          )
-        : GoalLogicService.calculateMacrosFromProteinCarbs(
-            targetCalories: targetCalories,
-            proteinGrams: _settings.proteinTarget,
-            carbGrams: _settings.useNetCarbs
-                ? _settings.carbTarget + _settings.fiberTarget
-                : _settings.carbTarget,
-          );
-
-    final displayCarbs = _settings.useNetCarbs
-        ? (_settings.calculationMode == MacroCalculationMode.proteinFat
-            ? (macros['carbs']! - _settings.fiberTarget).clamp(0.0, double.infinity)
-            : _settings.carbTarget)
-        : macros['carbs']!;
-
-    _currentGoals = MacroGoals(
-      calories: macros['calories']!,
-      protein: macros['protein']!,
-      fat: macros['fat']!,
-      carbs: displayCarbs,
-      fiber: _settings.fiberTarget,
-    );
+    // Delegate to recalculateTargets so that all modes (including maintain
+    // drift correction) are handled consistently in one place.
+    final result = await recalculateTargets(_settings, isInitialSetup: isInitialSetup);
+    _settings = result.settings;
+    _currentGoals = result.goals;
 
     await _saveToPrefs();
     await _saveTargetSnapshot();
@@ -413,12 +362,14 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
 
         // Apply mode
         if (settings.mode == GoalMode.maintain) {
-          // Drift correction: adjust calories to steer weight back to anchor
+          // Drift correction: adjust calories to steer weight back to anchor.
+          // If over anchor weight, drift > 0, so we subtract calories to create
+          // a deficit; if under, drift < 0, so we add calories to create a surplus.
           final double C = GoalLogicService.kCalPerLb;
           final drift = kalmanWeight - settings.anchorWeight;
           final correctionCals = drift * C /
               settings.correctionWindowDays;
-          targetCalories = kalmanTDEE + correctionCals;
+          targetCalories = kalmanTDEE - correctionCals;
         } else {
           double delta = settings.fixedDelta;
           if (settings.mode == GoalMode.lose) {

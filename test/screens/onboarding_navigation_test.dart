@@ -45,8 +45,16 @@ void main() {
     when(
       mockLogProvider.getDailyMacroStats(any, any),
     ).thenAnswer((_) async => []);
+    when(mockLogProvider.currentDate).thenReturn(DateTime(2024, 1, 15));
     when(mockGoalsProvider.currentGoals).thenReturn(MacroGoals.hardcoded());
     when(mockGoalsProvider.targetFor(any)).thenReturn(MacroGoals.hardcoded());
+    when(mockGoalsProvider.useNetCarbs).thenReturn(false);
+    when(mockGoalsProvider.showUpdateNotification).thenReturn(false);
+    when(mockNavigationProvider.selectedIndex).thenReturn(0);
+    when(mockNavigationProvider.showConsumed).thenReturn(true);
+    when(mockNavigationProvider.weightRangeDays).thenReturn(7);
+    when(mockNavigationProvider.weightRangeLabel).thenReturn('1 wk');
+    when(mockNavigationProvider.changeTab(any)).thenReturn(null);
   });
 
   testWidgets('Saving initial goals should return to Overview screen (tab 0)', (

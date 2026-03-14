@@ -17,6 +17,15 @@ class BackupConfigService {
   // Failure tracking
   static const String _keyConsecutiveFailures = 'backup_consecutive_failures';
 
+  // Local backup configuration keys
+  static const String _keyLocalBackupEnabled = 'local_backup_enabled';
+  static const String _keyLocalBackupPath = 'local_backup_path';
+  static const String _keyLocalBackupLastTime = 'local_backup_last_time';
+  static const String _keyLocalBackupScheduledHour =
+      'local_backup_scheduled_hour';
+  static const String _keyLocalBackupScheduledMinute =
+      'local_backup_scheduled_minute';
+
   // Secure storage keys
   static const String _keyNasUsername = 'nas_username';
   static const String _keyNasPassword = 'nas_password';
@@ -172,6 +181,97 @@ class BackupConfigService {
   Future<void> clearNasCredentials() async {
     await _secureStorage.delete(key: _keyNasUsername);
     await _secureStorage.delete(key: _keyNasPassword);
+  }
+
+  // --- Local Backup Configuration ---
+
+  Future<void> setLocalBackupEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyLocalBackupEnabled, enabled);
+  }
+
+  Future<bool> isLocalBackupEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyLocalBackupEnabled) ?? false;
+  }
+
+  Future<void> setLocalBackupPath(String? path) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (path != null) {
+      await prefs.setString(_keyLocalBackupPath, path);
+    } else {
+      await prefs.remove(_keyLocalBackupPath);
+    }
+  }
+
+  Future<String?> getLocalBackupPath() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyLocalBackupPath);
+  }
+
+  Future<void> updateLocalBackupLastTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(
+      _keyLocalBackupLastTime,
+      DateTime.now().millisecondsSinceEpoch,
+    );
+  }
+
+  Future<DateTime?> getLocalBackupLastTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    final ms = prefs.getInt(_keyLocalBackupLastTime);
+    return ms != null ? DateTime.fromMillisecondsSinceEpoch(ms) : null;
+  }
+
+  /// Set scheduled time for local backup. Pass null to clear (run on any open).
+  Future<void> setLocalBackupScheduledTime(int? hour, int? minute) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (hour != null && minute != null) {
+      await prefs.setInt(_keyLocalBackupScheduledHour, hour);
+      await prefs.setInt(_keyLocalBackupScheduledMinute, minute);
+    } else {
+      await prefs.remove(_keyLocalBackupScheduledHour);
+      await prefs.remove(_keyLocalBackupScheduledMinute);
+    }
+  }
+
+  /// Returns (hour, minute) or null if no scheduled time is set.
+  Future<(int, int)?> getLocalBackupScheduledTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hour = prefs.getInt(_keyLocalBackupScheduledHour);
+    final minute = prefs.getInt(_keyLocalBackupScheduledMinute);
+    if (hour != null && minute != null) return (hour, minute);
+    return null;
+  }
+
+  Future<bool> isLocalBackupConfigured() async {
+    final path = await getLocalBackupPath();
+    return path != null && path.isNotEmpty;
+  }
+
+  /// Returns true if local backup should run now based on the schedule.
+  /// If no scheduled time, uses 24-hour cooldown. If scheduled, runs once
+  /// after the scheduled time each day.
+  Future<bool> shouldRunLocalBackup() async {
+    final lastBackup = await getLocalBackupLastTime();
+    final schedule = await getLocalBackupScheduledTime();
+
+    if (schedule == null) {
+      // No schedule: use 24-hour cooldown
+      if (lastBackup == null) return true;
+      return DateTime.now().difference(lastBackup) >= const Duration(hours: 24);
+    }
+
+    final (hour, minute) = schedule;
+    final now = DateTime.now();
+    final scheduledToday = DateTime(now.year, now.month, now.day, hour, minute);
+
+    // Haven't reached scheduled time today
+    if (now.isBefore(scheduledToday)) return false;
+
+    // Run if we've never backed up, or last backup was before today's schedule
+    if (lastBackup == null) return true;
+    return lastBackup.isBefore(scheduledToday);
   }
 
   /// Returns true if host, path, and credentials are all set.

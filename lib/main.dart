@@ -64,8 +64,9 @@ class _MyAppState extends State<MyApp> {
       }
       debugPrint('MyApp: Initialization complete.');
 
-      // Fire-and-forget: attempt auto-backup if conditions are met
+      // Fire-and-forget: attempt auto-backups if conditions are met
       tryAutoBackup();
+      tryAutoLocalBackup();
 
       // Check for repeated backup failures from previous sessions
       _checkBackupWarning();

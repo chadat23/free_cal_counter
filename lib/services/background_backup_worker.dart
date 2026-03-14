@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:meal_of_record/services/backup_config_service.dart';
 import 'package:meal_of_record/services/database_service.dart';
@@ -80,6 +81,78 @@ Future<bool> tryAutoBackup({
     try {
       await config.recordBackupFailure();
     } catch (_) {}
+    return false;
+  }
+}
+
+/// Attempts an automatic local folder backup if all conditions are met:
+/// enabled, path configured, data is dirty, and schedule/cooldown allows it.
+///
+/// Writes a fixed filename `meal_of_record_backup.zip`, overwriting any
+/// previous backup so that external tools (e.g. Syncthing) handle versioning.
+///
+/// If [force] is true, skips the dirty and timing checks.
+///
+/// Runs silently — logs via debugPrint but never throws.
+Future<bool> tryAutoLocalBackup({
+  BackupConfigService? configService,
+  bool force = false,
+}) async {
+  final config = configService ?? BackupConfigService.instance;
+
+  try {
+    final isEnabled = await config.isLocalBackupEnabled();
+    if (!isEnabled) {
+      debugPrint('tryAutoLocalBackup: Local backup disabled. Skipping.');
+      return false;
+    }
+
+    final isConfigured = await config.isLocalBackupConfigured();
+    if (!isConfigured) {
+      debugPrint('tryAutoLocalBackup: No backup path configured. Skipping.');
+      return false;
+    }
+
+    if (!force) {
+      final isDirty = await config.isDirty();
+      if (!isDirty) {
+        debugPrint('tryAutoLocalBackup: Database not dirty. Skipping.');
+        return false;
+      }
+
+      final shouldRun = await config.shouldRunLocalBackup();
+      if (!shouldRun) {
+        debugPrint('tryAutoLocalBackup: Schedule/cooldown check failed. Skipping.');
+        return false;
+      }
+    }
+
+    final backupPath = await config.getLocalBackupPath();
+    if (backupPath == null) return false;
+
+    debugPrint('tryAutoLocalBackup: Starting backup...');
+    final zipFile = await DatabaseService.instance.exportBackupAsZip();
+
+    try {
+      final destDir = Directory(backupPath);
+      if (!await destDir.exists()) {
+        await destDir.create(recursive: true);
+      }
+
+      final destFile = File('$backupPath/meal_of_record_backup.zip');
+      await zipFile.copy(destFile.path);
+    } finally {
+      try {
+        await zipFile.delete();
+      } catch (_) {}
+    }
+
+    await config.clearDirty();
+    await config.updateLocalBackupLastTime();
+    debugPrint('tryAutoLocalBackup: Backup successful!');
+    return true;
+  } catch (e) {
+    debugPrint('tryAutoLocalBackup: Error: $e');
     return false;
   }
 }

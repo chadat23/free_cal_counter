@@ -38,6 +38,12 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
   DateTime? _lastBackupTime;
   bool _isLoadingSettings = true;
 
+  // Local Backup State
+  bool _isLocalBackupEnabled = false;
+  String? _localBackupPath;
+  DateTime? _localBackupLastTime;
+  (int, int)? _localBackupScheduledTime;
+
   late final NasBackupService _nasService;
   late final BackupConfigService _backupConfigService;
 
@@ -57,6 +63,12 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
     final retention = await config.getRetentionCount();
     final lastTime = await config.getLastBackupTime();
     final configured = await config.isNasConfigured();
+
+    // Local backup settings
+    final localEnabled = await config.isLocalBackupEnabled();
+    final localPath = await config.getLocalBackupPath();
+    final localLastTime = await config.getLocalBackupLastTime();
+    final localSchedule = await config.getLocalBackupScheduledTime();
 
     String? displayAddr;
     String? connNote;
@@ -88,6 +100,10 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
         _nasDisplayAddress = displayAddr;
         _nasConnectionNote = connNote;
         _isLoadingSettings = false;
+        _isLocalBackupEnabled = localEnabled;
+        _localBackupPath = localPath;
+        _localBackupLastTime = localLastTime;
+        _localBackupScheduledTime = localSchedule;
       });
     }
   }
@@ -319,6 +335,80 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
     await config.setNasAllowSelfSigned(allowSelfSigned);
     if (username.isNotEmpty && password.isNotEmpty) {
       await config.saveNasCredentials(username.trim(), password);
+    }
+  }
+
+  Future<void> _toggleLocalBackup(bool value) async {
+    if (value && _localBackupPath == null) {
+      final picked = await _pickLocalFolder();
+      if (picked == null) return;
+    }
+    await _backupConfigService.setLocalBackupEnabled(value);
+    if (value) {
+      tryAutoLocalBackup(force: true);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Local backup enabled!')),
+        );
+      }
+    }
+    await _loadSettings();
+  }
+
+  Future<String?> _pickLocalFolder() async {
+    final path = await FilePicker.platform.getDirectoryPath(
+      dialogTitle: 'Select Local Backup Folder',
+    );
+    if (path != null) {
+      await _backupConfigService.setLocalBackupPath(path);
+      await _loadSettings();
+    }
+    return path;
+  }
+
+  Future<void> _showLocalBackupTimePicker() async {
+    final current = _localBackupScheduledTime;
+    final initialTime = current != null
+        ? TimeOfDay(hour: current.$1, minute: current.$2)
+        : const TimeOfDay(hour: 8, minute: 0);
+
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initialTime,
+      helpText: 'Schedule daily backup time',
+    );
+
+    if (picked != null) {
+      await _backupConfigService.setLocalBackupScheduledTime(
+        picked.hour,
+        picked.minute,
+      );
+      await _loadSettings();
+    }
+  }
+
+  Future<void> _clearLocalBackupSchedule() async {
+    await _backupConfigService.setLocalBackupScheduledTime(null, null);
+    await _loadSettings();
+  }
+
+  Future<void> _backupToLocalNow() async {
+    setState(() => _isRestoring = true);
+    try {
+      final success = await tryAutoLocalBackup(force: true);
+      if (!mounted) return;
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Local backup successful!')),
+        );
+        await _loadSettings();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Local backup failed.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isRestoring = false);
     }
   }
 
@@ -656,6 +746,136 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                 ),
               ],
             ),
+    );
+  }
+
+  Widget _buildLocalBackupCard() {
+    if (_isLoadingSettings) return const SizedBox.shrink();
+
+    final schedule = _localBackupScheduledTime;
+    final scheduleLabel = schedule != null
+        ? TimeOfDay(hour: schedule.$1, minute: schedule.$2).format(context)
+        : null;
+
+    return Card(
+      color: Colors.grey[900],
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.folder_special, color: Colors.teal),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Local Backup',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Switch(
+                  value: _isLocalBackupEnabled,
+                  onChanged: _toggleLocalBackup,
+                  activeColor: Colors.teal,
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 36.0, top: 4.0),
+              child: Text(
+                'Overwrites a single file — pair with Syncthing for versioning.',
+                style: const TextStyle(fontSize: 11, color: Colors.grey),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.only(left: 36.0),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.folder_open, size: 16),
+                    label: Text(
+                      _localBackupPath != null ? 'Change Folder' : 'Select Folder',
+                    ),
+                    onPressed: _pickLocalFolder,
+                  ),
+                  if (_isLocalBackupEnabled)
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.backup, size: 16),
+                      label: const Text('Backup Now'),
+                      onPressed: _backupToLocalNow,
+                    ),
+                ],
+              ),
+            ),
+            if (_localBackupPath != null) ...[
+              Padding(
+                padding: const EdgeInsets.only(left: 36.0, top: 6.0),
+                child: Text(
+                  _localBackupPath!,
+                  style: const TextStyle(fontSize: 11, color: Colors.white70),
+                ),
+              ),
+            ],
+            if (_isLocalBackupEnabled) ...[
+              const Divider(color: Colors.white24),
+              Row(
+                children: [
+                  const Icon(Icons.schedule, size: 16, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      scheduleLabel != null
+                          ? 'Scheduled daily at $scheduleLabel'
+                          : 'Runs once a day when app opens',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: _showLocalBackupTimePicker,
+                    child: Text(
+                      scheduleLabel != null ? 'Change' : 'Set Time',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ),
+                  if (scheduleLabel != null)
+                    TextButton(
+                      onPressed: _clearLocalBackupSchedule,
+                      child: const Text(
+                        'Clear',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    ),
+                ],
+              ),
+            ],
+            if (_localBackupLastTime != null) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.black26,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.check_circle, size: 16, color: Colors.green),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Last backup: ${DateFormat('MM/dd HH:mm').format(_localBackupLastTime!)}',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 

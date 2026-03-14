@@ -24,6 +24,10 @@ void main() {
     when(mockConfigService.getRetentionCount()).thenAnswer((_) async => 7);
     when(mockConfigService.getLastBackupTime()).thenAnswer((_) async => null);
     when(mockConfigService.isNasConfigured()).thenAnswer((_) async => false);
+    when(mockConfigService.isLocalBackupEnabled()).thenAnswer((_) async => false);
+    when(mockConfigService.getLocalBackupPath()).thenAnswer((_) async => null);
+    when(mockConfigService.getLocalBackupLastTime()).thenAnswer((_) async => null);
+    when(mockConfigService.getLocalBackupScheduledTime()).thenAnswer((_) async => null);
   });
 
   Widget createSubject() {

@@ -31,6 +31,7 @@ v0.2.0
  Bugs:
  - Fixed Overview Macro issue
  - Fixed TDEE window inconsistancies
+ - Fixed Mananance Calorie drift bug
  - Log multiselect wasn't properly unselecting in screen change
  - 6 months weight graph didn't show data points
  - OFF Log Queue replacing each other

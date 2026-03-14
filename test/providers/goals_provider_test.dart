@@ -284,16 +284,114 @@ void main() {
       expect(provider.currentGoals.calories, closeTo(2000.0, 100.0));
     });
 
-    test('maintain mode: target = Kalman TDEE', () async {
+    test('maintain mode at anchor weight: target = Kalman TDEE', () async {
       final now = DateTime(2024, 1, 15, 10);
       final provider = await createWarmProvider(
         clock: () => now,
         settings: baseSettings(mode: GoalMode.maintain),
+        weightValue: 100.0, // equals anchorWeight: 100.0 → drift = 0
       );
 
-      // With no logged intake DTOs, Kalman gets intakeIsValid=false everywhere,
-      // so TDEE stays near initial (2000). Target = TDEE in maintain mode.
+      // drift = 0, so no correction. Target = TDEE.
       expect(provider.currentGoals.calories, closeTo(2000.0, 100.0));
+    });
+
+    test('maintain mode above anchor weight: target < TDEE (deficit to drift down)', () async {
+      // NOTE: createWarmProvider/createProvider reset mocks internally, so we
+      // wire up the GoalsProvider directly to ensure weight data reaches Kalman.
+      final now = DateTime(2024, 1, 15, 10); // Monday
+      // 2 lbs over target, 30-day correction window → deficit = 2*3500/30 ≈ 233 cal/day
+      const correctionWindowDays = 30;
+      const anchorWeight = 100.0;
+      const currentWeight = 102.0; // 2 lbs over
+      const expectedCorrection = (currentWeight - anchorWeight) * 3500 / correctionWindowDays;
+
+      final settings = GoalSettings(
+        anchorWeight: anchorWeight,
+        maintenanceCaloriesStart: 2000,
+        proteinTarget: 150,
+        fatTarget: 70,
+        carbTarget: 200,
+        mode: GoalMode.maintain,
+        calculationMode: MacroCalculationMode.proteinCarbs,
+        proteinTargetMode: ProteinTargetMode.fixed,
+        proteinMultiplier: 1.0,
+        fixedDelta: 0,
+        lastTargetUpdate: DateTime(2024, 1, 1), // old → triggers Monday recalc
+        fiberTarget: 37.0,
+        enableSmartTargets: true,
+        correctionWindowDays: correctionWindowDays,
+      );
+
+      SharedPreferences.setMockInitialValues({
+        'goal_settings': jsonEncode(settings.toJson()),
+      });
+      final weights = buildRecentWeights(now, 20, weight: currentWeight);
+      when(mockDatabaseService.getWeightsForRange(any, any))
+          .thenAnswer((_) async => weights);
+      when(mockDatabaseService.getLoggedMacrosForDateRange(any, any))
+          .thenAnswer((_) async => []);
+
+      final provider = GoalsProvider(
+        databaseService: mockDatabaseService,
+        clock: () => now,
+      );
+      await Future.delayed(Duration.zero);
+
+      // TDEE stays near 2000 (no valid intake). Target should be below TDEE.
+      expect(provider.currentGoals.calories, lessThan(2000.0));
+      expect(
+        provider.currentGoals.calories,
+        closeTo(2000.0 - expectedCorrection, 100.0),
+      );
+    });
+
+    test('maintain mode below anchor weight: target > TDEE (surplus to drift up)', () async {
+      final now = DateTime(2024, 1, 15, 10); // Monday
+      // 2 lbs under target, 30-day correction window → surplus = 2*3500/30 ≈ 233 cal/day
+      const correctionWindowDays = 30;
+      const anchorWeight = 100.0;
+      const currentWeight = 98.0; // 2 lbs under
+      const expectedCorrection = (currentWeight - anchorWeight) * 3500 / correctionWindowDays; // negative
+
+      final settings = GoalSettings(
+        anchorWeight: anchorWeight,
+        maintenanceCaloriesStart: 2000,
+        proteinTarget: 150,
+        fatTarget: 70,
+        carbTarget: 200,
+        mode: GoalMode.maintain,
+        calculationMode: MacroCalculationMode.proteinCarbs,
+        proteinTargetMode: ProteinTargetMode.fixed,
+        proteinMultiplier: 1.0,
+        fixedDelta: 0,
+        lastTargetUpdate: DateTime(2024, 1, 1), // old → triggers Monday recalc
+        fiberTarget: 37.0,
+        enableSmartTargets: true,
+        correctionWindowDays: correctionWindowDays,
+      );
+
+      SharedPreferences.setMockInitialValues({
+        'goal_settings': jsonEncode(settings.toJson()),
+      });
+      final weights = buildRecentWeights(now, 20, weight: currentWeight);
+      when(mockDatabaseService.getWeightsForRange(any, any))
+          .thenAnswer((_) async => weights);
+      when(mockDatabaseService.getLoggedMacrosForDateRange(any, any))
+          .thenAnswer((_) async => []);
+
+      final provider = GoalsProvider(
+        databaseService: mockDatabaseService,
+        clock: () => now,
+      );
+      await Future.delayed(Duration.zero);
+
+      // TDEE stays near 2000 (no valid intake). Target should be above TDEE.
+      expect(provider.currentGoals.calories, greaterThan(2000.0));
+      expect(
+        provider.currentGoals.calories,
+        closeTo(2000.0 - expectedCorrection, 100.0),
+      );
     });
 
     test('lose mode: target = Kalman TDEE - fixedDelta', () async {

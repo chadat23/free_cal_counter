@@ -311,6 +311,90 @@ class MockBackupConfigService extends _i1.Mock
           as _i3.Future<void>);
 
   @override
+  _i3.Future<void> setLocalBackupEnabled(bool? enabled) =>
+      (super.noSuchMethod(
+            Invocation.method(#setLocalBackupEnabled, [enabled]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<bool> isLocalBackupEnabled() =>
+      (super.noSuchMethod(
+            Invocation.method(#isLocalBackupEnabled, []),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
+
+  @override
+  _i3.Future<void> setLocalBackupPath(String? path) =>
+      (super.noSuchMethod(
+            Invocation.method(#setLocalBackupPath, [path]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<String?> getLocalBackupPath() =>
+      (super.noSuchMethod(
+            Invocation.method(#getLocalBackupPath, []),
+            returnValue: _i3.Future<String?>.value(),
+          )
+          as _i3.Future<String?>);
+
+  @override
+  _i3.Future<void> updateLocalBackupLastTime() =>
+      (super.noSuchMethod(
+            Invocation.method(#updateLocalBackupLastTime, []),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<DateTime?> getLocalBackupLastTime() =>
+      (super.noSuchMethod(
+            Invocation.method(#getLocalBackupLastTime, []),
+            returnValue: _i3.Future<DateTime?>.value(),
+          )
+          as _i3.Future<DateTime?>);
+
+  @override
+  _i3.Future<void> setLocalBackupScheduledTime(int? hour, int? minute) =>
+      (super.noSuchMethod(
+            Invocation.method(#setLocalBackupScheduledTime, [hour, minute]),
+            returnValue: _i3.Future<void>.value(),
+            returnValueForMissingStub: _i3.Future<void>.value(),
+          )
+          as _i3.Future<void>);
+
+  @override
+  _i3.Future<(int, int)?> getLocalBackupScheduledTime() =>
+      (super.noSuchMethod(
+            Invocation.method(#getLocalBackupScheduledTime, []),
+            returnValue: _i3.Future<(int, int)?>.value(),
+          )
+          as _i3.Future<(int, int)?>);
+
+  @override
+  _i3.Future<bool> isLocalBackupConfigured() =>
+      (super.noSuchMethod(
+            Invocation.method(#isLocalBackupConfigured, []),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
+
+  @override
+  _i3.Future<bool> shouldRunLocalBackup() =>
+      (super.noSuchMethod(
+            Invocation.method(#shouldRunLocalBackup, []),
+            returnValue: _i3.Future<bool>.value(false),
+          )
+          as _i3.Future<bool>);
+
+  @override
   _i3.Future<bool> isNasConfigured() =>
       (super.noSuchMethod(
             Invocation.method(#isNasConfigured, []),

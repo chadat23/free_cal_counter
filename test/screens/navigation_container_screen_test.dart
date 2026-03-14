@@ -62,6 +62,7 @@ void main() {
     when(mockLogProvider.queuedCarbs).thenReturn(0.0);
     when(mockLogProvider.queuedFiber).thenReturn(0.0);
     when(mockLogProvider.isFasted).thenReturn(false);
+    when(mockLogProvider.currentDate).thenReturn(DateTime(2024, 1, 15));
     when(mockLogProvider.getDailyMacroStats(any, any)).thenAnswer(
       (_) async => List.generate(
         7,

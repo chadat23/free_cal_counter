@@ -4,7 +4,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 import 'package:meal_of_record/screens/goal_settings_screen.dart';
-import 'package:meal_of_record/providers/goals_provider.dart';
+import 'package:meal_of_record/providers/goals_provider.dart' show GoalsProvider, TargetRecalcResult;
 import 'package:meal_of_record/models/goal_settings.dart';
 import 'package:meal_of_record/models/macro_goals.dart';
 import 'package:meal_of_record/providers/weight_provider.dart';
@@ -33,6 +33,12 @@ void main() {
     // Stub weight provider
     when(mockWeightProvider.getWeightForDate(any)).thenReturn(null);
     when(mockWeightProvider.saveWeight(any, any)).thenAnswer((_) async {});
+    when(mockGoalsProvider.recalculateTargets(any, isInitialSetup: anyNamed('isInitialSetup'), updateTdeeEstimate: anyNamed('updateTdeeEstimate'))).thenAnswer(
+      (invocation) async => TargetRecalcResult(
+        settings: GoalSettings.defaultSettings(),
+        goals: MacroGoals.hardcoded(),
+      ),
+    );
   });
 
   testWidgets('GoalSettingsScreen renders all fields and toggles', (

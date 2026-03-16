@@ -1227,12 +1227,16 @@ class MockGoalsProvider extends _i1.Mock implements _i8.GoalsProvider {
   _i13.Future<_i8.TargetRecalcResult> recalculateTargets(
     _i6.GoalSettings? settings, {
     bool? isInitialSetup = false,
+    bool? updateTdeeEstimate = true,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
               #recalculateTargets,
               [settings],
-              {#isInitialSetup: isInitialSetup},
+              {
+                #isInitialSetup: isInitialSetup,
+                #updateTdeeEstimate: updateTdeeEstimate,
+              },
             ),
             returnValue: _i13.Future<_i8.TargetRecalcResult>.value(
               _FakeTargetRecalcResult_7(
@@ -1240,7 +1244,10 @@ class MockGoalsProvider extends _i1.Mock implements _i8.GoalsProvider {
                 Invocation.method(
                   #recalculateTargets,
                   [settings],
-                  {#isInitialSetup: isInitialSetup},
+                  {
+                    #isInitialSetup: isInitialSetup,
+                    #updateTdeeEstimate: updateTdeeEstimate,
+                  },
                 ),
               ),
             ),

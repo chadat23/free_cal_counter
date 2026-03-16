@@ -213,7 +213,9 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
 
     // Delegate to recalculateTargets so that all modes (including maintain
     // drift correction) are handled consistently in one place.
-    final result = await recalculateTargets(_settings, isInitialSetup: isInitialSetup);
+    // updateTdeeEstimate: false — respect whatever maintenance calorie value
+    // the user typed; Kalman weight is still used for drift correction.
+    final result = await recalculateTargets(_settings, isInitialSetup: isInitialSetup, updateTdeeEstimate: false);
     _settings = result.settings;
     _currentGoals = result.goals;
 
@@ -266,7 +268,12 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   /// The core calculation engine for dynamic macro targets.
   /// Pure computation: takes settings, returns result. Does NOT persist or notify.
-  Future<TargetRecalcResult> recalculateTargets(GoalSettings settings, {bool isInitialSetup = false}) async {
+  ///
+  /// [updateTdeeEstimate] controls whether the Kalman TDEE result overwrites
+  /// [GoalSettings.maintenanceCaloriesStart]. Pass `false` when saving from the
+  /// settings screen so the user's typed value is preserved; the Kalman weight
+  /// estimate is still used for drift correction and dynamic protein.
+  Future<TargetRecalcResult> recalculateTargets(GoalSettings settings, {bool isInitialSetup = false, bool updateTdeeEstimate = true}) async {
     final now = _clock();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = DateTime(today.year, today.month, today.day - 1);
@@ -355,10 +362,16 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
         final kalmanWeight = estimate.weight;
         kalmanWeightEstimate = kalmanWeight;
 
-        // Update maintenance baseline with Kalman result
-        settings = settings.copyWith(
-          maintenanceCaloriesStart: kalmanTDEE,
-        );
+        // Only overwrite the stored baseline when the caller wants a TDEE update
+        // (Monday recalc, preview). On a settings save we keep the user's typed value.
+        if (updateTdeeEstimate) {
+          settings = settings.copyWith(
+            maintenanceCaloriesStart: kalmanTDEE,
+          );
+        }
+
+        // Base calories: the Kalman TDEE when updating, otherwise the user's value.
+        final baseCalories = settings.maintenanceCaloriesStart;
 
         // Apply mode
         if (settings.mode == GoalMode.maintain) {
@@ -369,7 +382,7 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
           final drift = kalmanWeight - settings.anchorWeight;
           final correctionCals = drift * C /
               settings.correctionWindowDays;
-          targetCalories = kalmanTDEE - correctionCals;
+          targetCalories = baseCalories - correctionCals;
         } else {
           double delta = settings.fixedDelta;
           if (settings.mode == GoalMode.lose) {
@@ -377,7 +390,7 @@ class GoalsProvider extends ChangeNotifier with WidgetsBindingObserver {
           } else {
             delta = delta.abs();
           }
-          targetCalories = kalmanTDEE + delta;
+          targetCalories = baseCalories + delta;
         }
 
         settings = settings.copyWith(lastTargetUpdate: _clock());

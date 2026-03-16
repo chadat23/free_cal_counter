@@ -556,6 +556,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
         setState(() {
           _mode = newMode;
         });
+        _runPreview();
       },
     );
   }

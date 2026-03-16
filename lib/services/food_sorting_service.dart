@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:fuzzywuzzy/fuzzywuzzy.dart' as fuzzy;
 import 'package:meal_of_record/models/food.dart';
 import 'package:meal_of_record/models/food_usage_stats.dart';
@@ -39,18 +41,19 @@ class FoodSortingService {
       double usageScore = 0.0;
       final stats = usageStats?[food.id];
       if (stats != null) {
-        // Frequency: 1 point per log (capped at 50 to avoid extreme outliers)
-        usageScore += stats.logCount.clamp(0, 50);
+        // Time-decayed frequency: each log contributes exp(-days/halfLife)
+        // so recent logs count much more than old ones (half-life = 30 days)
+        const halfLife = 30.0;
+        for (final timestamp in stats.logTimestamps) {
+          final daysSince = now.difference(timestamp).inDays;
+          usageScore += math.exp(-0.693 * daysSince / halfLife);
+        }
+        usageScore = usageScore.clamp(0.0, 20.0);
 
-        // Recency: Up to 10 points for something eaten today, decaying
-        final daysSince = stats.daysSinceLastLogged;
-        usageScore += (10.0 / (daysSince + 1.0));
-
-        // Time of Day: 5 points if it's within +/- 2 hours of typical usage
+        // Time of day: small bonus if within ±2 hours of typical usage
         final diff = (stats.typicalHour - currentHour).abs();
-        final hourMatch = diff <= 2 || diff >= 22; // Handle wrap around
-        if (hourMatch) {
-          usageScore += 5.0;
+        if (diff <= 2 || diff >= 22) {
+          usageScore += 1.0;
         }
       }
 

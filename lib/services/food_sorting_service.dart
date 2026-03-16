@@ -24,18 +24,15 @@ class FoodSortingService {
       final lowerCaseName = _normalize(food.name.toLowerCase());
       final lowerCaseQuery = _normalize(query.toLowerCase());
 
-      // 1. Calculate fuzzy match score (lower is better)
+      // 1. Calculate match score (lower is better)
+      // Exact match > starts with > everything else (sorted by usage)
       int fuzzyScore;
       if (lowerCaseName == lowerCaseQuery) {
         fuzzyScore = 0;
       } else if (lowerCaseName.startsWith(lowerCaseQuery)) {
         fuzzyScore = 1;
-      } else if (lowerCaseName.contains(' $lowerCaseQuery')) {
-        fuzzyScore = 2;
       } else {
-        fuzzyScore = 100 - fuzzy.tokenSetRatio(lowerCaseName, lowerCaseQuery);
-        if (fuzzyScore < 0) fuzzyScore = 0;
-        fuzzyScore += 3; // Shift to be worse than simple matches
+        fuzzyScore = 2;
       }
 
       // 2. Calculate weighted usage score (higher is better)

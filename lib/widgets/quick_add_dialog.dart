@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:meal_of_record/models/food_portion.dart';
+import 'package:meal_of_record/providers/goals_provider.dart';
+import 'package:meal_of_record/providers/log_provider.dart';
 import 'package:meal_of_record/services/database_service.dart';
 import 'package:meal_of_record/utils/math_evaluator.dart';
 import 'package:meal_of_record/widgets/math_input_bar.dart';
@@ -54,6 +57,34 @@ class _QuickAddScreenState extends State<QuickAddScreen> {
     if (val == 0) return '0';
     if (val < 1) return val.toStringAsFixed(1);
     return val.toStringAsFixed(1).replaceAll(RegExp(r'\.0$'), '');
+  }
+
+  void _fillRemaining() {
+    final goalsProvider = Provider.of<GoalsProvider>(context, listen: false);
+    final logProvider = Provider.of<LogProvider>(context, listen: false);
+
+    final goal = goalsProvider.currentGoals.calories;
+    if (goal <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No calorie goal set')),
+      );
+      return;
+    }
+
+    final consumed = logProvider.loggedCalories + logProvider.queuedCalories;
+    final remaining = goal - consumed;
+
+    if (remaining <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Already at or over calorie goal')),
+      );
+      return;
+    }
+
+    setState(() {
+      _caloriesController.text = remaining.toStringAsFixed(0);
+      _error = null;
+    });
   }
 
   Future<void> _submit() async {
@@ -153,6 +184,12 @@ class _QuickAddScreenState extends State<QuickAddScreen> {
                           ),
                     ),
                   ),
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: _fillRemaining,
+                  icon: const Icon(Icons.auto_fix_high, size: 18),
+                  label: const Text('Fill Remaining'),
+                ),
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: _isLoading ? null : _submit,

@@ -60,9 +60,9 @@ Future<bool> tryAutoBackup({
       retentionCount: retention,
     );
 
-    // Clean up temp zip
+    // Clean up temp zip and its temp directory
     try {
-      await zipFile.delete();
+      await zipFile.parent.delete(recursive: true);
     } catch (_) {}
 
     if (success) {
@@ -139,11 +139,11 @@ Future<bool> tryAutoLocalBackup({
         await destDir.create(recursive: true);
       }
 
-      final destFile = File('$backupPath/meal_of_record_backup.zip');
+      final destFile = File('$backupPath/meal_of_record.zip');
       await zipFile.copy(destFile.path);
     } finally {
       try {
-        await zipFile.delete();
+        await zipFile.parent.delete(recursive: true);
       } catch (_) {}
     }
 

@@ -110,7 +110,61 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
                 onPressed: () async {
                   final messenger = ScaffoldMessenger.of(context);
                   final navigator = Navigator.of(context);
-                  final success = await provider.saveRecipe();
+
+                  // Check if this edit would trigger versioning
+                  final wouldVersion =
+                      await provider.wouldTriggerVersioning();
+
+                  bool forceUpdateInPlace = false;
+                  if (wouldVersion && mounted) {
+                    final choice = await showDialog<String>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Save Recipe'),
+                        content: const Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'This recipe has been logged. '
+                              'How would you like to save it?',
+                            ),
+                            SizedBox(height: 16),
+                            Text(
+                              'New Version — historical logs keep '
+                              'their original nutrition values.',
+                              style: TextStyle(fontSize: 13),
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'Fix in Place — all logs using this '
+                              'recipe will reflect the changes.',
+                              style: TextStyle(fontSize: 13),
+                            ),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () =>
+                                Navigator.pop(ctx, 'version'),
+                            child: const Text('New Version'),
+                          ),
+                          TextButton(
+                            onPressed: () =>
+                                Navigator.pop(ctx, 'fix'),
+                            child: const Text('Fix in Place'),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (choice == null) return; // dismissed
+                    forceUpdateInPlace = choice == 'fix';
+                  }
+
+                  final success = await provider.saveRecipe(
+                    forceUpdateInPlace: forceUpdateInPlace,
+                  );
 
                   if (!mounted) return;
 

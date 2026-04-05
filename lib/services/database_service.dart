@@ -1476,7 +1476,10 @@ class DatabaseService {
     }).toList();
   }
 
-  Future<int> saveRecipe(model.Recipe recipe) async {
+  Future<int> saveRecipe(
+    model.Recipe recipe, {
+    bool forceUpdateInPlace = false,
+  }) async {
     bool isUsed = false;
     model.Recipe? existingRecipe;
     if (recipe.id > 0) {
@@ -1487,9 +1490,10 @@ class DatabaseService {
     final result = await _liveDb.transaction(() async {
       int recipeId;
       bool shouldVersion =
+          !forceUpdateInPlace &&
           isUsed &&
           existingRecipe != null &&
-          !_isRecipeNutritionallyEquivalent(existingRecipe, recipe);
+          !isRecipeNutritionallyEquivalent(existingRecipe, recipe);
 
       if (shouldVersion) {
         // SMART VERSIONING: Create new recipe, hide old one
@@ -2118,7 +2122,7 @@ class DatabaseService {
     return true;
   }
 
-  bool _isRecipeNutritionallyEquivalent(model.Recipe oldR, model.Recipe newR) {
+  bool isRecipeNutritionallyEquivalent(model.Recipe oldR, model.Recipe newR) {
     if ((oldR.servingsCreated - newR.servingsCreated).abs() > 0.001) {
       return false;
     }

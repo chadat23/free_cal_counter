@@ -58,6 +58,38 @@ int? findNearestRealPoint({
   return null;
 }
 
+/// Returns the pixel position of a point on the chart given its date and weight.
+Offset _getPointPosition({
+  required DateTime date,
+  required double weight,
+  required Size chartSize,
+  required List<Weight> realData,
+  required List<double> trends,
+  required DateTime startDate,
+  required DateTime endDate,
+}) {
+  final weights = realData.map((e) => e.weight).toList();
+  final allValues = [...weights, ...trends];
+  final minWeight = allValues.reduce((a, b) => a < b ? a : b) - 0.5;
+  final maxWeight = allValues.reduce((a, b) => a > b ? a : b) + 0.5;
+  final weightRange = maxWeight - minWeight;
+
+  const double leftPadding = 40.0;
+  const double rightPadding = 40.0;
+  final drawAreaWidth = chartSize.width - leftPadding - rightPadding;
+  final totalDuration = endDate.difference(startDate).inSeconds;
+
+  final elapsed = date.difference(startDate).inSeconds;
+  final x = totalDuration == 0
+      ? leftPadding
+      : leftPadding + (elapsed / totalDuration) * drawAreaWidth;
+
+  final normalized = (weight - minWeight) / weightRange;
+  final y = chartSize.height - (normalized * chartSize.height);
+
+  return Offset(x, y);
+}
+
 class WeightTrendChart extends StatefulWidget {
   final List<Weight> weightHistory;
   final List<double> maintenanceHistory;
@@ -65,6 +97,7 @@ class WeightTrendChart extends StatefulWidget {
   final String timeframeLabel;
   final DateTime startDate;
   final DateTime endDate;
+  final VoidCallback? onTodayPlaceholderTapped;
 
   const WeightTrendChart({
     super.key,
@@ -74,6 +107,7 @@ class WeightTrendChart extends StatefulWidget {
     required this.timeframeLabel,
     required this.startDate,
     required this.endDate,
+    this.onTodayPlaceholderTapped,
   });
 
   @override
@@ -205,9 +239,35 @@ class _WeightTrendChartState extends State<WeightTrendChart> {
                   constraints.maxWidth,
                   constraints.maxHeight,
                 );
+                // Find today's placeholder point (if any) for tap detection
+                final todayPlaceholder = points.cast<_ChartPoint?>().firstWhere(
+                  (p) => p!.isToday && p.isPlaceholder,
+                  orElse: () => null,
+                );
+
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTapUp: (details) {
+                    // Check if tap is on today's placeholder red dot
+                    if (todayPlaceholder != null && widget.onTodayPlaceholderTapped != null) {
+                      final tapPos = details.localPosition;
+                      final placeholderPos = _getPointPosition(
+                        date: todayPlaceholder.date,
+                        weight: todayPlaceholder.weight,
+                        chartSize: chartSize,
+                        realData: sortedReal,
+                        trends: trends,
+                        startDate: widget.startDate,
+                        endDate: widget.endDate,
+                      );
+                      final dx = tapPos.dx - placeholderPos.dx;
+                      final dy = tapPos.dy - placeholderPos.dy;
+                      if (sqrt(dx * dx + dy * dy) <= 24.0) {
+                        widget.onTodayPlaceholderTapped!();
+                        return;
+                      }
+                    }
+
                     final tapped = findNearestRealPoint(
                       tapPosition: details.localPosition,
                       chartSize: chartSize,

@@ -1,8 +1,9 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:meal_of_record/services/database_service.dart';
 import 'package:meal_of_record/widgets/screen_background.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:meal_of_record/services/backup_config_service.dart';
 import 'package:meal_of_record/services/nas_backup_service.dart';
@@ -392,53 +393,82 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
     await _loadSettings();
   }
 
+  /// Returns true if the app has (or was just granted) storage write permission.
+  /// On non-Android platforms always returns true.
+  Future<bool> _ensureStoragePermission() async {
+    if (defaultTargetPlatform != TargetPlatform.android) return true;
+    var status = await Permission.manageExternalStorage.status;
+    if (status.isGranted) return true;
+    status = await Permission.manageExternalStorage.request();
+    if (status.isGranted) return true;
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Storage permission required. Grant "All files access" in Settings.',
+          ),
+        ),
+      );
+    }
+    return false;
+  }
+
   Future<void> _backupToLocalNow() async {
+    if (_localBackupPath == null) return;
+    if (!await _ensureStoragePermission()) return;
     setState(() => _isRestoring = true);
     try {
-      final success = await tryAutoLocalBackup(force: true);
-      if (!mounted) return;
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Local backup successful!')),
-        );
-        await _loadSettings();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Local backup failed.')),
-        );
+      final zipFile = await DatabaseService.instance.exportBackupAsZip();
+      try {
+        final destDir = Directory(_localBackupPath!);
+        if (!await destDir.exists()) {
+          await destDir.create(recursive: true);
+        }
+        final destFile = File('$_localBackupPath/meal_of_record.zip');
+        await zipFile.copy(destFile.path);
+      } finally {
+        try { await zipFile.parent.delete(recursive: true); } catch (_) {}
       }
+      await _backupConfigService.clearDirty();
+      await _backupConfigService.updateLocalBackupLastTime();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Local backup successful!')),
+      );
+      await _loadSettings();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Local backup failed: $e')),
+      );
     } finally {
       if (mounted) setState(() => _isRestoring = false);
     }
   }
 
   Future<void> _exportBackup() async {
+    if (_localBackupPath == null) return;
+    if (!await _ensureStoragePermission()) return;
     try {
       setState(() => _isRestoring = true);
       final zipFile = await DatabaseService.instance.exportBackupAsZip();
-
-      if (await zipFile.exists()) {
-        await Share.shareXFiles([
-          XFile(
-            zipFile.path,
-            name:
-                'meal_of_record_${DateTime.now().millisecondsSinceEpoch}.zip',
-          ),
-        ], text: 'Meal of Record Backup (with images)');
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Database file could not be created.'),
-            ),
-          );
-        }
+      try {
+        final dateStr = DateFormat('yyyy-MM-dd_HH-mm-ss').format(DateTime.now());
+        final destFile = File('$_localBackupPath/meal_of_record_$dateStr.zip');
+        await zipFile.copy(destFile.path);
+      } finally {
+        try { await zipFile.parent.delete(recursive: true); } catch (_) {}
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Export successful!')),
+        );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Export failed: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Export failed: $e')),
+        );
       }
     } finally {
       if (mounted) setState(() => _isRestoring = false);
@@ -456,9 +486,9 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
         retentionCount: retention,
       );
 
-      // Clean up temp zip
+      // Clean up temp zip and its temp directory
       try {
-        await zipFile.delete();
+        await zipFile.parent.delete(recursive: true);
       } catch (_) {}
 
       if (success) {
@@ -670,6 +700,8 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
               children: [
                 _buildNasBackupCard(),
                 const SizedBox(height: 24),
+                _buildLocalBackupCard(),
+                const SizedBox(height: 24),
                 const Text(
                   'Manual Backup',
                   style: TextStyle(
@@ -681,12 +713,18 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                 Card(
                   color: Colors.grey[900],
                   child: ListTile(
-                    leading: const Icon(Icons.file_upload, color: Colors.blue),
-                    title: const Text('Export to File'),
-                    subtitle: const Text(
-                      'Export database and images as a .zip file.',
+                    leading: Icon(Icons.file_upload,
+                        color: _localBackupPath != null ? Colors.blue : Colors.grey),
+                    title: const Text('Export Now'),
+                    subtitle: Text(
+                      _localBackupPath != null
+                          ? 'Save a dated backup to your local backup folder.'
+                          : 'Select a local backup folder above first.',
+                      style: TextStyle(
+                        color: _localBackupPath != null ? null : Colors.grey,
+                      ),
                     ),
-                    onTap: _exportBackup,
+                    onTap: _localBackupPath != null ? _exportBackup : null,
                   ),
                 ),
                 const SizedBox(height: 16),

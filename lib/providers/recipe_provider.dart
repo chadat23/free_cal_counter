@@ -185,8 +185,38 @@ class RecipeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Check if saving would trigger versioning (nutritional change on a logged recipe).
+  /// Returns true if the Rev/Update dialog should be shown.
+  Future<bool> wouldTriggerVersioning() async {
+    if (!_isLogged || _id <= 0) return false;
+    final db = DatabaseService.instance;
+    final existingRecipe = await db.getRecipeById(_id);
+    final currentRecipe = _buildRecipe();
+    return !db.isRecipeNutritionallyEquivalent(existingRecipe, currentRecipe);
+  }
+
+  Recipe _buildRecipe() {
+    return Recipe(
+      id: _id,
+      name: _name,
+      servingsCreated: _servingsCreated,
+      finalWeightGrams: _finalWeightGrams,
+      portionName: _portionName,
+      notes: _notes,
+      link: _link.isEmpty ? null : _link,
+      isTemplate: _isTemplate,
+      hidden: false,
+      parentId: _parentId,
+      emoji: _emoji,
+      thumbnail: _thumbnail,
+      createdTimestamp: DateTime.now().millisecondsSinceEpoch,
+      items: _items,
+      categories: _selectedCategories,
+    );
+  }
+
   // Persistence
-  Future<bool> saveRecipe() async {
+  Future<bool> saveRecipe({bool forceUpdateInPlace = false}) async {
     _errorMessage = null;
     if (_name.isEmpty) {
       _errorMessage = 'Please provide a name for the recipe.';
@@ -205,25 +235,9 @@ class RecipeProvider extends ChangeNotifier {
     try {
       final db = DatabaseService.instance;
 
-      final recipe = Recipe(
-        id: _id,
-        name: _name,
-        servingsCreated: _servingsCreated,
-        finalWeightGrams: _finalWeightGrams,
-        portionName: _portionName,
-        notes: _notes,
-        link: _link.isEmpty ? null : _link,
-        isTemplate: _isTemplate,
-        hidden: false,
-        parentId: _parentId,
-        emoji: _emoji,
-        thumbnail: _thumbnail,
-        createdTimestamp: DateTime.now().millisecondsSinceEpoch,
-        items: _items,
-        categories: _selectedCategories,
-      );
+      final recipe = _buildRecipe();
 
-      await db.saveRecipe(recipe);
+      await db.saveRecipe(recipe, forceUpdateInPlace: forceUpdateInPlace);
 
       reset();
       return true;

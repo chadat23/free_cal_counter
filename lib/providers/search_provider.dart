@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:meal_of_record/models/food.dart' as model;
 import 'package:meal_of_record/services/database_service.dart';
@@ -15,6 +17,51 @@ class SearchProvider extends ChangeNotifier {
     required this.offApiService,
     required this.searchService,
   });
+
+  /// Converts raw exceptions into user-friendly error messages.
+  static String _friendlyError(Object error, {bool isOffSearch = false}) {
+    final message = error.toString().toLowerCase();
+
+    // Network connectivity issues
+    if (error is SocketException ||
+        message.contains('socketexception') ||
+        message.contains('failed host lookup') ||
+        message.contains('connection refused') ||
+        message.contains('network is unreachable')) {
+      return 'No internet connection. Check your network and try again.';
+    }
+
+    // Timeouts
+    if (error is HttpException ||
+        message.contains('timeout') ||
+        message.contains('timed out')) {
+      return 'The request timed out. Please try again.';
+    }
+
+    // Open Food Facts server issues (HTML error pages instead of JSON, 5xx, etc.)
+    if (message.contains('json expected') ||
+        message.contains('server error') ||
+        message.contains('temporarily unavailable') ||
+        message.contains('502') ||
+        message.contains('503') ||
+        message.contains('500')) {
+      return 'Open Food Facts is temporarily unavailable. Please try again later.';
+    }
+
+    // FormatException from bad JSON
+    if (error is FormatException || message.contains('formatexception')) {
+      if (isOffSearch) {
+        return 'Open Food Facts returned an unexpected response. Please try again later.';
+      }
+      return 'Something went wrong reading the data. Please try again.';
+    }
+
+    // Generic fallback — still friendly, no raw exception dump
+    if (isOffSearch) {
+      return 'Could not reach Open Food Facts. Please try again later.';
+    }
+    return 'Something went wrong. Please try again.';
+  }
 
   List<model.Food> _searchResults = [];
   List<model.Food> get searchResults => _searchResults;
@@ -104,7 +151,7 @@ class SearchProvider extends ChangeNotifier {
       }
       _applySearchResults(results);
     } catch (e) {
-      _errorMessage = 'Failed to search for food: ${e.toString()}';
+      _errorMessage = _friendlyError(e);
       _searchResults = [];
       _displayNotes = {};
     } finally {
@@ -125,7 +172,7 @@ class SearchProvider extends ChangeNotifier {
       final results = await searchService.searchOff(_currentQuery);
       _applySearchResults(results);
     } catch (e) {
-      _errorMessage = 'Failed to search for food: ${e.toString()}';
+      _errorMessage = _friendlyError(e, isOffSearch: true);
       _searchResults = [];
       _displayNotes = {};
     } finally {
@@ -150,7 +197,7 @@ class SearchProvider extends ChangeNotifier {
       // Switch to text mode to display results
       _searchMode = SearchMode.text;
     } catch (e) {
-      _errorMessage = 'Failed to search by barcode: ${e.toString()}';
+      _errorMessage = _friendlyError(e);
       _searchResults = [];
     } finally {
       _isLoading = false;
@@ -176,7 +223,7 @@ class SearchProvider extends ChangeNotifier {
       // Switch to text mode to display results
       _searchMode = SearchMode.text;
     } catch (e) {
-      _errorMessage = 'Failed to search Open Food Facts: ${e.toString()}';
+      _errorMessage = _friendlyError(e, isOffSearch: true);
       _searchResults = [];
     } finally {
       _isLoading = false;

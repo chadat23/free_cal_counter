@@ -373,6 +373,9 @@ class _OverviewScreenState extends State<OverviewScreen> {
                               timeframeLabel: Provider.of<NavigationProvider>(context, listen: false).weightRangeLabel,
                               startDate: _weightRangeStart,
                               endDate: _weightRangeEnd,
+                              onTodayPlaceholderTapped: () {
+                                Provider.of<NavigationProvider>(context, listen: false).changeTab(2);
+                              },
                             ),
                             const SizedBox(height: 8),
                             _buildRangeSelector(),

@@ -1051,9 +1051,19 @@ class MockRecipeProvider extends _i1.Mock implements _i19.RecipeProvider {
   );
 
   @override
-  _i13.Future<bool> saveRecipe() =>
+  _i13.Future<bool> wouldTriggerVersioning() =>
       (super.noSuchMethod(
-            Invocation.method(#saveRecipe, []),
+            Invocation.method(#wouldTriggerVersioning, []),
+            returnValue: _i13.Future<bool>.value(false),
+          )
+          as _i13.Future<bool>);
+
+  @override
+  _i13.Future<bool> saveRecipe({bool? forceUpdateInPlace = false}) =>
+      (super.noSuchMethod(
+            Invocation.method(#saveRecipe, [], {
+              #forceUpdateInPlace: forceUpdateInPlace,
+            }),
             returnValue: _i13.Future<bool>.value(false),
           )
           as _i13.Future<bool>);
@@ -1833,9 +1843,16 @@ class MockDatabaseService extends _i1.Mock implements _i6.DatabaseService {
           as _i13.Future<List<_i22.Category>>);
 
   @override
-  _i13.Future<int> saveRecipe(_i10.Recipe? recipe) =>
+  _i13.Future<int> saveRecipe(
+    _i10.Recipe? recipe, {
+    bool? forceUpdateInPlace = false,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#saveRecipe, [recipe]),
+            Invocation.method(
+              #saveRecipe,
+              [recipe],
+              {#forceUpdateInPlace: forceUpdateInPlace},
+            ),
             returnValue: _i13.Future<int>.value(0),
           )
           as _i13.Future<int>);
@@ -1982,6 +1999,14 @@ class MockDatabaseService extends _i1.Mock implements _i6.DatabaseService {
             returnValue: _i13.Future<bool>.value(false),
           )
           as _i13.Future<bool>);
+
+  @override
+  bool isRecipeNutritionallyEquivalent(_i10.Recipe? oldR, _i10.Recipe? newR) =>
+      (super.noSuchMethod(
+            Invocation.method(#isRecipeNutritionallyEquivalent, [oldR, newR]),
+            returnValue: false,
+          )
+          as bool);
 
   @override
   _i13.Future<List<_i11.Food>> filterReferenceFoodsWithLiveVersions(

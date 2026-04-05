@@ -99,6 +99,13 @@ void main() {
       await tester.pumpWidget(createSubject());
       await tester.pumpAndSettle();
 
+      // Scroll down so the NAS action cards are visible in the viewport
+      await tester.scrollUntilVisible(
+        find.text('Backup to NAS'),
+        200,
+      );
+      await tester.pumpAndSettle();
+
       expect(find.text('Backup to NAS'), findsOneWidget);
       expect(find.text('Restore from NAS'), findsOneWidget);
     });

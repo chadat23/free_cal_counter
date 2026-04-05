@@ -153,7 +153,7 @@ void main() {
       await searchProvider.textSearch('error_query');
 
       // Assert
-      expect(searchProvider.errorMessage, contains('Local DB error'));
+      expect(searchProvider.errorMessage, contains('Something went wrong'));
       expect(searchProvider.searchResults, isEmpty);
     });
   });
@@ -219,7 +219,7 @@ void main() {
       await searchProvider.performOffSearch();
 
       // Assert
-      expect(searchProvider.errorMessage, contains('OFF API error'));
+      expect(searchProvider.errorMessage, contains('Could not reach Open Food Facts'));
       expect(searchProvider.searchResults, isEmpty);
     });
   });
@@ -330,7 +330,7 @@ void main() {
       await searchProvider.barcodeOffSearch('12345');
 
       // Assert
-      expect(searchProvider.errorMessage, contains('Network error'));
+      expect(searchProvider.errorMessage, contains('Could not reach Open Food Facts'));
       expect(searchProvider.searchResults, isEmpty);
     });
   });

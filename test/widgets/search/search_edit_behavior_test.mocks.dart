@@ -910,9 +910,19 @@ class MockRecipeProvider extends _i1.Mock implements _i19.RecipeProvider {
   );
 
   @override
-  _i13.Future<bool> saveRecipe() =>
+  _i13.Future<bool> wouldTriggerVersioning() =>
       (super.noSuchMethod(
-            Invocation.method(#saveRecipe, []),
+            Invocation.method(#wouldTriggerVersioning, []),
+            returnValue: _i13.Future<bool>.value(false),
+          )
+          as _i13.Future<bool>);
+
+  @override
+  _i13.Future<bool> saveRecipe({bool? forceUpdateInPlace = false}) =>
+      (super.noSuchMethod(
+            Invocation.method(#saveRecipe, [], {
+              #forceUpdateInPlace: forceUpdateInPlace,
+            }),
             returnValue: _i13.Future<bool>.value(false),
           )
           as _i13.Future<bool>);

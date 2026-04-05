@@ -504,9 +504,16 @@ class MockDatabaseService extends _i1.Mock implements _i5.DatabaseService {
           as _i9.Future<List<_i16.Category>>);
 
   @override
-  _i9.Future<int> saveRecipe(_i3.Recipe? recipe) =>
+  _i9.Future<int> saveRecipe(
+    _i3.Recipe? recipe, {
+    bool? forceUpdateInPlace = false,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#saveRecipe, [recipe]),
+            Invocation.method(
+              #saveRecipe,
+              [recipe],
+              {#forceUpdateInPlace: forceUpdateInPlace},
+            ),
             returnValue: _i9.Future<int>.value(0),
           )
           as _i9.Future<int>);
@@ -653,6 +660,14 @@ class MockDatabaseService extends _i1.Mock implements _i5.DatabaseService {
             returnValue: _i9.Future<bool>.value(false),
           )
           as _i9.Future<bool>);
+
+  @override
+  bool isRecipeNutritionallyEquivalent(_i3.Recipe? oldR, _i3.Recipe? newR) =>
+      (super.noSuchMethod(
+            Invocation.method(#isRecipeNutritionallyEquivalent, [oldR, newR]),
+            returnValue: false,
+          )
+          as bool);
 
   @override
   _i9.Future<List<_i4.Food>> filterReferenceFoodsWithLiveVersions(

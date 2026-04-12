@@ -638,6 +638,21 @@ class MockDatabaseService extends _i1.Mock implements _i8.DatabaseService {
           as _i9.Future<Map<int, _i17.FoodUsageStats>>);
 
   @override
+  _i9.Future<List<({int foodId, int logTimestamp})>> getSoloFoodLogs({
+    int? lookbackDays = 30,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#getSoloFoodLogs, [], {
+              #lookbackDays: lookbackDays,
+            }),
+            returnValue:
+                _i9.Future<List<({int foodId, int logTimestamp})>>.value(
+                  <({int foodId, int logTimestamp})>[],
+                ),
+          )
+          as _i9.Future<List<({int foodId, int logTimestamp})>>);
+
+  @override
   _i9.Future<Map<int, _i17.FoodUsageStats>> getRecipeUsageStats(
     List<int>? recipeIds,
   ) =>

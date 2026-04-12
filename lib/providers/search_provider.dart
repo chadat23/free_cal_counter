@@ -63,6 +63,8 @@ class SearchProvider extends ChangeNotifier {
     return 'Something went wrong. Please try again.';
   }
 
+  SearchResults? _suggestions;
+
   List<model.Food> _searchResults = [];
   List<model.Food> get searchResults => _searchResults;
 
@@ -101,6 +103,23 @@ class SearchProvider extends ChangeNotifier {
     textSearch('');
   }
 
+  /// Pre-loads solo food suggestions. Called once when search opens.
+  Future<void> loadSuggestions() async {
+    try {
+      _suggestions = await searchService.getSuggestions();
+    } catch (_) {
+      _suggestions = null;
+    }
+    // Apply immediately if query is still empty and in text mode
+    if (_currentQuery.isEmpty &&
+        _searchMode != SearchMode.recipe &&
+        _suggestions != null &&
+        _suggestions!.foods.isNotEmpty) {
+      _applySearchResults(_suggestions!);
+      notifyListeners();
+    }
+  }
+
   void _applySearchResults(SearchResults results) {
     _searchResults = results.foods;
     _displayNotes = results.displayNotes;
@@ -126,8 +145,22 @@ class SearchProvider extends ChangeNotifier {
   // Always performs a local search
   Future<void> textSearch(String query) async {
     _currentQuery = query;
-    _isLoading = true;
     _clearErrorMessage();
+
+    // Show cached suggestions when query is empty in text/scan mode
+    if (query.isEmpty && _searchMode != SearchMode.recipe) {
+      if (_suggestions != null && _suggestions!.foods.isNotEmpty) {
+        _applySearchResults(_suggestions!);
+      } else {
+        _searchResults = [];
+        _displayNotes = {};
+      }
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
+
+    _isLoading = true;
     notifyListeners();
 
     try {

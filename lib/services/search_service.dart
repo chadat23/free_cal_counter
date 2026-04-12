@@ -135,6 +135,46 @@ class SearchService {
     return SearchResults(foods: resultsWithEmoji, displayNotes: usageNotes);
   }
 
+  /// Returns food suggestions for the empty-query state.
+  /// Surfaces solo-logged foods scored by time-of-day and recency.
+  Future<SearchResults> getSuggestions() async {
+    final soloLogs = await databaseService.getSoloFoodLogs();
+    if (soloLogs.isEmpty) {
+      return const SearchResults(foods: [], displayNotes: {});
+    }
+
+    final rankedIds = sortingService.scoreSuggestions(
+      soloLogs: soloLogs,
+      now: DateTime.now(),
+    );
+    if (rankedIds.isEmpty) {
+      return const SearchResults(foods: [], displayNotes: {});
+    }
+
+    final foodsMap = await databaseService.getFoodsByIds(rankedIds, 'live');
+
+    // Reorder to match ranked order
+    final orderedFoods = <model.Food>[];
+    for (final id in rankedIds) {
+      final food = foodsMap[id];
+      if (food != null) orderedFoods.add(food);
+    }
+
+    final usageNotes = await databaseService.getFoodsUsageNotes(orderedFoods);
+
+    final resultsWithEmoji = orderedFoods
+        .map(
+          (food) => food.copyWith(
+            emoji: (food.emoji == null || food.emoji == '🍴' || food.emoji == '')
+                ? emojiForFoodName(food.name)
+                : food.emoji,
+          ),
+        )
+        .toList();
+
+    return SearchResults(foods: resultsWithEmoji, displayNotes: usageNotes);
+  }
+
   Future<SearchResults> searchOff(String query) async {
     if (query.isEmpty) {
       return const SearchResults(foods: [], displayNotes: {});

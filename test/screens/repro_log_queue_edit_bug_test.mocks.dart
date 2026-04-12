@@ -171,6 +171,19 @@ class MockSearchService extends _i1.Mock implements _i5.SearchService {
           as _i9.Future<_i5.SearchResults>);
 
   @override
+  _i9.Future<_i5.SearchResults> getSuggestions() =>
+      (super.noSuchMethod(
+            Invocation.method(#getSuggestions, []),
+            returnValue: _i9.Future<_i5.SearchResults>.value(
+              _FakeSearchResults_3(
+                this,
+                Invocation.method(#getSuggestions, []),
+              ),
+            ),
+          )
+          as _i9.Future<_i5.SearchResults>);
+
+  @override
   _i9.Future<_i5.SearchResults> searchOff(String? query) =>
       (super.noSuchMethod(
             Invocation.method(#searchOff, [query]),

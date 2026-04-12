@@ -1227,6 +1227,15 @@ class MockSearchProvider extends _i1.Mock implements _i23.SearchProvider {
   );
 
   @override
+  _i13.Future<void> loadSuggestions() =>
+      (super.noSuchMethod(
+            Invocation.method(#loadSuggestions, []),
+            returnValue: _i13.Future<void>.value(),
+            returnValueForMissingStub: _i13.Future<void>.value(),
+          )
+          as _i13.Future<void>);
+
+  @override
   void setSearchMode(_i24.SearchMode? mode) => super.noSuchMethod(
     Invocation.method(#setSearchMode, [mode]),
     returnValueForMissingStub: null,
@@ -1979,6 +1988,21 @@ class MockDatabaseService extends _i1.Mock implements _i6.DatabaseService {
             ),
           )
           as _i13.Future<Map<int, _i29.FoodUsageStats>>);
+
+  @override
+  _i13.Future<List<({int foodId, int logTimestamp})>> getSoloFoodLogs({
+    int? lookbackDays = 30,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#getSoloFoodLogs, [], {
+              #lookbackDays: lookbackDays,
+            }),
+            returnValue:
+                _i13.Future<List<({int foodId, int logTimestamp})>>.value(
+                  <({int foodId, int logTimestamp})>[],
+                ),
+          )
+          as _i13.Future<List<({int foodId, int logTimestamp})>>);
 
   @override
   _i13.Future<Map<int, _i29.FoodUsageStats>> getRecipeUsageStats(

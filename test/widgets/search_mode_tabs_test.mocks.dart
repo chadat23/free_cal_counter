@@ -153,6 +153,15 @@ class MockSearchProvider extends _i1.Mock implements _i5.SearchProvider {
   );
 
   @override
+  _i9.Future<void> loadSuggestions() =>
+      (super.noSuchMethod(
+            Invocation.method(#loadSuggestions, []),
+            returnValue: _i9.Future<void>.value(),
+            returnValueForMissingStub: _i9.Future<void>.value(),
+          )
+          as _i9.Future<void>);
+
+  @override
   void setSearchMode(_i8.SearchMode? mode) => super.noSuchMethod(
     Invocation.method(#setSearchMode, [mode]),
     returnValueForMissingStub: null,

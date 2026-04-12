@@ -209,6 +209,41 @@ class FoodSortingService {
     return scoredFoods.map((e) => e['food'] as Food).toList();
   }
 
+  /// Score solo-logged foods by time-of-day proximity and recency.
+  /// Returns food IDs sorted descending by total score, limited to [maxResults].
+  List<int> scoreSuggestions({
+    required List<({int foodId, int logTimestamp})> soloLogs,
+    required DateTime now,
+    int maxResults = 20,
+  }) {
+    if (soloLogs.isEmpty) return [];
+
+    final nowHour = now.hour + now.minute / 60.0;
+    final Map<int, double> scores = {};
+
+    for (final log in soloLogs) {
+      final logTime = DateTime.fromMillisecondsSinceEpoch(log.logTimestamp);
+
+      // Circular time-of-day delta (handles midnight wrapping)
+      final logHour = logTime.hour + logTime.minute / 60.0;
+      double deltaHours = (nowHour - logHour).abs();
+      if (deltaHours > 12) deltaHours = 24 - deltaHours;
+      final timeOfDayScore = math.exp(-deltaHours * deltaHours / 18);
+
+      // Recency: fractional days for finer granularity
+      final daysSince = now.difference(logTime).inHours / 24.0;
+      final recencyScore = math.exp(-0.693 * daysSince / 30);
+
+      final contribution = timeOfDayScore + recencyScore;
+      scores[log.foodId] = (scores[log.foodId] ?? 0) + contribution;
+    }
+
+    final ranked = scores.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    return ranked.take(maxResults).map((e) => e.key).toList();
+  }
+
   /// Sort foods alphabetically (case-insensitive)
   List<Food> _sortAlphabetically(List<Food> foods) {
     final sorted = List<Food>.from(foods);

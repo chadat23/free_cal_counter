@@ -2054,6 +2054,42 @@ class DatabaseService {
     return results;
   }
 
+  /// Returns solo food log entries from the last [lookbackDays] days.
+  /// A solo log is a logTimestamp that has exactly one portion,
+  /// where that portion is a food (not a recipe) and the food is not hidden.
+  Future<List<({int foodId, int logTimestamp})>> getSoloFoodLogs({
+    int lookbackDays = 30,
+  }) async {
+    final cutoff = DateTime.now()
+        .subtract(Duration(days: lookbackDays))
+        .millisecondsSinceEpoch;
+
+    final rows = await _liveDb.customSelect(
+      '''
+      SELECT lp.loggedFoodId AS foodId, lp.log_timestamp
+      FROM logged_portions lp
+      INNER JOIN foods f ON f.id = lp.loggedFoodId
+      WHERE lp.log_timestamp >= ?
+        AND lp.loggedFoodId IS NOT NULL
+        AND lp.recipeId IS NULL
+        AND f.hidden = 0
+        AND lp.log_timestamp IN (
+          SELECT log_timestamp FROM logged_portions
+          GROUP BY log_timestamp HAVING COUNT(*) = 1
+        )
+      ORDER BY lp.log_timestamp DESC
+      ''',
+      variables: [Variable.withInt(cutoff)],
+    ).get();
+
+    return rows.map((row) {
+      return (
+        foodId: row.read<int>('foodId'),
+        logTimestamp: row.read<int>('log_timestamp'),
+      );
+    }).toList();
+  }
+
   /// Get usage statistics for a list of recipe IDs
   /// Queries LoggedPortions joined with LoggedFoods where originalFoodSource='recipe'
   Future<Map<int, FoodUsageStats>> getRecipeUsageStats(

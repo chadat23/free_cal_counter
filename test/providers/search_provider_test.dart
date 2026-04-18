@@ -86,7 +86,8 @@ void main() {
 
         // Assert
         expect(searchProvider.searchResults, mockRecipes);
-        verify(mockSearchService.getAllRecipesAsFoods()).called(1);
+        // Called once by setSearchMode (re-triggers search) and once by textSearch
+        verify(mockSearchService.getAllRecipesAsFoods()).called(2);
         verifyNever(mockSearchService.searchLocal(any));
       },
     );
@@ -116,6 +117,13 @@ void main() {
           ),
         ).thenAnswer((_) async => SearchResults(foods: mockRecipes, displayNotes: {}));
 
+        // Stub getAllRecipesAsFoods since setSearchMode re-triggers search with empty query
+        when(
+          mockSearchService.getAllRecipesAsFoods(
+            categoryId: anyNamed('categoryId'),
+          ),
+        ).thenAnswer((_) async => SearchResults(foods: [], displayNotes: {}));
+
         searchProvider.setSearchMode(SearchMode.recipe);
 
         // Act
@@ -132,11 +140,6 @@ void main() {
         verifyNever(
           mockSearchService.searchLocal(
             any,
-            categoryId: anyNamed('categoryId'),
-          ),
-        );
-        verifyNever(
-          mockSearchService.getAllRecipesAsFoods(
             categoryId: anyNamed('categoryId'),
           ),
         );

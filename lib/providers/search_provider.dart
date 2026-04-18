@@ -131,6 +131,8 @@ class SearchProvider extends ChangeNotifier {
     _displayNotes = {};
     _clearErrorMessage();
     notifyListeners();
+    // Re-run search with existing query so results update for the new mode
+    textSearch(_currentQuery);
   }
 
   void _clearErrorMessage() {

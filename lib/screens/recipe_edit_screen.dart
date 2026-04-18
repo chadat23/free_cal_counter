@@ -29,6 +29,10 @@ import 'package:meal_of_record/screens/square_camera_screen.dart';
 import 'package:meal_of_record/widgets/food_image_widget.dart';
 import 'package:meal_of_record/services/image_storage_service.dart';
 import 'package:meal_of_record/widgets/unit_select_field.dart';
+import 'package:meal_of_record/utils/math_evaluator.dart';
+import 'package:meal_of_record/widgets/math_input_bar.dart';
+import 'package:meal_of_record/models/food_container.dart';
+import 'package:meal_of_record/utils/ui_utils.dart';
 
 class RecipeEditScreen extends StatefulWidget {
   const RecipeEditScreen({super.key});
@@ -45,6 +49,8 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
   late TextEditingController _notesController;
   late TextEditingController _linkController;
   late TextEditingController _emojiController;
+  final FocusNode _weightFocusNode = FocusNode();
+  bool _isWeightFocused = false;
   List<model_cat.Category> _allCategories = [];
   List<String> _availableUnits = [];
 
@@ -63,6 +69,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
     _notesController = TextEditingController(text: provider.notes);
     _linkController = TextEditingController(text: provider.link);
     _emojiController = TextEditingController(text: provider.emoji);
+    _weightFocusNode.addListener(_onWeightFocusChange);
     _loadCategories();
     _loadAvailableUnits();
   }
@@ -87,6 +94,8 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
 
   @override
   void dispose() {
+    _weightFocusNode.removeListener(_onWeightFocusChange);
+    _weightFocusNode.dispose();
     _nameController.dispose();
     _portionsController.dispose();
     _portionNameController.dispose();
@@ -95,6 +104,127 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
     _linkController.dispose();
     _emojiController.dispose();
     super.dispose();
+  }
+
+  void _onWeightFocusChange() {
+    setState(() {
+      _isWeightFocused = _weightFocusNode.hasFocus;
+    });
+    if (!_weightFocusNode.hasFocus) {
+      _evaluateWeightExpression();
+    }
+  }
+
+  void _evaluateWeightExpression() {
+    final text = _weightController.text;
+    if (text.isEmpty) return;
+
+    // Skip if it's already just a number
+    if (double.tryParse(text) != null) return;
+
+    final result = MathEvaluator.evaluate(text);
+    if (result == null || result.isInfinite || result.isNaN) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Invalid expression')),
+      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _weightFocusNode.requestFocus();
+      });
+      return;
+    }
+
+    final formatted =
+        result == result.roundToDouble()
+            ? result.toStringAsFixed(0)
+            : result.toStringAsFixed(2);
+    setState(() {
+      _weightController.text = formatted;
+    });
+    final provider = Provider.of<RecipeProvider>(context, listen: false);
+    provider.setFinalWeightGrams(result);
+  }
+
+  Future<void> _showWeightContainerSelection() async {
+    final containers = await DatabaseService.instance.getAllContainers();
+    if (!mounted) return;
+
+    if (containers.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No containers found. Add them in Settings.'),
+        ),
+      );
+      return;
+    }
+
+    final selected = await showModalBottomSheet<FoodContainer>(
+      context: context,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Select Container to Subtract',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: containers.length,
+              itemBuilder: (context, index) {
+                final container = containers[index];
+                return ListTile(
+                  leading: SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: container.thumbnail != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: FoodImageWidget(
+                              thumbnail: container.thumbnail,
+                              size: 40,
+                            ),
+                          )
+                        : const Icon(Icons.inventory_2_outlined),
+                  ),
+                  title: Text(container.name),
+                  subtitle: Text('${container.weight} ${container.unit}'),
+                  onTap: () => Navigator.pop(context, container),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (selected != null && mounted) {
+      final currentVal = double.tryParse(_weightController.text) ?? 0.0;
+      final weightToSubtract = selected.weight;
+      final newValue = currentVal - weightToSubtract;
+
+      if (newValue < 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Container weight is larger than total weight!'),
+          ),
+        );
+      } else {
+        setState(() {
+          _weightController.text = newValue.toStringAsFixed(0);
+        });
+        final provider = Provider.of<RecipeProvider>(context, listen: false);
+        provider.setFinalWeightGrams(newValue);
+        if (mounted) {
+          await UiUtils.showAutoDismissDialog(
+            context,
+            'Subtracted ${selected.weight}g for ${selected.name}',
+          );
+        }
+      }
+    }
   }
 
   @override
@@ -247,9 +377,23 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
                 ),
             ],
           ),
-          body: SlidableAutoCloseBehavior(
+          resizeToAvoidBottomInset: false,
+          body: Builder(
+            builder: (context) {
+              final keyboardHeight =
+                  MediaQuery.of(context).viewInsets.bottom;
+              final showOperatorBar =
+                  _isWeightFocused && keyboardHeight > 0;
+              return Stack(
+                children: [
+                  SlidableAutoCloseBehavior(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.only(
+                left: 16.0,
+                right: 16.0,
+                top: 16.0,
+                bottom: 16.0 + (showOperatorBar ? 48 + keyboardHeight : 0),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -342,6 +486,17 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
               ),
             ),
           ),
+                  if (showOperatorBar)
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: keyboardHeight,
+                      child: MathInputBar(controller: _weightController),
+                    ),
+                ],
+              );
+            },
+          ),
         );
       },
     );
@@ -414,14 +569,17 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
         Row(
           children: [
             Expanded(
+              flex: 2,
               child: TextField(
                 controller: _weightController,
-                keyboardType: TextInputType.number,
+                focusNode: _weightFocusNode,
+                keyboardType: TextInputType.text,
                 decoration: const InputDecoration(
                   labelText: 'Final Weight (g)',
                   hintText: 'Optional',
                 ),
                 onChanged: (val) {
+                  // Only update provider if it's a plain number
                   final d = double.tryParse(val);
                   provider.setFinalWeightGrams(d);
                 },
@@ -431,6 +589,26 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
                     extentOffset: _weightController.text.length,
                   );
                 },
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              flex: 1,
+              child: TextButton.icon(
+                onPressed: _showWeightContainerSelection,
+                icon: const Icon(Icons.remove_circle_outline, size: 18),
+                label: const Text(
+                  'Minus Container',
+                  style: TextStyle(fontSize: 11),
+                ),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 4,
+                  ),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
               ),
             ),
           ],

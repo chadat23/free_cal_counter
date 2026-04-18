@@ -632,7 +632,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
 
     if (recipe != null && recipe.isTemplate) {
       // Dump-only recipe: compute proportionally-scaled ingredient list
-      final quantity = grams / recipe.gramsPerPortion;
+      final quantity = grams / recipe.totalGrams;
       final logProvider = Provider.of<LogProvider>(context, listen: false);
       portions = logProvider.dumpRecipePortionsAsList(recipe, quantity: quantity);
     } else if (recipe != null) {

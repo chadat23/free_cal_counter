@@ -131,7 +131,7 @@ class LogProvider extends ChangeNotifier {
       } else if (item.isRecipe) {
         _collectRecipePortions(
           item.recipe!,
-          (item.grams / item.recipe!.gramsPerPortion) * quantity,
+          (item.grams / item.recipe!.totalGrams) * quantity,
           result,
         );
       }

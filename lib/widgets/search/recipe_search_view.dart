@@ -300,7 +300,7 @@ class _RecipeSearchViewState extends State<RecipeSearchView> {
                                 context,
                                 listen: false,
                               );
-                              final quantity = result.grams / recipe.gramsPerPortion;
+                              final quantity = result.grams / recipe.totalGrams;
                               logProvider.dumpRecipeToQueue(recipe, quantity: quantity);
                               searchProvider.clearSearch();
                               ScaffoldMessenger.of(context).showSnackBar(

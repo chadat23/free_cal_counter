@@ -5,6 +5,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i3;
 import 'dart:io' as _i4;
+import 'dart:ui' as _i7;
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i6;
 import 'package:meal_of_record/services/backup_config_service.dart' as _i5;
@@ -93,6 +94,12 @@ class MockBackupConfigService extends _i1.Mock
   @override
   set secureStorage(_i6.FlutterSecureStorage? storage) => super.noSuchMethod(
     Invocation.setter(#secureStorage, storage),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  set onDebouncedDirty(_i7.VoidCallback? value) => super.noSuchMethod(
+    Invocation.setter(#onDebouncedDirty, value),
     returnValueForMissingStub: null,
   );
 

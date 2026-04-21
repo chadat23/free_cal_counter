@@ -31,14 +31,40 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   bool _initialized = false;
   String? _error;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initialize();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    debugPrint('MyApp: Lifecycle state changed to $state');
+    if (!_initialized) {
+      debugPrint('MyApp: Not initialized yet, skipping backup.');
+      return;
+    }
+
+    if (state == AppLifecycleState.paused) {
+      // User is leaving — flush any pending debounce and backup now,
+      // because the OS may kill the process before the timer fires.
+      debugPrint('MyApp: App paused — flushing debounce and running backups.');
+      final config = BackupConfigService.instance;
+      config.cancelDebounce();
+      tryAutoBackup();
+      tryAutoLocalBackup();
+    }
   }
 
   Future<void> _initialize() async {
@@ -64,7 +90,15 @@ class _MyAppState extends State<MyApp> {
       }
       debugPrint('MyApp: Initialization complete.');
 
-      // Fire-and-forget: attempt auto-backups if conditions are met
+      // Wire debounced backup: after data changes settle (30s of quiet),
+      // attempt backups automatically.
+      BackupConfigService.instance.onDebouncedDirty = () {
+        tryAutoBackup();
+        tryAutoLocalBackup();
+      };
+
+      // One-time cold-start attempt: catches changes from a previous session
+      // where the app was killed before the debounce timer could fire.
       tryAutoBackup();
       tryAutoLocalBackup();
 

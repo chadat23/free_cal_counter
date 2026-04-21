@@ -340,13 +340,16 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
   }
 
   Future<void> _toggleLocalBackup(bool value) async {
-    if (value && _localBackupPath == null) {
-      final picked = await _pickLocalFolder();
-      if (picked == null) return;
+    if (value) {
+      if (!await _ensureStoragePermission()) return;
+      if (_localBackupPath == null) {
+        final picked = await _pickLocalFolder();
+        if (picked == null) return;
+      }
     }
     await _backupConfigService.setLocalBackupEnabled(value);
     if (value) {
-      tryAutoLocalBackup(force: true);
+      tryAutoLocalBackup();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Local backup enabled!')),

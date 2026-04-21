@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -30,6 +32,9 @@ class BackupConfigService {
   static const String _keyNasUsername = 'nas_username';
   static const String _keyNasPassword = 'nas_password';
 
+  /// How long to wait after the last write before triggering a backup.
+  static const Duration debounceDuration = Duration(seconds: 30);
+
   // Singleton instance
   static final BackupConfigService instance = BackupConfigService._();
   BackupConfigService._();
@@ -38,6 +43,19 @@ class BackupConfigService {
   FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   set secureStorage(FlutterSecureStorage storage) =>
       _secureStorage = storage;
+
+  /// Called when the debounce timer fires after data changes settle.
+  /// Wired in main.dart to trigger backup attempts.
+  VoidCallback? onDebouncedDirty;
+
+  Timer? _debounceTimer;
+
+  /// Cancel any pending debounce timer. Useful in tests to avoid
+  /// "Timer is still pending" failures.
+  void cancelDebounce() {
+    _debounceTimer?.cancel();
+    _debounceTimer = null;
+  }
 
   Future<void> setAutoBackupEnabled(bool enabled) async {
     final prefs = await SharedPreferences.getInstance();
@@ -64,6 +82,17 @@ class BackupConfigService {
     // Only write if not already dirty to save IO
     if (prefs.getBool(_keyIsDirty) != true) {
       await prefs.setBool(_keyIsDirty, true);
+    }
+
+    // Reset the debounce timer. When writes stop for 30 seconds, fire backup.
+    // Only start the timer if a callback is registered (avoids pending-timer
+    // issues in tests where no backup wiring exists).
+    if (onDebouncedDirty != null) {
+      _debounceTimer?.cancel();
+      _debounceTimer = Timer(debounceDuration, () {
+        debugPrint('BackupConfigService: Debounce fired — triggering backups.');
+        onDebouncedDirty?.call();
+      });
     }
   }
 

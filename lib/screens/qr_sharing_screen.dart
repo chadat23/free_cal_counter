@@ -241,7 +241,7 @@ class _QrSharingScreenState extends State<QrSharingScreen>
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
@@ -253,13 +253,13 @@ class _QrSharingScreenState extends State<QrSharingScreen>
             backgroundColor: Colors.white,
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
         if (total > 1) ...[
           Text(
             'Part ${_currentChunkIndex + 1} of $total',
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           IconButton(
             icon: Icon(
               _isAnimating
@@ -271,7 +271,7 @@ class _QrSharingScreenState extends State<QrSharingScreen>
             onPressed: _toggleAnimation,
           ),
           const Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(12.0),
             child: Text(
               'This recipe is large, so it is split into multiple QR codes. The recipient needs to keep scanning until all parts are captured.',
               textAlign: TextAlign.center,
@@ -296,7 +296,7 @@ class _QrSharingScreenState extends State<QrSharingScreen>
           ),
         ),
         Container(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(16.0),
           color: Colors.grey[900],
           width: double.infinity,
           child: Column(

@@ -146,7 +146,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
     if (goalsProvider.isGoalsSet) return const SizedBox.shrink();
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.amber.withOpacity(0.1),
@@ -356,14 +356,14 @@ class _OverviewScreenState extends State<OverviewScreen> {
                     children: [
                       _buildGoalsWarning(),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
                         child: NutritionTargetsOverviewChart(
                           nutritionData: liveNutritionData,
                           dates: _nutritionDates,
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
                         child: Column(
                           children: [
                             WeightTrendChart(

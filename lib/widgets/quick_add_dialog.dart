@@ -150,9 +150,9 @@ class _QuickAddScreenState extends State<QuickAddScreen> {
         children: [
           Padding(
             padding: EdgeInsets.fromLTRB(
-              24,
-              32,
-              24,
+              16,
+              16,
+              16,
               showMathBar ? 48 + keyboardHeight : keyboardHeight,
             ),
             child: Column(
@@ -184,13 +184,13 @@ class _QuickAddScreenState extends State<QuickAddScreen> {
                           ),
                     ),
                   ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
                 OutlinedButton.icon(
                   onPressed: _fillRemaining,
                   icon: const Icon(Icons.auto_fix_high, size: 18),
                   label: const Text('Fill Remaining'),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: _isLoading ? null : _submit,
                   child: _isLoading

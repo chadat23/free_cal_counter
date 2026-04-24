@@ -27,7 +27,7 @@ class SearchModeTabs extends StatelessWidget {
     return Consumer<SearchProvider>(
       builder: (context, provider, child) {
         return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
           decoration: BoxDecoration(
             color: const Color(
               0xFF2D2D2D,
@@ -58,7 +58,7 @@ class SearchModeTabs extends StatelessWidget {
       child: GestureDetector(
         onTap: () => handleScanTap(context),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
           decoration: BoxDecoration(
             color: Colors.transparent,
             borderRadius: BorderRadius.circular(12.0),
@@ -85,7 +85,7 @@ class SearchModeTabs extends StatelessWidget {
       child: GestureDetector(
         onTap: () => provider.setSearchMode(mode),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
           decoration: BoxDecoration(
             color: isSelected
                 ? Theme.of(context).primaryColor

@@ -180,7 +180,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
                     style: const TextStyle(color: Colors.white),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
                       _scannerController?.start();
@@ -209,7 +209,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
             color: Colors.black.withValues(alpha: 0.5),
             alignment: Alignment.bottomCenter,
             child: const Padding(
-              padding: EdgeInsets.only(bottom: 24.0),
+              padding: EdgeInsets.only(bottom: 16.0),
               child: Text(
                 'Point camera at barcode',
                 style: TextStyle(
@@ -259,12 +259,12 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
   Widget _buildPermissionDeniedView() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32.0),
+        padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.camera_alt_outlined, color: Colors.grey, size: 80),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             const Text(
               'Camera Permission Required',
               style: TextStyle(
@@ -282,16 +282,16 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
               style: const TextStyle(color: Colors.grey, fontSize: 16),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: _openSettings,
               icon: const Icon(Icons.settings),
               label: const Text('Open Settings'),
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: const Text('Cancel'),
@@ -305,12 +305,12 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
   Widget _buildErrorView() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32.0),
+        padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.error_outline, color: Colors.red, size: 80),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             const Text(
               'Camera Error',
               style: TextStyle(
@@ -325,7 +325,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
               style: const TextStyle(color: Colors.grey, fontSize: 16),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 setState(() {
@@ -335,7 +335,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
               },
               child: const Text('Try Again'),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: const Text('Cancel'),
@@ -352,7 +352,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(color: Colors.white),
-          SizedBox(height: 24),
+          SizedBox(height: 16),
           Text(
             'Initializing camera...',
             style: TextStyle(color: Colors.white, fontSize: 16),

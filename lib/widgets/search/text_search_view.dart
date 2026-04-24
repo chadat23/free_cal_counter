@@ -420,7 +420,7 @@ class _TextSearchViewState extends State<TextSearchView> {
                 style: const TextStyle(fontFamily: 'monospace'),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             const Text('What would you like to do?'),
           ],
         ),

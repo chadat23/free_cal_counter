@@ -33,7 +33,7 @@ class HorizontalMiniBarChart extends StatelessWidget {
     final double hundredPercentX = 1.0 / _maxVisualRatio;
 
     return Container(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(6.0),
       decoration: BoxDecoration(
         color: Colors.grey[850],
         borderRadius: BorderRadius.circular(8),

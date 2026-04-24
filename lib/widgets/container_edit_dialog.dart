@@ -143,7 +143,7 @@ class _ContainerEditDialogState extends State<ContainerEditDialog> {
                       : const Icon(Icons.add_a_photo, size: 40),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(

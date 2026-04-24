@@ -110,7 +110,7 @@ class _ContainerSettingsScreenState extends State<ContainerSettingsScreen> {
                       size: 64,
                       color: Colors.white24,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 10),
                     const Text(
                       'No containers yet.\nAdd one to quickly subtract weights!',
                       textAlign: TextAlign.center,
@@ -120,7 +120,7 @@ class _ContainerSettingsScreenState extends State<ContainerSettingsScreen> {
                 ),
               )
             : ListView.builder(
-                padding: const EdgeInsets.only(bottom: 80),
+                padding: const EdgeInsets.only(bottom: 60),
                 itemCount: _containers.length,
                 itemBuilder: (context, index) {
                   final container = _containers[index];

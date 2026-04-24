@@ -31,11 +31,11 @@ class MealWidget extends StatelessWidget {
     final logProvider = Provider.of<LogProvider>(context);
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 3.0),
       child: GestureDetector(
         onTap: onBackgroundTap,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

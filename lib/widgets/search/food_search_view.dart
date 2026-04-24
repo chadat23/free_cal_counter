@@ -18,18 +18,18 @@ class FoodSearchView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(12.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _buildQuickAddButton(context),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           _buildCreateFoodButton(context),
           if (config.onSaveOverride == null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             _buildScanPortionsButton(context),
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           _buildFastedDayButton(context),
         ],
       ),
@@ -43,7 +43,7 @@ class FoodSearchView extends StatelessWidget {
         icon: const Icon(Icons.flash_on, size: 32),
         label: const Text('Quick Add', style: TextStyle(fontSize: 18)),
         style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 20),
+          padding: const EdgeInsets.symmetric(vertical: 10),
         ),
         onPressed: () async {
           final portion = await Navigator.push<model_portion.FoodPortion>(
@@ -75,7 +75,7 @@ class FoodSearchView extends StatelessWidget {
         icon: const Icon(Icons.add_circle_outline, size: 32),
         label: const Text('Create New Food', style: TextStyle(fontSize: 18)),
         style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 20),
+          padding: const EdgeInsets.symmetric(vertical: 10),
         ),
         onPressed: () async {
           final result = await Navigator.push<FoodEditResult>(
@@ -133,7 +133,7 @@ class FoodSearchView extends StatelessWidget {
         icon: const Icon(Icons.qr_code_scanner, size: 32),
         label: const Text('Scan Portions', style: TextStyle(fontSize: 18)),
         style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 20),
+          padding: const EdgeInsets.symmetric(vertical: 10),
         ),
         onPressed: () {
           Navigator.push(
@@ -159,7 +159,7 @@ class FoodSearchView extends StatelessWidget {
             ),
             label: const Text('Fasted Day', style: TextStyle(fontSize: 18)),
             style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 20),
+              padding: const EdgeInsets.symmetric(vertical: 10),
             ),
             onPressed: () async {
               await logProvider.logFasted(logProvider.currentDate);

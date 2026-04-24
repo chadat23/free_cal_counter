@@ -107,7 +107,7 @@ class _WeightScreenState extends State<WeightScreen> {
           _buildHeader(),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(8.0),
               child: Consumer2<WeightProvider, GoalsProvider>(
                 builder: (context, weightProvider, goalsProvider, child) {
                   final weightEntry = weightProvider.getWeightForDate(
@@ -154,14 +154,14 @@ class _WeightScreenState extends State<WeightScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 16),
                       Center(
                         child: ElevatedButton(
                           onPressed: _submitWeight,
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 40,
-                              vertical: 15,
+                              horizontal: 32,
+                              vertical: 12,
                             ),
                             textStyle: const TextStyle(fontSize: 18),
                           ),
@@ -181,7 +181,7 @@ class _WeightScreenState extends State<WeightScreen> {
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
       color: AppColors.largeWidgetBackground,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -192,7 +192,7 @@ class _WeightScreenState extends State<WeightScreen> {
               DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day - 1),
             ),
           ),
-          const SizedBox(width: 20),
+          const SizedBox(width: 12),
           GestureDetector(
             onTap: () async {
               final picked = await showDatePicker(
@@ -212,7 +212,7 @@ class _WeightScreenState extends State<WeightScreen> {
               ),
             ),
           ),
-          const SizedBox(width: 20),
+          const SizedBox(width: 12),
           IconButton(
             icon: const Icon(Icons.chevron_right, color: Colors.white),
             onPressed: () =>

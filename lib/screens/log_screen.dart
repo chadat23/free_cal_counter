@@ -369,11 +369,11 @@ class _DateTimePickerDialogState extends State<_DateTimePickerDialog> {
             const Divider(height: 1),
             // Time picker button
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(8.0),
               child: InkWell(
                 onTap: _selectTime,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey),
                     borderRadius: BorderRadius.circular(8.0),

@@ -169,10 +169,10 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
         children: [
           SingleChildScrollView(
             padding: EdgeInsets.only(
-              left: 16.0,
-              right: 16.0,
-              top: 16.0,
-              bottom: 16.0 + (showOperatorBar ? 48 + keyboardHeight : 0),
+              left: 12.0,
+              right: 12.0,
+              top: 8.0,
+              bottom: 8.0 + (showOperatorBar ? 48 + keyboardHeight : 0),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -180,16 +180,16 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
                 _buildFoodHeader(),
                 const SizedBox(height: 8),
                 _buildMacroDisplay(),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 _buildResultsActions(),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 _buildInputSection(),
                 const SizedBox(height: 8),
                 if (widget.config.context == QuantityEditContext.recipe)
                   _buildRecipeToggle(),
-                const SizedBox(height: 24),
+                const SizedBox(height: 8),
                 _buildTargetSelection(),
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
                 if (_recipeLink != null)
                   Center(
                     child: TextButton.icon(
@@ -298,7 +298,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
               isRecipe ? null : dailyGoals,
               showConsumed,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 6),
             _buildChartSection(
               isRecipe ? "Ingredient's Macros" : "Portion's Macros",
               itemValues,
@@ -331,7 +331,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
             );
           },
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
         // Action buttons row
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -444,7 +444,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
             child: const Text('Cancel'),
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: 12),
         Expanded(
           child: ElevatedButton(
             onPressed: _handleSave,
@@ -513,11 +513,11 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
   ) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
             Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             Row(
               children: [
                 Expanded(
@@ -904,7 +904,7 @@ class _QuantityEditScreenState extends State<QuantityEditScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(12.0),
             child: Text(
               'Select Container to Subtract',
               style: Theme.of(context).textTheme.titleMedium,

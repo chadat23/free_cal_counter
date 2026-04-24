@@ -131,7 +131,7 @@ class _WeightTrendChartState extends State<WeightTrendChart> {
     if (widget.weightHistory.isEmpty) {
       return Container(
         height: 200,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: AppColors.largeWidgetBackground,
           borderRadius: BorderRadius.circular(16),
@@ -215,7 +215,7 @@ class _WeightTrendChartState extends State<WeightTrendChart> {
 
     return Container(
       height: 250,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.largeWidgetBackground,
         borderRadius: BorderRadius.circular(16),
@@ -231,7 +231,7 @@ class _WeightTrendChartState extends State<WeightTrendChart> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 6),
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {

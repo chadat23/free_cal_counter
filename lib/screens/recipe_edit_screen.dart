@@ -163,7 +163,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(12.0),
             child: Text(
               'Select Container to Subtract',
               style: Theme.of(context).textTheme.titleMedium,
@@ -259,7 +259,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
                               'This recipe has been logged. '
                               'How would you like to save it?',
                             ),
-                            SizedBox(height: 16),
+                            SizedBox(height: 10),
                             Text(
                               'New Version — historical logs keep '
                               'their original nutrition values.',
@@ -389,18 +389,18 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
                   SlidableAutoCloseBehavior(
             child: SingleChildScrollView(
               padding: EdgeInsets.only(
-                left: 16.0,
-                right: 16.0,
-                top: 16.0,
-                bottom: 16.0 + (showOperatorBar ? 48 + keyboardHeight : 0),
+                left: 12.0,
+                right: 12.0,
+                top: 8.0,
+                bottom: 8.0 + (showOperatorBar ? 48 + keyboardHeight : 0),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildMetadataFields(provider),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 10),
                   _buildMacroSummary(provider),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -461,7 +461,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
                   ),
                   const Divider(),
                   _buildIngredientList(provider),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 10),
                   TextField(
                     controller: _linkController,
                     keyboardType: TextInputType.url,
@@ -472,7 +472,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
                     ),
                     onChanged: provider.setLink,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   TextField(
                     controller: _notesController,
                     maxLines: 3,
@@ -524,9 +524,9 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
                 onChanged: provider.setEmoji,
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
             _buildImagePreview(provider),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
             Expanded(
               child: ElevatedButton.icon(
                 onPressed: () => _pickImage(provider),
@@ -555,7 +555,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
                 },
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
             Expanded(
               child: UnitSelectField(
                 label: 'Portion Unit Name',
@@ -631,7 +631,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
           'When enabled, this recipe can only be dumped as individual ingredients into your log.',
           style: TextStyle(color: Colors.grey, fontSize: 12),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 10),
         InkWell(
           onTap: _showCategorySelectionDialog,
           child: InputDecorator(
@@ -847,7 +847,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
 
   Widget _buildMacroSummary(RecipeProvider provider) {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(10.0),
       decoration: BoxDecoration(
         color: AppColors.largeWidgetBackground,
         borderRadius: BorderRadius.circular(16.0),
@@ -863,9 +863,9 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
             Provider.of<GoalsProvider>(context, listen: false).useNetCarbs ? provider.totalNetCarbs : provider.totalCarbs,
             provider.totalFiber,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           const Divider(height: 1, color: Colors.white24),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           _buildMacroRow(
             'Macros per ${provider.portionName}',
             provider.caloriesPerPortion,
@@ -930,7 +930,7 @@ class _RecipeEditScreenState extends State<RecipeEditScreen> {
   Widget _buildIngredientList(RecipeProvider provider) {
     if (provider.items.isEmpty) {
       return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 32.0),
+        padding: EdgeInsets.symmetric(vertical: 16.0),
         child: Center(
           child: Text(
             'No ingredients added yet',

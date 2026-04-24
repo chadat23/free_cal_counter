@@ -79,7 +79,7 @@ class _MealPortionScreenState extends State<MealPortionScreen> {
     return Scaffold(
       appBar: AppBar(title: Text('Meal at $mealTime')),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

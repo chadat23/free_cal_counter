@@ -34,7 +34,7 @@ class _NutritionTargetsOverviewChartState
         final showConsumed = navProvider.showConsumed;
 
         return Container(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(10.0),
           decoration: BoxDecoration(
             color: AppColors.largeWidgetBackground,
             borderRadius: BorderRadius.circular(16.0),
@@ -54,7 +54,7 @@ class _NutritionTargetsOverviewChartState
                   const Spacer(),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 6),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -67,7 +67,7 @@ class _NutritionTargetsOverviewChartState
                       );
                     }),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Column(
                       children: [
@@ -133,7 +133,7 @@ class _NutritionTargetsOverviewChartState
                       ],
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 8),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,7 +173,7 @@ class _NutritionTargetsOverviewChartState
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 6),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -192,7 +192,7 @@ class _NutritionTargetsOverviewChartState
                     ),
                     child: const Text('Consumed'),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 8),
                   TextButton(
                     onPressed: () => navProvider.setShowConsumed(false),
                     style: TextButton.styleFrom(

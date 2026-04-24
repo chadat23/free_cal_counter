@@ -120,7 +120,7 @@ class _RecipeSearchViewState extends State<RecipeSearchView> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.restaurant_menu, size: 64, color: Colors.grey),
-                      SizedBox(height: 16),
+                      SizedBox(height: 10),
                       const Text(
                         'No recipes found',
                         style: TextStyle(fontSize: 18, color: Colors.grey),

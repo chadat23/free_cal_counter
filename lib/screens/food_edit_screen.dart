@@ -465,23 +465,23 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
               key: _formKey,
               child: ListView(
                 padding: EdgeInsets.only(
-                  left: 16.0,
-                  right: 16.0,
-                  top: 16.0,
-                  bottom: 16.0 + (showOperatorBar ? 48 + keyboardHeight : keyboardHeight),
+                  left: 12.0,
+                  right: 12.0,
+                  top: 8.0,
+                  bottom: 8.0 + (showOperatorBar ? 48 + keyboardHeight : keyboardHeight),
                 ),
                 children: [
                   _buildMetadataSection(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
                   _buildPrimaryServingSection(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
                   _buildMacroSection(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
                   _buildServingsSection(),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 16),
                   if (widget.contextType == FoodEditContext.search)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 24.0),
+                      padding: const EdgeInsets.only(bottom: 12.0),
                       child: ElevatedButton.icon(
                         onPressed: () => _save(true),
                         icon: const Icon(Icons.input),
@@ -489,7 +489,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
                         ),
                       ),
                     ),
@@ -523,7 +523,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
                 onChanged: (val) {},
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
             Expanded(
               child: TextFormField(
                 controller: _nameController,
@@ -534,17 +534,17 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         TextFormField(
           controller: _notesController,
           decoration: const InputDecoration(labelText: 'Notes (Optional)'),
           maxLines: 2,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         Row(
           children: [
             _buildImagePreview(),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
             Expanded(
               child: ElevatedButton.icon(
                 onPressed: _pickImage,
@@ -554,7 +554,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 10),
         _buildBarcodeSection(),
       ],
     );
@@ -751,7 +751,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
 
   Widget _buildPrimaryServingSection() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: AppColors.largeWidgetBackground,
         borderRadius: BorderRadius.circular(12),
@@ -800,7 +800,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
             ],
           ),
           if (_isPerServingMode) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             Row(
               children: [
                 // Quantity field
@@ -920,7 +920,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
 
   Widget _buildMacroSection() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: AppColors.largeWidgetBackground,
         borderRadius: BorderRadius.circular(12),
@@ -946,7 +946,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
                 style: TextStyle(color: Colors.grey[400], fontSize: 12),
               ),
             ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 6),
           _buildMacroRow(_caloriesController, 'Calories', 'cal'),
           _buildMacroRow(_fatController, 'Fat', 'g'),
           _buildMacroRow(_carbsController, 'Carbs', 'g'),
@@ -1048,7 +1048,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
             ),
           );
         }),
-        const SizedBox(height: 16),
+        const SizedBox(height: 10),
         // View Servings Info button
         if (widget.originalFood != null || _servings.length > 1)
           Center(

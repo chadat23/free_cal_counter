@@ -699,12 +699,12 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       child: _isRestoring
           ? const Center(child: CircularProgressIndicator())
           : ListView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               children: [
                 _buildNasBackupCard(),
-                const SizedBox(height: 24),
+                const SizedBox(height: 10),
                 _buildLocalBackupCard(),
-                const SizedBox(height: 24),
+                const SizedBox(height: 10),
                 const Text(
                   'Manual Backup',
                   style: TextStyle(
@@ -730,7 +730,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                     onTap: _localBackupPath != null ? _exportBackup : null,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
                 Card(
                   color: Colors.grey[900],
                   child: ListTile(
@@ -746,7 +746,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                   ),
                 ),
                 if (_isNasConfigured) ...[
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
                   Card(
                     color: Colors.grey[900],
                     child: ListTile(
@@ -761,7 +761,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                       onTap: _backupToNas,
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
                   Card(
                     color: Colors.grey[900],
                     child: ListTile(
@@ -778,7 +778,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                   ),
                 ],
                 const Padding(
-                  padding: EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(12.0),
                   child: Text(
                     'Note: Restoring data will replace your current recipes and food logs. Make sure you have a backup of your current data if you still need it.',
                     style: TextStyle(color: Colors.grey, fontSize: 12),
@@ -802,7 +802,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       color: Colors.grey[900],
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -824,7 +824,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
               ],
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 36.0, top: 4.0),
+              padding: const EdgeInsets.only(left: 28.0, top: 4.0),
               child: Text(
                 'Overwrites a single file — pair with Syncthing for versioning.',
                 style: const TextStyle(fontSize: 11, color: Colors.grey),
@@ -832,7 +832,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
             ),
             const SizedBox(height: 8),
             Padding(
-              padding: const EdgeInsets.only(left: 36.0),
+              padding: const EdgeInsets.only(left: 28.0),
               child: Wrap(
                 spacing: 8,
                 runSpacing: 4,
@@ -855,7 +855,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
             ),
             if (_localBackupPath != null) ...[
               Padding(
-                padding: const EdgeInsets.only(left: 36.0, top: 6.0),
+                padding: const EdgeInsets.only(left: 28.0, top: 6.0),
                 child: Text(
                   _localBackupPath!,
                   style: const TextStyle(fontSize: 11, color: Colors.white70),
@@ -924,7 +924,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
     if (_isLoadingSettings) {
       return const Center(
         child: Padding(
-          padding: EdgeInsets.all(20),
+          padding: EdgeInsets.all(16),
           child: CircularProgressIndicator(),
         ),
       );
@@ -934,7 +934,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
       color: Colors.grey[900],
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -958,7 +958,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
 
             if (!_isNasConfigured)
               Padding(
-                padding: const EdgeInsets.only(left: 36.0, top: 8.0),
+                padding: const EdgeInsets.only(left: 28.0, top: 8.0),
                 child: OutlinedButton.icon(
                   icon: const Icon(Icons.settings, size: 18),
                   label: const Text('Configure NAS'),
@@ -971,7 +971,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
 
             if (_isNasConfigured) ...[
               Padding(
-                padding: const EdgeInsets.only(left: 36.0, top: 4.0),
+                padding: const EdgeInsets.only(left: 28.0, top: 4.0),
                 child: Text(
                   _nasDisplayAddress ?? '',
                   style: const TextStyle(fontSize: 12, color: Colors.white70),
@@ -979,14 +979,14 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
               ),
               if (_nasConnectionNote != null)
                 Padding(
-                  padding: const EdgeInsets.only(left: 36.0),
+                  padding: const EdgeInsets.only(left: 28.0),
                   child: Text(
                     _nasConnectionNote!,
                     style: const TextStyle(fontSize: 11, color: Colors.grey),
                   ),
                 ),
               Padding(
-                padding: const EdgeInsets.only(left: 36.0, top: 8.0),
+                padding: const EdgeInsets.only(left: 28.0, top: 8.0),
                 child: Wrap(
                   spacing: 8,
                   children: [
@@ -1039,7 +1039,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
                 'Backups exceeding this count will be deleted (oldest first).',
                 style: TextStyle(fontSize: 10, color: Colors.grey),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
               const Text(
                 'Backs up when app opens (at most once per day)',
                 style: TextStyle(color: Colors.grey),
@@ -1047,7 +1047,7 @@ class _DataManagementScreenState extends State<DataManagementScreen> {
             ],
 
             if (_lastBackupTime != null) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(

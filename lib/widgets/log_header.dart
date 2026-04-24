@@ -44,7 +44,7 @@ class _LogHeaderState extends State<LogHeader> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
       decoration: BoxDecoration(
         color: AppColors.largeWidgetBackground,
         borderRadius: BorderRadius.circular(12.0),
@@ -82,7 +82,7 @@ class _LogHeaderState extends State<LogHeader> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           Consumer<NavigationProvider>(
             builder: (context, navProvider, child) {
               final showConsumed = navProvider.showConsumed;

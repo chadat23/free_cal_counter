@@ -372,7 +372,7 @@ class _QrPortionSharingScreenState extends State<QrPortionSharingScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
@@ -387,7 +387,7 @@ class _QrPortionSharingScreenState extends State<QrPortionSharingScreen> {
         const SizedBox(height: 16),
         // Thumbnail toggle
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: SwitchListTile(
             title: const Text('Include images'),
             value: _includeImages,
@@ -419,7 +419,7 @@ class _QrPortionSharingScreenState extends State<QrPortionSharingScreen> {
             onPressed: _toggleAnimation,
           ),
           const Padding(
-            padding: EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(12.0),
             child: Text(
               'Multiple QR codes needed. The recipient must keep scanning until all parts are captured.',
               textAlign: TextAlign.center,
@@ -444,7 +444,7 @@ class _QrPortionSharingScreenState extends State<QrPortionSharingScreen> {
           ),
         ),
         Container(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(16.0),
           color: Colors.grey[900],
           width: double.infinity,
           child: Column(

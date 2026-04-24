@@ -37,7 +37,7 @@ class ServingInfoSheet extends StatelessWidget {
             children: [
               // Drag handle
               Container(
-                margin: const EdgeInsets.symmetric(vertical: 12),
+                margin: const EdgeInsets.symmetric(vertical: 8),
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
@@ -47,7 +47,7 @@ class ServingInfoSheet extends StatelessWidget {
               ),
               // Title
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Row(
                   children: [
                     Expanded(
@@ -69,7 +69,7 @@ class ServingInfoSheet extends StatelessWidget {
               Expanded(
                 child: ListView(
                   controller: scrollController,
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(12),
                   children: [
                     // Always show per 100g first
                     _buildServingCard(
@@ -77,12 +77,12 @@ class ServingInfoSheet extends StatelessWidget {
                       label: '100g',
                       grams: 100,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     // Then show all other servings
                     ...food.servings
                         .where((s) => s.unit != 'g')
                         .map((serving) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
+                              padding: const EdgeInsets.only(bottom: 8),
                               child: _buildServingCard(
                                 context,
                                 label: _formatServingLabel(serving),
@@ -121,7 +121,7 @@ class ServingInfoSheet extends StatelessWidget {
     final fiber = food.fiber * grams;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.smallWidgetBackground,
         borderRadius: BorderRadius.circular(12),
@@ -136,7 +136,7 @@ class ServingInfoSheet extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           _buildMacroRow('Calories', _formatMacro(calories), 'cal'),
           _buildMacroRow('Protein', _formatMacro(protein), 'g'),
           _buildMacroRow('Fat', _formatMacro(fat), 'g'),

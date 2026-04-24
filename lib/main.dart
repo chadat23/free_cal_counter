@@ -168,7 +168,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         home: Scaffold(
           body: Center(
             child: Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.all(12.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -184,7 +184,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.red[200]),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => _initialize(),
                     child: const Text('Retry'),
@@ -207,7 +207,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 CircularProgressIndicator(),
-                SizedBox(height: 24),
+                SizedBox(height: 16),
                 Text(
                   'Cooking up your data...',
                   style: TextStyle(color: Colors.white70),

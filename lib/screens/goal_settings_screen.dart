@@ -283,7 +283,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
         elevation: 0,
       ),
       child: ListView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(12.0),
         children: [
           const Text(
             'Goal Mode',
@@ -339,14 +339,14 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
               hint: 'e.g. 30',
               keyboardType: TextInputType.number,
             ),
-          const Divider(height: 40),
+          const Divider(height: 24),
           const Text(
             'Macro Split Strategy',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 10),
           _buildCalcModeSelector(),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           _buildProteinSection(),
           const SizedBox(height: 10),
           if (_calcMode == MacroCalculationMode.proteinFat)
@@ -366,10 +366,10 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
             label: 'Fiber (g)',
             keyboardType: TextInputType.number,
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 16),
           ElevatedButton(
             onPressed: _save,
-            style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(16)),
+            style: ElevatedButton.styleFrom(padding: const EdgeInsets.all(12)),
             child: const Text('Save Settings'),
           ),
         ],
@@ -415,7 +415,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
 
   Widget _buildTdeeWindowSelector() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -509,7 +509,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
             });
           },
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 10),
         if (_proteinTargetMode == ProteinTargetMode.fixed)
           _buildTextField(
             controller: _proteinController,
@@ -570,7 +570,7 @@ class _GoalSettingsScreenState extends State<GoalSettingsScreen> {
     ),
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
+      padding: const EdgeInsets.only(bottom: 10.0),
       child: TextField(
         controller: controller,
         decoration: InputDecoration(

@@ -226,7 +226,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
         _primaryServingQuantityController.text =
             _formatQuantity(primaryServing.quantity);
         _primaryServingGramsController.text =
-            primaryServing.grams.toStringAsFixed(0);
+            _formatServingGrams(primaryServing.grams);
         // Set macros for this serving
         _updateMacroFieldsForServing(food, primaryServing);
       } else {
@@ -277,6 +277,16 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
     return val == val.roundToDouble()
         ? val.round().toString()
         : val.toStringAsFixed(1);
+  }
+
+  /// Format serving weight in grams, preserving up to 2 decimal places.
+  String _formatServingGrams(double val) {
+    if (val == val.roundToDouble()) return val.round().toString();
+    final s = val.toStringAsFixed(2);
+    // Strip trailing zeros: "28.50" → "28.5", "28.00" → "28"
+    return s
+        .replaceAll(RegExp(r'0+$'), '')
+        .replaceAll(RegExp(r'\.$'), '');
   }
 
   @override
@@ -352,12 +362,36 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
 
     // Calculate per-gram values
     double factor = 1.0;
+    final displayGrams = _isPerServingMode && _selectedServingForMacroInput != null
+        ? _selectedServingForMacroInput!.grams
+        : 100.0;
     if (_isPerServingMode && _selectedServingForMacroInput != null) {
       if (_selectedServingForMacroInput!.grams > 0) {
         factor = 1.0 / _selectedServingForMacroInput!.grams;
       }
     } else {
       factor = 0.01;
+    }
+
+    double cal = _parse(_caloriesController.text) * factor;
+    double prot = _parse(_proteinController.text) * factor;
+    double fat = _parse(_fatController.text) * factor;
+    double carb = _parse(_carbsController.text) * factor;
+    double fib = _parse(_fiberController.text) * factor;
+
+    // Snap per-gram values to originals when the difference is only from
+    // display rounding (prevents false revisions on cosmetic-only edits).
+    // Max display rounding error is 0.05 (half of 1 decimal place) divided
+    // by the display serving grams. This tolerance is always less than the
+    // minimum intentional change (0.1 / grams), so real edits are preserved.
+    if (widget.originalFood != null && !widget.isCopy && displayGrams > 0) {
+      final orig = widget.originalFood!;
+      final tolerance = 0.06 / displayGrams; // slightly above 0.05 for float safety
+      if ((cal - orig.calories).abs() < tolerance) cal = orig.calories;
+      if ((prot - orig.protein).abs() < tolerance) prot = orig.protein;
+      if ((fat - orig.fat).abs() < tolerance) fat = orig.fat;
+      if ((carb - orig.carbs).abs() < tolerance) carb = orig.carbs;
+      if ((fib - orig.fiber).abs() < tolerance) fib = orig.fiber;
     }
 
     final newFood = Food(
@@ -368,11 +402,11 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
       emoji: _emojiController.text.trim(),
       thumbnail: _thumbnail,
       usageNote: _notesController.text.trim(),
-      calories: _parse(_caloriesController.text) * factor,
-      protein: _parse(_proteinController.text) * factor,
-      fat: _parse(_fatController.text) * factor,
-      carbs: _parse(_carbsController.text) * factor,
-      fiber: _parse(_fiberController.text) * factor,
+      calories: cal,
+      protein: prot,
+      fat: fat,
+      carbs: carb,
+      fiber: fib,
       source: widget.originalFood?.source ?? 'user',
       sourceBarcode: widget.originalFood?.sourceBarcode,
       servings: _servings,
@@ -853,7 +887,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
                         );
                         if (existingServing.grams > 0) {
                           _primaryServingGramsController.text =
-                              existingServing.grams.toStringAsFixed(0);
+                              _formatServingGrams(existingServing.grams);
                           _primaryServingQuantityController.text =
                               _formatQuantity(existingServing.quantity);
                           _selectedServingForMacroInput = existingServing;
@@ -1027,7 +1061,7 @@ class _FoodEditScreenState extends State<FoodEditScreen> {
             margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
               title: Text(_formatServingLabel(serving)),
-              subtitle: Text('= ${serving.grams.toStringAsFixed(0)}g'),
+              subtitle: Text('= ${_formatServingGrams(serving.grams)}g'),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

@@ -189,15 +189,18 @@ class _RecipeSearchViewState extends State<RecipeSearchView> {
                         onAdd: (selectedUnit) async {
                           if (recipe == null) return;
                           if (recipe.isTemplate && context.mounted) {
+                            final quantity = recipe.totalGrams > 0
+                                ? selectedUnit.grams / recipe.totalGrams
+                                : 1.0;
                             Provider.of<LogProvider>(
                               context,
                               listen: false,
-                            ).dumpRecipeToQueue(recipe);
+                            ).dumpRecipeToQueue(recipe, quantity: quantity);
                             searchProvider.clearSearch();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  'Dumped ${recipe.name} into Log Queue',
+                                  'Dumped ${recipe.name} (${selectedUnit.grams.toStringAsFixed(0)}g) into Log Queue',
                                 ),
                               ),
                             );
@@ -417,18 +420,21 @@ class _RecipeSearchViewState extends State<RecipeSearchView> {
                           await db.deleteRecipe(food.id);
                           searchProvider.textSearch('');
                         },
-                        onDecompose: () async {
+                        onDecompose: (selectedUnit) async {
                           if (recipe == null) return;
                           if (context.mounted) {
+                            final quantity = recipe.totalGrams > 0
+                                ? selectedUnit.grams / recipe.totalGrams
+                                : 1.0;
                             Provider.of<LogProvider>(
                               context,
                               listen: false,
-                            ).dumpRecipeToQueue(recipe);
+                            ).dumpRecipeToQueue(recipe, quantity: quantity);
                             searchProvider.clearSearch();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  'Dumped ${recipe.name} into Log Queue',
+                                  'Dumped ${recipe.name} (${selectedUnit.grams.toStringAsFixed(0)}g) into Log Queue',
                                 ),
                               ),
                             );

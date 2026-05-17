@@ -19,6 +19,7 @@ import 'package:meal_of_record/providers/search_provider.dart';
 import 'package:meal_of_record/models/search_config.dart';
 import 'package:meal_of_record/models/quantity_edit_config.dart';
 import 'package:meal_of_record/screens/container_settings_screen.dart';
+import 'package:meal_of_record/screens/duplicate_merge_screen.dart';
 
 class AppRouter {
   static const String homeRoute = '/';
@@ -31,6 +32,7 @@ class AppRouter {
   static const String containerSettingsRoute = '/container_settings';
   static const String qrPortionSharingRoute = '/qr_portion_sharing';
   static const String mealPortionRoute = '/meal_portion';
+  static const String duplicateMergeRoute = '/duplicate_merge';
 
   final DatabaseService databaseService;
   final OffApiService offApiService;
@@ -91,6 +93,10 @@ class AppRouter {
         final meal = settings.arguments as Meal;
         return MaterialPageRoute(
           builder: (_) => MealPortionScreen(meal: meal),
+        );
+      case duplicateMergeRoute:
+        return MaterialPageRoute(
+          builder: (_) => const DuplicateMergeScreen(),
         );
       default:
         return MaterialPageRoute(

@@ -26,10 +26,12 @@ class SearchResultTile extends StatefulWidget {
   });
 
   @override
-  State<SearchResultTile> createState() => _SearchResultTileState();
+  State<SearchResultTile> createState() => SearchResultTileState();
 }
 
-class _SearchResultTileState extends State<SearchResultTile> {
+class SearchResultTileState extends State<SearchResultTile> {
+  model_unit.FoodServing get currentServing => _getServingWithDisplayQuantity();
+
   late model_unit.FoodServing _selectedUnit;
   late List<model_unit.FoodServing> _availableServings;
   late double _displayQuantity;

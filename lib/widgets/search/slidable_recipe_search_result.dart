@@ -4,14 +4,14 @@ import 'package:meal_of_record/models/food.dart';
 import 'package:meal_of_record/models/food_serving.dart' as model_unit;
 import 'package:meal_of_record/widgets/search_result_tile.dart';
 
-class SlidableRecipeSearchResult extends StatelessWidget {
+class SlidableRecipeSearchResult extends StatefulWidget {
   final Food food;
   final void Function(model_unit.FoodServing) onTap;
   final void Function(model_unit.FoodServing)? onAdd;
   final VoidCallback onEdit;
   final VoidCallback onCopy;
   final VoidCallback onDelete;
-  final VoidCallback onDecompose;
+  final void Function(model_unit.FoodServing) onDecompose;
   final String? note;
   final bool isUpdate;
 
@@ -29,28 +29,43 @@ class SlidableRecipeSearchResult extends StatelessWidget {
   });
 
   @override
+  State<SlidableRecipeSearchResult> createState() =>
+      _SlidableRecipeSearchResultState();
+}
+
+class _SlidableRecipeSearchResultState
+    extends State<SlidableRecipeSearchResult> {
+  final GlobalKey<SearchResultTileState> _tileKey =
+      GlobalKey<SearchResultTileState>();
+
+  @override
   Widget build(BuildContext context) {
     return Slidable(
-      key: ValueKey(food.id),
+      key: ValueKey(widget.food.id),
       startActionPane: ActionPane(
         motion: const ScrollMotion(),
         children: [
           SlidableAction(
-            onPressed: (context) => onEdit(),
+            onPressed: (context) => widget.onEdit(),
             backgroundColor: Colors.blue,
             foregroundColor: Colors.white,
             icon: Icons.edit,
             label: 'Edit',
           ),
           SlidableAction(
-            onPressed: (context) => onCopy(),
+            onPressed: (context) => widget.onCopy(),
             backgroundColor: Colors.green,
             foregroundColor: Colors.white,
             icon: Icons.copy,
             label: 'Copy',
           ),
           SlidableAction(
-            onPressed: (context) => onDecompose(),
+            onPressed: (context) {
+              final tileState = _tileKey.currentState;
+              if (tileState != null) {
+                widget.onDecompose(tileState.currentServing);
+              }
+            },
             backgroundColor: Colors.orange,
             foregroundColor: Colors.white,
             icon: Icons.account_tree,
@@ -71,11 +86,12 @@ class SlidableRecipeSearchResult extends StatelessWidget {
         ],
       ),
       child: SearchResultTile(
-        food: food,
-        onTap: onTap,
-        onAdd: onAdd,
-        note: note,
-        isUpdate: isUpdate,
+        key: _tileKey,
+        food: widget.food,
+        onTap: widget.onTap,
+        onAdd: widget.onAdd,
+        note: widget.note,
+        isUpdate: widget.isUpdate,
       ),
     );
   }
@@ -85,7 +101,7 @@ class SlidableRecipeSearchResult extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Recipe'),
-        content: Text('Are you sure you want to delete "${food.name}"?'),
+        content: Text('Are you sure you want to delete "${widget.food.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -94,7 +110,7 @@ class SlidableRecipeSearchResult extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              onDelete();
+              widget.onDelete();
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Delete'),

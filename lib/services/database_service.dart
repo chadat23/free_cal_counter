@@ -19,6 +19,7 @@ import 'package:meal_of_record/services/reference_database.dart'
     hide FoodPortion, FoodsCompanion, FoodPortionsCompanion;
 import 'package:meal_of_record/models/food_usage_stats.dart';
 import 'package:meal_of_record/models/food_container.dart';
+import 'package:meal_of_record/models/merge_result.dart';
 import 'package:meal_of_record/services/image_storage_service.dart';
 
 /// Holds information about the last logged unit and quantity for a food.
@@ -212,6 +213,7 @@ class DatabaseService {
       sourceFdcId: foodData.sourceFdcId,
       sourceBarcode: foodData.sourceBarcode,
       usageNote: foodData.usageNote,
+      hidden: foodData.hidden ?? false,
       database: database,
     );
   }
@@ -2276,5 +2278,343 @@ class DatabaseService {
   /// Ensures the system Quick Add food exists. Called during init.
   Future<void> _ensureSystemQuickAddFood() async {
     await getSystemQuickAddFood();
+  }
+
+  // ========== DUPLICATE FOOD MERGE ==========
+
+  Future<Set<int>> getFoodIdsWithBarcodes(List<int> foodIds) async {
+    if (foodIds.isEmpty) return {};
+    final rows = await (_liveDb.select(_liveDb.foodBarcodes)
+          ..where((t) => t.foodId.isIn(foodIds)))
+        .get();
+    return rows.map((r) => r.foodId).toSet();
+  }
+
+  Future<Map<int, int>> getRecipeUsageCounts(List<int> foodIds) async {
+    if (foodIds.isEmpty) return {};
+    final rows = await (_liveDb.select(_liveDb.recipeItems)
+          ..where((t) => t.ingredientFoodId.isIn(foodIds)))
+        .get();
+    final Map<int, int> counts = {for (final id in foodIds) id: 0};
+    for (final row in rows) {
+      final fid = row.ingredientFoodId;
+      if (fid != null) counts[fid] = (counts[fid] ?? 0) + 1;
+    }
+    return counts;
+  }
+
+  /// Returns groups of foods connected by `parentId`. Each group is a single
+  /// version-chain cluster (parent + child + grandchild + …). Only includes
+  /// chains of size >= 2. Excludes `source='system'`.
+  ///
+  /// These chains arise from the smart-versioning path in [saveFood] (and
+  /// historically from a "rev on rename" bug). Surfacing them as merge
+  /// candidates lets the user consolidate the chain even when macros drifted.
+  Future<List<List<model.Food>>> findVersionChainGroups() async {
+    final liveRows = await (_liveDb.select(_liveDb.foods)
+          ..where((f) => f.source.equals('system').not()))
+        .get();
+    if (liveRows.length < 2) return [];
+
+    final idToIndex = <int, int>{
+      for (int i = 0; i < liveRows.length; i++) liveRows[i].id: i,
+    };
+
+    final n = liveRows.length;
+    final parent = List<int>.generate(n, (i) => i);
+    int find(int i) {
+      while (parent[i] != i) {
+        parent[i] = parent[parent[i]];
+        i = parent[i];
+      }
+      return i;
+    }
+    void union(int a, int b) {
+      final ra = find(a), rb = find(b);
+      if (ra != rb) parent[ra] = rb;
+    }
+
+    bool anyEdge = false;
+    for (int i = 0; i < n; i++) {
+      final pid = liveRows[i].parentId;
+      if (pid == null) continue;
+      final j = idToIndex[pid];
+      if (j == null) continue; // parent not in live set (shouldn't happen)
+      union(i, j);
+      anyEdge = true;
+    }
+    if (!anyEdge) return [];
+
+    final Map<int, List<int>> byRoot = {};
+    for (int i = 0; i < n; i++) {
+      final r = find(i);
+      // Only keep clusters that actually have an edge — singletons stay out.
+      byRoot.putIfAbsent(r, () => []).add(i);
+    }
+    final groupIndices =
+        byRoot.values.where((g) => g.length >= 2).toList();
+    if (groupIndices.isEmpty) return [];
+
+    final allIds =
+        groupIndices.expand((g) => g.map((i) => liveRows[i].id)).toList();
+    final servingsMap = await getServingsForFoods(allIds, 'live');
+
+    return groupIndices
+        .map((g) => g
+            .map((i) => _mapFoodData(
+                  liveRows[i],
+                  servingsMap[liveRows[i].id] ?? [],
+                  model.FoodDatabase.live,
+                ))
+            .toList())
+        .toList();
+  }
+
+  Future<List<List<model.Food>>> findDuplicateFoodGroups({
+    required double thresholdPct,
+  }) async {
+    // Every row in the live DB is user-owned. The `source` column records
+    // provenance (e.g., 'off' for OpenFoodFacts imports, 'FOUNDATION' for
+    // USDA imports) — these are all legitimate merge candidates. Only the
+    // 'system' pseudo-foods (Quick Add, Fasted) are excluded.
+    final liveRows = await (_liveDb.select(_liveDb.foods)
+          ..where((f) => f.source.equals('system').not()))
+        .get();
+
+    if (liveRows.length < 2) return [];
+
+    final threshold = thresholdPct / 100.0;
+    bool macrosMatch(dynamic a, dynamic b) {
+      bool within(double x, double y) {
+        return (x - y).abs() <= [x.abs(), y.abs(), 0.001].reduce((m, n) => m > n ? m : n) * threshold;
+      }
+      return within(a.caloriesPerGram, b.caloriesPerGram) &&
+          within(a.proteinPerGram, b.proteinPerGram) &&
+          within(a.fatPerGram, b.fatPerGram) &&
+          within(a.carbsPerGram, b.carbsPerGram) &&
+          within(a.fiberPerGram, b.fiberPerGram);
+    }
+
+    final n = liveRows.length;
+    final parent = List<int>.generate(n, (i) => i);
+    int find(int i) {
+      while (parent[i] != i) {
+        parent[i] = parent[parent[i]];
+        i = parent[i];
+      }
+      return i;
+    }
+    void union(int a, int b) {
+      final ra = find(a), rb = find(b);
+      if (ra != rb) parent[ra] = rb;
+    }
+
+    for (int i = 0; i < n; i++) {
+      for (int j = i + 1; j < n; j++) {
+        if (macrosMatch(liveRows[i], liveRows[j])) union(i, j);
+      }
+    }
+
+    final Map<int, List<int>> byRoot = {};
+    for (int i = 0; i < n; i++) {
+      byRoot.putIfAbsent(find(i), () => []).add(i);
+    }
+
+    final groupIndices = byRoot.values.where((g) => g.length >= 2).toList();
+    if (groupIndices.isEmpty) return [];
+
+    final allIds = groupIndices.expand((g) => g.map((i) => liveRows[i].id)).toList();
+    final servingsMap = await getServingsForFoods(allIds, 'live');
+
+    return groupIndices
+        .map((g) => g
+            .map((i) => _mapFoodData(
+                  liveRows[i],
+                  servingsMap[liveRows[i].id] ?? [],
+                  model.FoodDatabase.live,
+                ))
+            .toList())
+        .toList();
+  }
+
+  Future<MergePredictedCounts> getMergePredictedCounts({
+    required int loserId,
+  }) async {
+    final logs = await (_liveDb.select(_liveDb.loggedPortions)
+          ..where((t) => t.foodId.equals(loserId)))
+        .get();
+    final recipeItems = await (_liveDb.select(_liveDb.recipeItems)
+          ..where((t) => t.ingredientFoodId.equals(loserId)))
+        .get();
+    final parentChains = await (_liveDb.select(_liveDb.foods)
+          ..where((t) => t.parentId.equals(loserId)))
+        .get();
+    final portions = await (_liveDb.select(_liveDb.foodPortions)
+          ..where((t) => t.foodId.equals(loserId)))
+        .get();
+    final barcodes = await (_liveDb.select(_liveDb.foodBarcodes)
+          ..where((t) => t.foodId.equals(loserId)))
+        .get();
+    return MergePredictedCounts(
+      loggedToRepoint: logs.length,
+      recipeToRepoint: recipeItems.length,
+      parentChainsToRepoint: parentChains.length,
+      portionsToDrop: portions.length,
+      barcodesToDrop: barcodes.length,
+    );
+  }
+
+  Future<MergeResult> mergeFoods({
+    required int keeperId,
+    required int loserId,
+  }) async {
+    if (keeperId == loserId) {
+      throw ArgumentError('keeperId and loserId must differ');
+    }
+    final keeper = await (_liveDb.select(_liveDb.foods)
+          ..where((t) => t.id.equals(keeperId)))
+        .getSingleOrNull();
+    final loser = await (_liveDb.select(_liveDb.foods)
+          ..where((t) => t.id.equals(loserId)))
+        .getSingleOrNull();
+    if (keeper == null || loser == null) {
+      throw ArgumentError('keeper or loser not found');
+    }
+    if (keeper.source == 'system' || loser.source == 'system') {
+      throw ArgumentError('system foods cannot be merged');
+    }
+
+    final sampleTimestampRows = await (_liveDb.select(_liveDb.loggedPortions)
+          ..where((t) => t.foodId.equals(loserId))
+          ..limit(5))
+        .get();
+    final sampleTimestamps =
+        sampleTimestampRows.map((r) => r.logTimestamp).toList();
+
+    final result = await _liveDb.transaction(() async {
+      final expectedLogs = (await (_liveDb.select(_liveDb.loggedPortions)
+                ..where((t) => t.foodId.equals(loserId)))
+              .get())
+          .length;
+      final actualLogs = await (_liveDb.update(_liveDb.loggedPortions)
+            ..where((t) => t.foodId.equals(loserId)))
+          .write(LoggedPortionsCompanion(foodId: Value(keeperId)));
+      if (actualLogs != expectedLogs) {
+        throw MergeIntegrityException(
+          'logged_portions: wrote $actualLogs, expected $expectedLogs',
+        );
+      }
+
+      final expectedRecipe = (await (_liveDb.select(_liveDb.recipeItems)
+                ..where((t) => t.ingredientFoodId.equals(loserId)))
+              .get())
+          .length;
+      final actualRecipe = await (_liveDb.update(_liveDb.recipeItems)
+            ..where((t) => t.ingredientFoodId.equals(loserId)))
+          .write(RecipeItemsCompanion(ingredientFoodId: Value(keeperId)));
+      if (actualRecipe != expectedRecipe) {
+        throw MergeIntegrityException(
+          'recipe_items: wrote $actualRecipe, expected $expectedRecipe',
+        );
+      }
+
+      final expectedParent = (await (_liveDb.select(_liveDb.foods)
+                ..where((t) => t.parentId.equals(loserId)))
+              .get())
+          .length;
+      final actualParent = await (_liveDb.update(_liveDb.foods)
+            ..where((t) => t.parentId.equals(loserId)))
+          .write(FoodsCompanion(parentId: Value(keeperId)));
+      if (actualParent != expectedParent) {
+        throw MergeIntegrityException(
+          'foods.parentId: wrote $actualParent, expected $expectedParent',
+        );
+      }
+
+      final expectedPortions = (await (_liveDb.select(_liveDb.foodPortions)
+                ..where((t) => t.foodId.equals(loserId)))
+              .get())
+          .length;
+      final actualPortions = await (_liveDb.delete(_liveDb.foodPortions)
+            ..where((t) => t.foodId.equals(loserId)))
+          .go();
+      if (actualPortions != expectedPortions) {
+        throw MergeIntegrityException(
+          'food_portions: deleted $actualPortions, expected $expectedPortions',
+        );
+      }
+
+      final expectedBarcodes = (await (_liveDb.select(_liveDb.foodBarcodes)
+                ..where((t) => t.foodId.equals(loserId)))
+              .get())
+          .length;
+      final actualBarcodes = await (_liveDb.delete(_liveDb.foodBarcodes)
+            ..where((t) => t.foodId.equals(loserId)))
+          .go();
+      if (actualBarcodes != expectedBarcodes) {
+        throw MergeIntegrityException(
+          'food_barcodes: deleted $actualBarcodes, expected $expectedBarcodes',
+        );
+      }
+
+      final foodDeleted = await (_liveDb.delete(_liveDb.foods)
+            ..where((t) => t.id.equals(loserId)))
+          .go();
+      if (foodDeleted != 1) {
+        throw MergeIntegrityException(
+          'foods: deleted $foodDeleted, expected 1',
+        );
+      }
+
+      return MergeResult(
+        keeperId: keeperId,
+        loserId: loserId,
+        loggedRepointed: actualLogs,
+        recipeRepointed: actualRecipe,
+        parentChainsRepointed: actualParent,
+        portionsDropped: actualPortions,
+        barcodesDropped: actualBarcodes,
+        sampleLoggedTimestamps: sampleTimestamps,
+      );
+    });
+
+    final orphanLogs = (await (_liveDb.select(_liveDb.loggedPortions)
+              ..where((t) => t.foodId.equals(loserId))
+              ..limit(1))
+            .get())
+        .length;
+    final orphanRecipe = (await (_liveDb.select(_liveDb.recipeItems)
+              ..where((t) => t.ingredientFoodId.equals(loserId))
+              ..limit(1))
+            .get())
+        .length;
+    final orphanParent = (await (_liveDb.select(_liveDb.foods)
+              ..where((t) => t.parentId.equals(loserId))
+              ..limit(1))
+            .get())
+        .length;
+    final orphanPortions = (await (_liveDb.select(_liveDb.foodPortions)
+              ..where((t) => t.foodId.equals(loserId))
+              ..limit(1))
+            .get())
+        .length;
+    final orphanBarcodes = (await (_liveDb.select(_liveDb.foodBarcodes)
+              ..where((t) => t.foodId.equals(loserId))
+              ..limit(1))
+            .get())
+        .length;
+    if (orphanLogs +
+            orphanRecipe +
+            orphanParent +
+            orphanPortions +
+            orphanBarcodes >
+        0) {
+      throw MergeIntegrityException(
+        'orphan refs to loser $loserId remain after merge',
+      );
+    }
+
+    BackupConfigService.instance.markDirty();
+    return result;
   }
 }

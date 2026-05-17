@@ -42,6 +42,15 @@ class SettingsScreen extends StatelessWidget {
               Navigator.pushNamed(context, AppRouter.goalSettingsRoute);
             },
           ),
+          ListTile(
+            leading: const Icon(Icons.merge_type, color: Colors.purple),
+            title: const Text('Clean up duplicates'),
+            subtitle: const Text('Find and merge duplicate foods'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.pushNamed(context, AppRouter.duplicateMergeRoute);
+            },
+          ),
         ],
       ),
     );
